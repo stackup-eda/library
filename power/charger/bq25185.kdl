@@ -1,0 +1,129 @@
+// @stackup/power/charger/bq25185 — TI BQ25185 single-cell Li-ion charger with power path, rated
+// for 1 A in WSON-10. IN connects to USB power, BAT to the cell, and SYS to the load. SYS
+// supplies regulated 4.5 V from IN or follows the battery voltage. Resistors set charge current
+// and regulation voltage; two open-drain STAT pins report status.
+//
+// CE, TS/MR, and both programming pins require connections. Default blocks enable charging,
+// substitute a resistor for the thermistor, and fit programming resistors. Disable these with
+// `without` when providing another circuit. A floating TS input suspends charging.
+
+use "@stackup/passives"
+
+part bq25185 {
+    symbol "BQ25185DLHR:BQ25185DLHR"
+    reference U
+    value "BQ25185"
+    datasheet "https://www.ti.com/lit/ds/symlink/bq25185.pdf"
+    description "1-cell 1A linear Li-ion charger with power path, 25V-tolerant input, WSON-10"
+    manufacturer "Texas Instruments"
+    order mpn=BQ25185DLHR lcsc=C19725033
+
+    // ICHG = 300 A·Ω / R_ISET; 604 Ω gives about 500 mA. R_VSET selects both regulation voltage
+    // and input current limit from Table 7-1. Those values are declared explicitly because the
+    // selection is tabulated.
+    param iset resistance default="604Ω"
+    param vset resistance default="18kΩ"
+    param vbatreg voltage default="4.2V"
+    param ilim current default="500mA"
+
+    pin SYS power_out
+    pin BAT passive
+    pin STAT2 open_collector
+    pin CE input required symbol="~{CE}"
+    pin GND power_in
+    pin TS input required symbol="TS/MR"
+    pin VSET input required symbol="ILIM/VSET"
+    pin ISET input required
+    pin STAT1 open_collector
+    pin IN power_in
+    pin PAD passive symbol=THERMAL_PAD
+
+    // SnapEDA footprint: ten signal pads, exposed pad 11, and two vias numbered 12 and 13.
+    package wson10 footprint="IC_BQ25185DLHR" {
+        pad SYS 1
+        pad BAT 2
+        pad STAT2 3
+        pad CE 4
+        pad GND 5
+        pad TS 6
+        pad VSET 7
+        pad ISET 8
+        pad STAT1 9
+        pad IN 10
+        pad PAD 11
+        pad PAD 12
+        pad PAD 13
+    }
+
+    derive ichg "300V / iset"
+
+    // Recommended input-voltage range and current limit selected by VSET.
+    port in type=power {
+        require net.voltage min="2.7V" max="5.5V"
+        add net.draw ilim
+        line rail pin=IN
+        line gnd pin=GND
+    }
+    // SYS follows battery voltage on battery power, or supplies 4.5 V ±2% from IN.
+    port sys type=power {
+        set net.voltage min="3.0V" max="4.6V"
+        line rail pin=SYS
+        line gnd pin=GND
+    }
+    // Battery voltage, up to the selected charge regulation voltage.
+    port bat type=power {
+        set net.voltage min="3.0V" max="4.2V"
+        line rail pin=BAT
+        line gnd pin=GND
+    }
+    // Active-low open-drain status outputs. The board provides pull-ups and optional host
+    // connections.
+    port stat1 pin=STAT1
+    port stat2 pin=STAT2
+
+    // Application circuits
+
+    block program {
+        default
+        place resistor Riset value=iset intent=series \
+            note="charge current program — {ichg} from 300 A·Ω / {iset}"
+        circuit ISET Riset in.gnd
+        place resistor Rvset value=vset intent=series \
+            note="regulation program — {vbatreg} and a {ilim} input limit, Table 7-1"
+        circuit VSET Rvset in.gnd
+    }
+
+    // Tie ~CE low to enable charging. Disable this block with `without` to control CE
+    // externally.
+    block always-enabled {
+        default
+        circuit CE in.gnd
+    }
+
+    // 10 kΩ to ground substitutes for a room-temperature thermistor. This prevents the
+    // floating-TS condition that suspends charging.
+    block ts-fixed {
+        default
+        place pull-down Rts node=TS rail=in value="10kΩ" \
+            note="TS/MR with no thermistor — floating would suspend charging; an NTC replaces it"
+    }
+
+    block thermal {
+        default
+        circuit PAD in.gnd
+    }
+
+    // At least 10 µF on SYS and IN per the datasheet, plus 10 µF on BAT and small bypass
+    // capacitors on the switching supplies.
+    block supply {
+        default
+        place bulk Cin node=IN rail=in value="10µF" footprint="C_0805_2012Metric" \
+            note="input bulk capacitance"
+        place decouple Cin-hf node=IN rail=in value="100nF"
+        place bulk Csys node=SYS rail=sys value="10µF" footprint="C_0805_2012Metric" \
+            note="system rail bulk capacitance — datasheet minimum"
+        place decouple Csys-hf node=SYS rail=sys value="100nF"
+        place bulk Cbat node=BAT rail=bat value="10µF" footprint="C_0805_2012Metric" \
+            note="at the cell terminal"
+    }
+}

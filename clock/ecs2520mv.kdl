@@ -1,0 +1,52 @@
+// @stackup/clock/ecs2520mv — ECS-2520MV HCMOS crystal oscillator in a 2.5 × 2.0 mm SMD package.
+// Power and enable are sufficient to produce a clock on OUT, which can drive an MCU oscillator
+// input.
+//
+// Set the frequency with the placement’s `value`, such as `value="40MHz"`; it is included in
+// the BOM.
+
+use "@stackup/passives"
+
+part ecs2520mv {
+    symbol "Oscillator:ECS-2520MV-xxx-xx"
+    reference Y
+    datasheet "https://www.ecsxtal.com/store/pdf/ECS-2520MV.pdf"
+    description "HCMOS Crystal Clock Oscillator, 2.5x2.0 mm SMD"
+    manufacturer ECS
+
+    pin TRISTATE input symbol="Tri-State"
+    pin GND power_in
+    pin OUT output
+    pin VDD power_in
+
+    package smd2520 footprint="Oscillator_SMD_ECS_2520MV-xxx-xx-4Pin_2.5x2.0mm" {
+        pad TRISTATE 1
+        pad GND 2
+        pad OUT 3
+        pad VDD 4
+    }
+
+    // MV supply range: 1.6–3.6 V. The maximum family supply current is 5 mA; lower-frequency
+    // variants use about one-third as much.
+    port vdd type=power {
+        require net.voltage min="1.6V" max="3.6V"
+        add net.draw "5mA"
+        line rail pin=VDD
+        line gnd pin=GND
+    }
+
+    port out type=output pin=OUT
+
+    // 100 nF close to VDD.
+    block supply {
+        default
+        place bypass Cbypass node=VDD rail=vdd value="100nF"
+    }
+
+    // Tie Tri-State to the supply to enable the output. To control it externally, place
+    // `without always-on` and drive the pin.
+    block always-on {
+        default
+        circuit TRISTATE vdd.rail
+    }
+}

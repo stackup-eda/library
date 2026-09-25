@@ -1,0 +1,15 @@
+// A fitted shunt connects A to B. The design should say what fitting it does.
+
+part jumper {
+    symbol "Connector_Generic:Conn_01x02"
+    reference J
+    description "2-pin 2.54 mm jumper header"
+    pin A passive
+    pin B passive
+    package header footprint="PinHeader_1x02_P2.54mm_Vertical" {
+        pad A 1
+        pad B 2
+    }
+    port a pin=A
+    port b pin=B
+}

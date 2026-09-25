@@ -1,0 +1,24 @@
+// @stackup/discrete/fet/bss138 — BSS138, a 50 V / 0.22 A N-channel MOSFET in SOT-23 for level
+// shifting and small-load switching. Rds(on) is 3.5 Ω at Vgs = 10 V, so it is unsuitable as a
+// power-stage pass transistor.
+
+part bss138 {
+    symbol "Transistor_FET:BSS138"
+    reference Q
+    datasheet "https://www.onsemi.com/pub/Collateral/BSS138-D.PDF"
+    description "50V Vds, 0.22A Id, N-Channel MOSFET, SOT-23"
+
+    pin GATE input
+    pin SOURCE passive
+    pin DRAIN passive
+
+    package sot23 footprint="SOT-23" {
+        pad GATE 1
+        pad SOURCE 2
+        pad DRAIN 3
+    }
+
+    port gate pin=GATE
+    port source pin=SOURCE
+    port drain pin=DRAIN
+}

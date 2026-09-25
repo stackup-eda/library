@@ -1,0 +1,68 @@
+// TI SN74AHCT125: four buffers with separate active-low output enables. Leave OE under board control.
+
+use "@stackup/passives"
+
+part ahct125 {
+    symbol "74xx:74AHCT125"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/sn74ahct125.pdf"
+    description "Quad tri-state buffer, TTL inputs, 4.5–5.5 V supply"
+    manufacturer "Texas Instruments"
+    pin A_OE input symbol="~{OE}"
+    pin A_A input symbol=A
+    pin A_Y tri_state symbol=Y
+    pin B_OE input symbol="~{OE}"
+    pin B_A input symbol=A
+    pin B_Y tri_state symbol=Y
+    pin C_OE input symbol="~{OE}"
+    pin C_A input symbol=A
+    pin C_Y tri_state symbol=Y
+    pin D_OE input symbol="~{OE}"
+    pin D_A input symbol=A
+    pin D_Y tri_state symbol=Y
+    pin GND power_in
+    pin VCC power_in
+    package tssop footprint="TSSOP-14_4.4x5mm_P0.65mm" {
+        order mpn=SN74AHCT125PWR mouser="595-SN74AHCT125PWR"
+        pad A_OE 1
+        pad A_A 2
+        pad A_Y 3
+        pad B_OE 4
+        pad B_A 5
+        pad B_Y 6
+        pad GND 7
+        pad C_Y 8
+        pad C_A 9
+        pad C_OE 10
+        pad D_Y 11
+        pad D_A 12
+        pad D_OE 13
+        pad VCC 14
+    }
+    package soic footprint="SOIC-14_3.9x8.7mm_P1.27mm" {
+        order mpn=SN74AHCT125DR mouser="595-SN74AHCT125DR"
+        pad A_OE 1
+        pad A_A 2
+        pad A_Y 3
+        pad B_OE 4
+        pad B_A 5
+        pad B_Y 6
+        pad GND 7
+        pad C_Y 8
+        pad C_A 9
+        pad C_OE 10
+        pad D_Y 11
+        pad D_A 12
+        pad D_OE 13
+        pad VCC 14
+    }
+    port vcc type=power {
+        require net.voltage min="4.5V" max="5.5V"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+    block supply {
+        default
+        place bypass Cvcc node=VCC rail=vcc value="100nF"
+    }
+}

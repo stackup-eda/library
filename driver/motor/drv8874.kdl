@@ -1,0 +1,110 @@
+// @stackup/driver/motor/drv8874 — TI 40 V / 6 A brushed-motor H-bridge in HTSSOP-16.
+
+use "@stackup/passives"
+
+part drv8874 {
+    symbol "DRV8874:DRV8874PWPR"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/drv8874.pdf"
+    description "6 A brushed motor driver, HTSSOP-16"
+    manufacturer "Texas Instruments"
+    order mpn="DRV8874PWPR" mouser="595-DRV8874PWPR" lcsc="C1855818"
+
+    pin EN_IN1 input symbol="EN/IN1"
+    pin PH_IN2 input symbol="PH/IN2"
+    pin SLEEP input symbol="~{SLEEP}"
+    pin FAULT open_collector symbol="~{FAULT}"
+    pin VREF input required
+    pin IPROPI output
+    pin IMODE input required
+    pin OUT1 output
+    pin PGND power_in
+    pin OUT2 output
+    pin VM power_in
+    pin VCP power_in
+    pin CPH power_in
+    pin CPL power_in
+    pin GND power_in
+    pin PMODE input required
+    pin PAD power_in
+
+    package htssop16 footprint="Package_SO:HTSSOP-16-1EP_4.4x5mm_P0.65mm" {
+        pad EN_IN1 1
+        pad PH_IN2 2
+        pad SLEEP 3
+        pad FAULT 4
+        pad VREF 5
+        pad IPROPI 6
+        pad IMODE 7
+        pad OUT1 8
+        pad PGND 9
+        pad OUT2 10
+        pad VM 11
+        pad VCP 12
+        pad CPH 13
+        pad CPL 14
+        pad GND 15
+        pad PMODE 16
+        pad PAD 17
+    }
+
+    port drive type=power {
+        require net.voltage min="4.5V" max="37V"
+        line rail pin=VM
+        line gnd pin=PGND
+    }
+    port logic type=power {
+        add net.draw "1mA"
+        line rail
+        line gnd pin=GND
+    }
+    port out-a pin=OUT1
+    port out-b pin=OUT2
+    port enable pin=EN_IN1
+    port phase pin=PH_IN2
+    port sleep pin=SLEEP
+    port fault pin=FAULT
+    port sense pin=IPROPI
+
+    param vref voltage default="1V"
+    param logic-design-voltage voltage default="3.3V"
+    // IMODE selects both the current-chopping behavior and whether a fault latches the outputs off.
+    param regulation strap default=cycle-retry
+
+    block support {
+        default
+        place bypass Cvm node=VM rail=drive value="100nF"
+        circuit GND PGND PAD drive.gnd
+        circuit PMODE drive.gnd
+        place capacitor Cflying value="22nF" intent=filter
+        circuit CPH Cflying CPL
+        place capacitor Cvcp value="100nF" intent=filter
+        circuit VM Cvcp VCP
+        place pull-up Rfault node=FAULT rail=logic value="10kΩ"
+    }
+    block imode-cycle-retry {
+        when "regulation == cycle-retry"
+        place resistor Rimode value="20kΩ" intent=series
+        circuit IMODE Rimode logic.gnd
+    }
+    block imode-cycle-latch {
+        when "regulation == cycle-latch"
+        place resistor Rimode value="62kΩ" intent=series
+        circuit IMODE Rimode logic.gnd
+    }
+    block imode-fixed-retry { when "regulation == fixed-retry"; circuit IMODE logic.gnd }
+    block imode-fixed-latch { when "regulation == fixed-latch"; nc IMODE note="IMODE floats for fixed off-time latch-off" }
+
+    // Optional VREF divider. IPROPI still needs a board-selected resistor to set current trip.
+    // The part's `vref` parameter states the requested reference voltage.
+    block current-limit {
+        derive top "e24((logic-design-voltage / vref - 1) * 30kΩ)"
+        derive actual-vref "logic.voltage * 30kΩ / (top + 30kΩ)"
+        assert "vref > 0V && vref < logic-design-voltage" message="VREF must be between ground and the design logic supply"
+        assert "actual-vref.min >= 0.95 * vref && actual-vref.max <= 1.05 * vref" \
+            message="The actual logic rail makes VREF {actual-vref}, outside 5% of the requested {vref}"
+        place resistor Rtop value=top intent=divider
+        place resistor Rbottom value="30kΩ" intent=divider
+        circuit logic.rail Rtop VREF Rbottom logic.gnd
+    }
+}

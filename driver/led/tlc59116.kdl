@@ -1,0 +1,120 @@
+// @stackup/driver/led/tlc59116 — TI 16-channel I²C constant-current LED sink.
+
+use "@stackup/passives"
+
+part tlc59116 {
+    symbol "TLC59116:TLC59116IPWR"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/tlc59116.pdf"
+    description "16-channel I²C LED current sink, TSSOP-28"
+    manufacturer "Texas Instruments"
+    order mpn="TLC59116IPWR" mouser="595-TLC59116IPWR"
+
+    pin REXT input required
+    pin A0 input required
+    pin A1 input required
+    pin A2 input required
+    pin A3 input required
+    pin OUT0 output
+    pin OUT1 output
+    pin OUT2 output
+    pin OUT3 output
+    pin OUT4 output
+    pin OUT5 output
+    pin OUT6 output
+    pin OUT7 output
+    pin OUT8 output
+    pin OUT9 output
+    pin OUT10 output
+    pin OUT11 output
+    pin OUT12 output
+    pin OUT13 output
+    pin OUT14 output
+    pin OUT15 output
+    pin GND power_in
+    pin RESET input symbol="~{RESET}"
+    pin SCL input
+    pin SDA bidirectional
+    pin VCC power_in
+
+    package tssop28 footprint="Package_SO:TSSOP-28_4.4x9.7mm_P0.65mm" {
+        pad REXT 1
+        pad A0 2
+        pad A1 3
+        pad A2 4
+        pad A3 5
+        pad OUT0 6
+        pad OUT1 7
+        pad OUT2 8
+        pad OUT3 9
+        pad GND 10
+        pad GND 19
+        pad GND 24
+        pad OUT4 11
+        pad OUT5 12
+        pad OUT6 13
+        pad OUT7 14
+        pad OUT8 15
+        pad OUT9 16
+        pad OUT10 17
+        pad OUT11 18
+        pad OUT12 20
+        pad OUT13 21
+        pad OUT14 22
+        pad OUT15 23
+        pad RESET 25
+        pad SCL 26
+        pad SDA 27
+        pad VCC 28
+    }
+
+    param address number default=0
+    param current current default="20mA"
+    assert "address >= 0 && address <= 13" message="TLC59116 address offset must be 0–13"
+    assert "current >= 5mA && current <= 120mA" message="TLC59116 full-scale current must be 5–120 mA"
+    derive bus-address "0x60 + address"
+    derive rext "e96((1.26V * (127 / 128) * 15) / current)"
+    port vdd type=power {
+        add net.draw "5mA"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+    port i2c type=i2c {
+        claim signal.address bus-address
+        line sda pin=SDA
+        line scl pin=SCL
+    }
+    port reset pin=RESET
+
+    block support {
+        default
+        place bypass Cvcc node=VCC rail=vdd value="100nF"
+        place resistor Rext value=rext intent=series
+        circuit REXT Rext vdd.gnd
+        place pull-up Rreset node=RESET rail=vdd value="10kΩ"
+    }
+    port out0 pin=OUT0
+    port out1 pin=OUT1
+    port out2 pin=OUT2
+    port out3 pin=OUT3
+    port out4 pin=OUT4
+    port out5 pin=OUT5
+    port out6 pin=OUT6
+    port out7 pin=OUT7
+    port out8 pin=OUT8
+    port out9 pin=OUT9
+    port out10 pin=OUT10
+    port out11 pin=OUT11
+    port out12 pin=OUT12
+    port out13 pin=OUT13
+    port out14 pin=OUT14
+    port out15 pin=OUT15
+    block a0-low { when "address == 0 || address == 2 || address == 4 || address == 6 || address == 8 || address == 10 || address == 12"; circuit A0 vdd.gnd }
+    block a0-high { when "address == 1 || address == 3 || address == 5 || address == 7 || address == 9 || address == 11 || address == 13"; circuit A0 vdd.rail }
+    block a1-low { when "address == 0 || address == 1 || address == 4 || address == 5 || address == 8 || address == 9 || address == 12 || address == 13"; circuit A1 vdd.gnd }
+    block a1-high { when "address == 2 || address == 3 || address == 6 || address == 7 || address == 10 || address == 11"; circuit A1 vdd.rail }
+    block a2-low { when "address == 0 || address == 1 || address == 2 || address == 3 || address == 8 || address == 9 || address == 10 || address == 11"; circuit A2 vdd.gnd }
+    block a2-high { when "address == 4 || address == 5 || address == 6 || address == 7 || address == 12 || address == 13"; circuit A2 vdd.rail }
+    block a3-low { when "address == 0 || address == 1 || address == 2 || address == 3 || address == 4 || address == 5 || address == 6 || address == 7"; circuit A3 vdd.gnd }
+    block a3-high { when "address == 8 || address == 9 || address == 10 || address == 11 || address == 12 || address == 13"; circuit A3 vdd.rail }
+}

@@ -1,0 +1,67 @@
+// @stackup/bus/rs485/iso1430 — TI isolated half-duplex RS-485 transceiver. Host and bus sides
+// use separate supplies and grounds. It has the ADM2483 pinout; pin 7 is NC instead of PV.
+
+use "@stackup/passives"
+
+part iso1430 {
+    symbol "ISO1430:ISO1430DW"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/iso1430.pdf"
+    description "Isolated half-duplex RS-485/RS-422 transceiver, 12 Mbps, 5 kVrms, SOIC-16W"
+    manufacturer "Texas Instruments"
+    order mpn=ISO1430DW mouser="595-ISO1430DW"
+
+    pin VCC1 power_in
+    pin GND1 power_in
+    pin R output
+    pin RE input symbol="~{RE}"
+    pin DE input
+    pin D input
+    pin GND2 power_in
+    pin NC no_connect
+    pin A bidirectional
+    pin B bidirectional
+    pin VCC2 power_in
+
+    package soic16w footprint="SOIC-16W_7.5x10.3mm_P1.27mm" {
+        pad VCC1 1
+        pad GND1 2
+        pad R 3
+        pad RE 4
+        pad DE 5
+        pad D 6
+        pad NC 7
+        pad GND1 8
+        pad GND2 9
+        pad NC 10
+        pad NC 11
+        pad A 12
+        pad B 13
+        pad NC 14
+        pad GND2 15
+        pad VCC2 16
+    }
+
+    port host type=power {
+        require net.voltage min="1.71V" max="5.5V"
+        add net.draw "5mA"
+        line rail pin=VCC1
+        line gnd pin=GND1
+    }
+    port link type=power {
+        require net.voltage min="3.0V" max="5.5V"
+        add net.draw "60mA"
+        line rail pin=VCC2
+        line gnd pin=GND2
+    }
+    port rxd pin=R
+    port txd type=output pin=D
+    port de type=output pin=DE
+    port re type=output pin=RE
+
+    block supply {
+        default
+        place bypass Chost node=VCC1 rail=host value="100nF"
+        place bypass Clink node=VCC2 rail=link value="100nF"
+    }
+}

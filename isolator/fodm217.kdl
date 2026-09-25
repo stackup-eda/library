@@ -1,0 +1,86 @@
+// @stackup/isolator/fodm217 — onsemi FODM217A phototransistor optocoupler in a 4.4 × 2.6 mm
+// SOP-4 mini-flat package, with a 3.75 kVrms isolation rating. Pins A/K connect to the LED and
+// C/E to the phototransistor. The A bin specifies 80–160% CTR at 5 mA.
+//
+// Switching takes tens of microseconds, and CTR varies with age. Neither side needs a separate
+// IC supply: LED current controls transistor conduction. The `rail-flag` block uses this to
+// report supply presence across an isolation barrier.
+
+use "@stackup/passives"
+
+part fodm217a {
+    symbol "Isolator:FODM217A"
+    reference U
+    datasheet "https://www.onsemi.com/pdf/datasheet/fodm217-d.pdf"
+    description "Optocoupler, phototransistor output, SOP-4"
+    manufacturer onsemi
+    order mpn=FODM217A mouser="512-FODM217A" lcsc=C190617
+
+    pin A passive
+    pin K passive
+    pin E passive
+    pin C passive
+
+    package sop4 footprint="SOP-4_4.4x2.6mm_P1.27mm" {
+        pad A 1
+        pad K 2
+        pad E 3
+        pad C 4
+    }
+
+    port anode pin=A
+    port cathode pin=K
+    port collector pin=C
+    port emitter pin=E
+}
+
+// Isolated supply-presence detector. The `sensed` rail drives the LED through a resistor. The
+// phototransistor pulls `out` low against a pull-up to the `observer` rail: low means the
+// sensed supply is present. Each circuit returns to its own ground.
+//
+// The placement selects the LED resistor; assertions check current at both ends of the supply
+// range. The default 2.0 kΩ approximates (5 V − 1.2 V) / 2 mA on E24. A 100 kΩ output pull-up
+// requires only tens of microamps, allowing margin for CTR variation and ageing at the cost of
+// switching speed.
+block rail-flag {
+    param r resistance default="2.0kΩ"
+    // Infrared LED forward voltage.
+    param forward voltage default="1.2V"
+    param limit current default="3mA"
+    param floor current default="1mA"
+    param pullup resistance default="100kΩ"
+
+    derive current "(sensed.voltage.max - forward) / r"
+    derive dim "(sensed.voltage.min - forward) / r"
+
+    assert "sensed.voltage.min > forward" \
+        message="LED forward voltage {forward} leaves no headroom at minimum sensed voltage {sensed.voltage.min}"
+    assert "current <= limit" \
+        message="optocoupler LED current {current} at {sensed.voltage.max} with {r} exceeds the {limit} limit"
+    assert "dim >= floor" \
+        message="optocoupler LED current {dim} at {sensed.voltage.min} is below the {floor} minimum used for the CTR rating"
+
+    // Current drawn from the sensed supply.
+    port sensed type=power {
+        add net.draw current
+    }
+    // Observer supply and phototransistor ground.
+    port observer type=power
+    // Active-low supply-present output, pulled up to the observer rail when the sensed supply
+    // is absent.
+    port out
+
+    place fodm217a as=self
+
+    // LED circuit, connected only to the sensed supply and its ground.
+    place resistor R_led value=r intent=series \
+        note="flag LED current limit — {current} at {sensed.voltage.max} while the rail is up"
+    circuit sensed.rail R_led self.anode
+    circuit self.cathode sensed.gnd
+
+    // Phototransistor circuit, connected only to the observer supply and its ground.
+    place pull-up pull_up node=out rail=observer value=pullup \
+        note="flag pull-up — the released state, read as \"rail down\""
+    circuit self.collector out
+    circuit self.emitter observer.gnd
+}

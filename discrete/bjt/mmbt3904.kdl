@@ -1,0 +1,25 @@
+// @stackup/discrete/bjt/mmbt3904 — MMBT3904, a 40 V / 200 mA NPN transistor in SOT-23 for
+// small-signal switching and inversion.
+
+part mmbt3904 {
+    symbol "Transistor_BJT:Q_NPN_BEC"
+    reference Q
+    value "MMBT3904"
+    datasheet "https://www.onsemi.com/pdf/datasheet/mmbt3904lt1-d.pdf"
+    description "40V Vce, 200mA Ic, NPN transistor, SOT-23"
+    order mpn=MMBT3904 lcsc=C20526
+
+    pin BASE input symbol=B
+    pin EMITTER passive symbol=E
+    pin COLLECTOR passive symbol=C
+
+    package sot23 footprint="SOT-23" {
+        pad BASE 1
+        pad EMITTER 2
+        pad COLLECTOR 3
+    }
+
+    port base pin=BASE
+    port emitter pin=EMITTER
+    port collector pin=COLLECTOR
+}

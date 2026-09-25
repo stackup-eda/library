@@ -1,0 +1,47 @@
+// @stackup/power/isolated/tri20 — Traco TRI 20-2415 isolated converter.
+// The input and output returns are separate. Do not join them unless the board
+// explicitly needs that connection. Output load contributes input draw at 88%
+// efficiency; the output check uses the connected board's actual load. The
+// internal input filter meets EN 55032 Class A.
+
+use "@stackup/passives"
+
+part tri20-2415 {
+    symbol "Converter_DCDC:TRI20-2415"
+    reference U
+    datasheet "https://www.tracopower.com/sites/default/files/products/datasheets/tri20_datasheet.pdf"
+    description "20W isolated DC/DC converter, 18-36V input, 24V output, reinforced 4200VAC isolation"
+    manufacturer "Traco Power"
+    order mpn="TRI 20-2415"
+
+    pin PVIN power_in symbol="+Vin"
+    pin NVIN power_in symbol="-Vin"
+    pin PVOUT power_out symbol="+Vout"
+    pin NVOUT power_out symbol="-Vout"
+    package dip footprint="Converter_DCDC:Converter_DCDC_TRACO_THB10-xxxx_Single_THT" {
+        pad PVIN 1
+        pad NVIN 2
+        pad PVOUT 3
+        pad NVOUT 5
+    }
+
+    derive input "out.draw * out.voltage / (0.88 * in.voltage.min)"
+    port in type=power {
+        require net.voltage min="18V" max="36V"
+        add net.draw input
+        line rail pin=PVIN
+        line gnd pin=NVIN
+    }
+    port out type=power {
+        set net.voltage "24V"
+        assert "draw <= 840mA" message="TRI 20-2415 output load {draw} exceeds 840mA"
+        line rail pin=PVOUT
+        line gnd pin=NVOUT
+    }
+
+    // The 150 mV peak-to-peak ripple figure assumes this capacitor is installed.
+    block output-capacitor {
+        default
+        place bulk Cout node=PVOUT rail=out value="4.7µF"
+    }
+}

@@ -1,0 +1,484 @@
+// @stackup/micro/stm32h723 — STM32H723VGT6 in LQFP-100_14x14mm_P0.5mm.
+// Cortex-M7, 550 MHz, 1 MB flash, 564 KB RAM. Supply blocks add local bypass, analog filtering, core capacitors, reset, and boot.
+
+use "@stackup/passives"
+use "@stackup/passive/ferrite"
+use "@stackup/types"
+
+part stm32h723vg {
+    symbol "MCU_ST_STM32H7:STM32H723VGTx"
+    reference U
+    datasheet "https://www.st.com/resource/en/datasheet/stm32h723vg.pdf"
+    description "Cortex-M7, 550 MHz, 1 MB flash, 564 KB RAM"
+    manufacturer STMicroelectronics
+    order mpn=STM32H723VGT6
+
+    pin PE2 bidirectional once
+    pin PE3 bidirectional once
+    pin PE4 bidirectional once
+    pin PE5 bidirectional once
+    pin PE6 bidirectional once
+    pin VBAT power_in
+    pin PC13 bidirectional once
+    pin PC14 bidirectional once
+    pin PC15 bidirectional once
+    pin VSS power_in
+    pin VDD power_in
+    pin PH0 bidirectional once
+    pin PH1 bidirectional once
+    pin NRST input {
+        role reset active=low pull=internal
+        require net.rest not=low
+    }
+    pin PC0 bidirectional once
+    pin PC1 bidirectional once
+    pin PC2_C bidirectional once
+    pin PC3_C bidirectional once
+    pin VSSA power_in
+    pin "VREF+" input
+    pin VDDA power_in
+    pin PA0 bidirectional once
+    pin PA1 bidirectional once
+    pin PA2 bidirectional once
+    pin PA3 bidirectional once
+    pin PA4 bidirectional once
+    pin PA5 bidirectional once
+    pin PA6 bidirectional once
+    pin PA7 bidirectional once
+    pin PC4 bidirectional once
+    pin PC5 bidirectional once
+    pin PB0 bidirectional once
+    pin PB1 bidirectional once
+    pin PB2 bidirectional once
+    pin PE7 bidirectional once
+    pin PE8 bidirectional once
+    pin PE9 bidirectional once
+    pin PE10 bidirectional once
+    pin PE11 bidirectional once
+    pin PE12 bidirectional once
+    pin PE13 bidirectional once
+    pin PE14 bidirectional once
+    pin PE15 bidirectional once
+    pin PB10 bidirectional once
+    pin PB11 bidirectional once
+    pin VCAP power_out
+    pin PB12 bidirectional once
+    pin PB13 bidirectional once
+    pin PB14 bidirectional once
+    pin PB15 bidirectional once
+    pin PD8 bidirectional once
+    pin PD9 bidirectional once
+    pin PD10 bidirectional once
+    pin PD11 bidirectional once
+    pin PD12 bidirectional once
+    pin PD13 bidirectional once
+    pin PD14 bidirectional once
+    pin PD15 bidirectional once
+    pin PC6 bidirectional once
+    pin PC7 bidirectional once
+    pin PC8 bidirectional once
+    pin PC9 bidirectional once
+    pin PA8 bidirectional once
+    pin PA9 bidirectional once
+    pin PA10 bidirectional once
+    pin PA11 bidirectional once
+    pin PA12 bidirectional once
+    pin PA13 bidirectional once
+    pin PA14 bidirectional once
+    pin PA15 bidirectional once
+    pin PC10 bidirectional once
+    pin PC11 bidirectional once
+    pin PC12 bidirectional once
+    pin PD0 bidirectional once
+    pin PD1 bidirectional once
+    pin PD2 bidirectional once
+    pin PD3 bidirectional once
+    pin PD4 bidirectional once
+    pin PD5 bidirectional once
+    pin PD6 bidirectional once
+    pin PD7 bidirectional once
+    pin PB3 bidirectional once
+    pin PB4 bidirectional once
+    pin PB5 bidirectional once
+    pin PB6 bidirectional once
+    pin PB7 bidirectional once
+    pin BOOT0 input {
+        role strap sampled=reset pull=none note="low boots from flash"
+    }
+    pin PB8 bidirectional once
+    pin PB9 bidirectional once
+    pin PE0 bidirectional once
+    pin PE1 bidirectional once
+
+    package lqfp100 footprint="LQFP-100_14x14mm_P0.5mm" {
+        symbol "MCU_ST_STM32H7:STM32H723VGTx"
+        order mpn=STM32H723VGT6
+        pad PE2 1
+        pad PE3 2
+        pad PE4 3
+        pad PE5 4
+        pad PE6 5
+        pad VBAT 6
+        pad PC13 7
+        pad PC14 8
+        pad PC15 9
+        pad VSS 10
+        pad VDD 11
+        pad PH0 12
+        pad PH1 13
+        pad NRST 14
+        pad PC0 15
+        pad PC1 16
+        pad PC2_C 17
+        pad PC3_C 18
+        pad VSSA 19
+        pad "VREF+" 20
+        pad VDDA 21
+        pad PA0 22
+        pad PA1 23
+        pad PA2 24
+        pad PA3 25
+        pad VSS 26
+        pad VDD 27
+        pad PA4 28
+        pad PA5 29
+        pad PA6 30
+        pad PA7 31
+        pad PC4 32
+        pad PC5 33
+        pad PB0 34
+        pad PB1 35
+        pad PB2 36
+        pad PE7 37
+        pad PE8 38
+        pad PE9 39
+        pad PE10 40
+        pad PE11 41
+        pad PE12 42
+        pad PE13 43
+        pad PE14 44
+        pad PE15 45
+        pad PB10 46
+        pad PB11 47
+        pad VCAP 48
+        pad VSS 49
+        pad VDD 50
+        pad PB12 51
+        pad PB13 52
+        pad PB14 53
+        pad PB15 54
+        pad PD8 55
+        pad PD9 56
+        pad PD10 57
+        pad PD11 58
+        pad PD12 59
+        pad PD13 60
+        pad PD14 61
+        pad PD15 62
+        pad PC6 63
+        pad PC7 64
+        pad PC8 65
+        pad PC9 66
+        pad PA8 67
+        pad PA9 68
+        pad PA10 69
+        pad PA11 70
+        pad PA12 71
+        pad PA13 72
+        pad VCAP 73
+        pad VSS 74
+        pad VDD 75
+        pad PA14 76
+        pad PA15 77
+        pad PC10 78
+        pad PC11 79
+        pad PC12 80
+        pad PD0 81
+        pad PD1 82
+        pad PD2 83
+        pad PD3 84
+        pad PD4 85
+        pad PD5 86
+        pad PD6 87
+        pad PD7 88
+        pad PB3 89
+        pad PB4 90
+        pad PB5 91
+        pad PB6 92
+        pad PB7 93
+        pad BOOT0 94
+        pad PB8 95
+        pad PB9 96
+        pad PE0 97
+        pad PE1 98
+        pad VSS 99
+        pad VDD 100
+    }
+
+    port vdd type=power {
+        require net.voltage min="1.71V" max="3.6V"
+        line rail pin=VDD
+        line gnd pin=VSS
+    }
+    port reset pin=NRST
+    port swd type=swd {
+        line swdio pin=PA13
+        line swclk pin=PA14
+        line nrst pin=NRST
+    }
+    port usb type=usb {
+        line dp pin=PA12
+        line dm pin=PA11
+    }
+
+    block supply {
+        default
+        place decouple Cvdd11 node=VDD@11 rail=vdd value="100nF"
+        place decouple Cvdd27 node=VDD@27 rail=vdd value="100nF"
+        place decouple Cvdd50 node=VDD@50 rail=vdd value="100nF"
+        place decouple Cvdd75 node=VDD@75 rail=vdd value="100nF"
+        place decouple Cvdd100 node=VDD@100 rail=vdd value="100nF"
+        place bulk Cbulk node=VDD rail=vdd value="10µF"
+        place filter Cnrst node=NRST rail=vdd value="100nF"
+        place pull-down Rboot0 node=BOOT0 rail=vdd value="10kΩ"
+        place bypass Cvcap48 node=VCAP@48 rail=vdd value="2.2µF" note="low-ESR core regulator capacitor"
+        place bypass Cvcap73 node=VCAP@73 rail=vdd value="2.2µF" note="low-ESR core regulator capacitor"
+    }
+    block backup {
+        default
+        circuit VBAT VDD
+        place bypass Cvbat node=VBAT rail=vdd value="100nF"
+    }
+    block analog {
+        default
+        place ferrite-bead FB value="600Ω@100MHz"
+        circuit VDD FB.a
+        circuit FB.b VDDA
+        place bulk Cvdda node=VDDA rail=vdd value="1µF"
+        place bypass Cvdda_hf node=VDDA rail=vdd value="100nF"
+        circuit VSSA vdd.gnd
+        circuit "VREF+" VDDA
+        place bulk Cvref node="VREF+" rail=vdd value="1µF"
+        place bypass Cvref_hf node="VREF+" rail=vdd value="100nF"
+    }
+
+    peripheral GPIO gpio {
+        io PE2 PE3 PE4 PE5 PE6 PC13 PC14 PC15 PH0 PH1 PC0 PC1 PC2_C PC3_C
+        io PA0 PA1 PA2 PA3 PA4 PA5 PA6 PA7 PC4 PC5 PB0 PB1 PB2 PE7
+        io PE8 PE9 PE10 PE11 PE12 PE13 PE14 PE15 PB10 PB11 PB12 PB13 PB14 PB15
+        io PD8 PD9 PD10 PD11 PD12 PD13 PD14 PD15 PC6 PC7 PC8 PC9 PA8 PA9
+        io PA10 PA11 PA12 PA13 PA14 PA15 PC10 PC11 PC12 PD0 PD1 PD2 PD3 PD4
+        io PD5 PD6 PD7 PB3 PB4 PB5 PB6 PB7 PB8 PB9 PE0 PE1
+    }
+    peripheral SWD swd {
+        swdio PA13
+        swclk PA14
+        nrst NRST
+    }
+    peripheral I2C1 i2c {
+        sda PB7 PB9
+        scl PB6 PB8
+    }
+    peripheral I2C2 i2c {
+        sda PB11
+        scl PB10
+    }
+    peripheral I2C3 i2c {
+        sda PC9
+        scl PA8
+    }
+    peripheral I2C4 i2c {
+        sda PB7 PB9 PD13
+        scl PB6 PB8 PD12
+    }
+    peripheral I2C5 i2c {
+        sda PC9 PC10
+        scl PA8 PC11
+    }
+    peripheral SPI1 spi {
+        sck PA5 PB3
+        mosi PA7 PB5 PD7
+        miso PA6 PB4
+        nss PA4 PA15
+    }
+    peripheral SPI2 spi {
+        sck PA9 PA12 PB10 PB13 PD3
+        mosi PB15 PC1 PC3_C
+        miso PB14 PC2_C
+        nss PA11 PB4 PB9 PB12
+    }
+    peripheral SPI3 spi {
+        sck PB3 PC10
+        mosi PB2 PB5 PC12 PD6
+        miso PB4 PC11
+        nss PA4 PA15
+    }
+    peripheral SPI4 spi {
+        sck PE2 PE12
+        mosi PE6 PE14
+        miso PE5 PE13
+        nss PE4 PE11
+    }
+    peripheral SPI6 spi {
+        sck PA5 PB3 PC12
+        mosi PA7 PB5
+        miso PA6 PB4
+        nss PA0 PA4 PA15
+    }
+    peripheral LPUART1 uart {
+        tx PA9 PB6
+        rx PA10 PB7
+        rts PA12
+        cts PA11
+    }
+    peripheral UART4 uart {
+        tx PA0 PA12 PB9 PC10 PD1
+        rx PA1 PA11 PB8 PC11 PD0
+        rts PA15 PB14
+        cts PB0 PB15
+    }
+    peripheral UART5 uart {
+        tx PB6 PB13 PC12
+        rx PB5 PB12 PD2
+        rts PC8
+        cts PC9
+    }
+    peripheral UART7 uart {
+        tx PA15 PB4 PE8
+        rx PA8 PB3 PE7
+        rts PE9
+        cts PE10
+    }
+    peripheral UART8 uart {
+        tx PE1
+        rx PE0
+        rts PD15
+        cts PD14
+    }
+    peripheral UART9 uart {
+        tx PD15
+        rx PD14
+        rts PD13
+        cts PD0
+    }
+    peripheral USART1 uart {
+        tx PA9 PB6 PB14
+        rx PA10 PB7 PB15
+        rts PA12
+        cts PA11
+    }
+    peripheral USART10 uart {
+        tx PE3
+        rx PE2
+    }
+    peripheral USART2 uart {
+        tx PA2 PD5
+        rx PA3 PD6
+        rts PA1 PD4
+        cts PA0 PD3
+    }
+    peripheral USART3 uart {
+        tx PB10 PC10 PD8
+        rx PB11 PC11 PD9
+        rts PB14 PD12
+        cts PB13 PD11
+    }
+    peripheral USART6 uart {
+        tx PC6
+        rx PC7
+    }
+    peripheral FDCAN1 can {
+        tx PA12 PB9 PD1
+        rx PA11 PB8 PD0
+    }
+    peripheral FDCAN2 can {
+        tx PB6 PB13
+        rx PB5 PB12
+    }
+    peripheral FDCAN3 can {
+        tx PD13
+        rx PD12
+    }
+    peripheral ADC1 adc {
+        in PA0 PA1 PA2 PA3 PA4 PA5 PA6 PA7 PB0 PB1 PC0 PC1 PC4 PC5
+    }
+    peripheral ADC2 adc {
+        in PA2 PA3 PA4 PA5 PA6 PA7 PB0 PB1 PC0 PC1 PC4 PC5
+    }
+    peripheral ADC3 adc {
+        in PC0 PC1 PC2_C PC3_C
+    }
+    peripheral OCTOSPI1 qspi {
+        sck PA3 PB2
+        cs PB6 PB10 PC11 PE11
+        io0 PA2 PB1 PB12 PC3_C PC9 PD11
+        io1 PB0 PC10 PD12
+        io2 PA3 PA7 PB13 PC2_C PE2
+        io3 PA1 PA6 PD13
+    }
+    peripheral TIM1 timer {
+        ch1n PA7 PB13 PE8
+        ch1 PA8 PE9
+        ch2 PA9 PE11
+        ch3 PA10 PE13
+        ch4 PA11 PE14
+        ch2n PB0 PB14 PE10
+        ch3n PB1 PB15 PE12
+    }
+    peripheral TIM12 timer {
+        ch1 PB14
+        ch2 PB15
+    }
+    peripheral TIM13 timer {
+        ch1 PA6
+    }
+    peripheral TIM14 timer {
+        ch1 PA7
+    }
+    peripheral TIM15 timer {
+        ch1n PA1 PE4
+        ch1 PA2 PC12 PE5
+        ch2 PA3 PE6
+    }
+    peripheral TIM16 timer {
+        ch1n PB6
+        ch1 PB8
+    }
+    peripheral TIM17 timer {
+        ch1n PB7
+        ch1 PB9
+    }
+    peripheral TIM2 timer {
+        ch1 PA0 PA5 PA15
+        ch2 PA1 PB3
+        ch3 PA2 PB10
+        ch4 PA3 PB11
+    }
+    peripheral TIM3 timer {
+        ch1 PA6 PB4 PC6
+        ch2 PA7 PB5 PC7
+        ch3 PB0 PC8
+        ch4 PB1 PC9
+    }
+    peripheral TIM4 timer {
+        ch1 PB6 PD12
+        ch2 PB7 PD13
+        ch3 PB8 PD14
+        ch4 PB9 PD15
+    }
+    peripheral TIM5 timer {
+        ch1 PA0
+        ch2 PA1
+        ch3 PA2
+        ch4 PA3
+    }
+    peripheral TIM8 timer {
+        ch1n PA5 PA7
+        ch2n PB0 PB14
+        ch3n PB1 PB15
+        ch1 PC6
+        ch2 PC7
+        ch3 PC8
+        ch4 PC9
+    }
+}

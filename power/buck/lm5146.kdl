@@ -1,0 +1,181 @@
+// @stackup/power/buck/lm5146 — TI 5.5–100 V synchronous buck controller.
+// This controller requires external FETs, an inductor, capacitor banks, current
+// limiting, and a Type III compensation network. The application block takes
+// explicit component values and a design envelope, then checks the board against it.
+
+use "@stackup/passives"
+use "@stackup/discrete/fet/bsc030n08ns5"
+
+part lm5146 {
+    symbol "LM5146:LM5146RGYR"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/lm5146.pdf"
+    description "5.5-100V synchronous buck controller, VQFN-20"
+    manufacturer "Texas Instruments"
+    pin EN_UVLO input symbol="EN/UVLO"
+    pin RT input
+    pin SS_TRK input symbol="SS/TRK"
+    pin COMP output
+    pin FB input
+    pin AGND power_in
+    pin SYNCOUT output
+    pin SYNCIN input
+    pin NC no_connect
+    pin PGOOD open_collector
+    pin ILIM input
+    pin PGND power_in
+    pin LO output
+    pin VCC power_out
+    pin BST input
+    pin HO output
+    pin SW input
+    pin VIN power_in
+    pin EP power_in
+    package vqfn20 footprint="Texas_RGY0020G_VQFN-20-1EP_3.5x4.5mm_P0.5mm_EP1.7x2.7mm" {
+        pad EN_UVLO 1
+        pad RT 2
+        pad SS_TRK 3
+        pad COMP 4
+        pad FB 5
+        pad AGND 6
+        pad SYNCOUT 7
+        pad SYNCIN 8
+        pad NC 9
+        pad PGOOD 10
+        pad ILIM 11
+        pad PGND 12
+        pad LO 13
+        pad VCC 14
+        pad NC 16
+        pad BST 17
+        pad HO 18
+        pad SW 19
+        pad VIN 20
+        pad EP 15
+        pad EP 21
+    }
+    port vin type=power {
+        require net.voltage min="5.5V" max="100V"
+        line rail pin=VIN
+        line gnd pin=PGND
+    }
+    port en pin=EN_UVLO
+    port fb pin=FB
+    port pgood pin=PGOOD
+    port sw pin=SW
+}
+
+// Supply the power-stage and compensation values for the stated design envelope.
+// BSC030N08NS5 is the default power FET (80 V, 3 mΩ at 10 V gate drive).
+// State the selected FET's voltage and on-resistance ratings alongside the
+// other design inputs, including when using that default.
+block lm5146-buck {
+    param power-fet part default=bsc030n08ns5
+    param fet-vds-max voltage
+    param fet-rds-on resistance
+    param vout voltage
+    param vin-min voltage
+    param vin-max voltage
+    param rated-load current
+    param overshoot voltage
+    param output-bank bank default=two
+    param cout-retention ratio
+    param inductor-saturation current
+    param inductance inductance
+    param cin capacitance
+    param cout capacitance
+    param rilim resistance
+    param cilim capacitance
+    param rc1 resistance
+    param cc1 capacitance
+    param cc2 capacitance
+    param rc2 resistance
+    param cc3 capacitance
+    param css capacitance
+    derive rfbtop "10kΩ * (vout / 0.8V - 1)"
+    derive input "out.draw * out.voltage / (0.9 * in.voltage.min)"
+    derive ripple "vout * (1 - vout / vin-max) / (inductance * 300kHz)"
+    derive required-cout "inductance * rated-load * rated-load / ((vout + overshoot) * (vout + overshoot) - vout * vout)"
+    derive effective-cout "match(output-bank, two: 2, three: 3) * cout * cout-retention"
+    derive current-limit "rilim * 200µA / fet-rds-on + ripple / 2"
+    assert "vin-min >= 5.5V && vin-max <= 100V && vin-max <= fet-vds-max && vin-min <= vin-max" \
+        message="The declared LM5146 input range must fit the 5.5–100 V controller and {fet-vds-max} FET rating"
+    assert "vout > 0V && vout < vin-min && rated-load > 0A && overshoot > 0V" \
+        message="The declared output and load must suit a step-down converter"
+    assert "fet-rds-on > 0Ω" message="The power FET on-resistance must be positive"
+    assert "output-bank == two || output-bank == three" message="Choose a two- or three-capacitor output bank"
+    assert "cout-retention > 0 && cout-retention <= 1" message="Output-capacitor retention must be between 0 and 1"
+    assert "effective-cout >= required-cout" \
+        message="The output bank has {effective-cout} after derating; the declared load step needs {required-cout}"
+    assert "current-limit > rated-load" \
+        message="The selected current-limit resistor trips below the declared {rated-load} load"
+    assert "inductor-saturation >= current-limit + ripple / 2" \
+        message="The inductor saturation rating must exceed the current-limit peak"
+    assert "in.voltage.min >= vin-min && in.voltage.max <= vin-max" \
+        message="The actual input voltage is outside the declared {vin-min}–{vin-max} design range"
+    assert "out.draw.max <= rated-load" \
+        message="The output draws {out.draw}; this converter was designed for {rated-load}"
+    port in type=power {
+        require net.voltage min="5.5V" max="100V"
+        add net.draw input
+    }
+    port out type=power { set net.voltage vout }
+    port en
+    port pgood
+    place lm5146 as=self
+    place power-fet Qhs
+    place power-fet Qls
+    place inductor L value=inductance footprint="L_Coilcraft-XAL1060" intent=filter
+    circuit in.rail Qhs.drain
+    circuit Qhs.source self.SW Qls.drain L
+    circuit Qhs.gate self.HO
+    circuit Qls.source in.gnd
+    circuit Qls.gate self.LO
+    circuit L out.rail
+    circuit self.AGND self.PGND self.EP in.gnd
+    circuit self.SYNCIN self.VCC
+    circuit en self.EN_UVLO
+    circuit pgood self.PGOOD
+    nc self.SYNCOUT self.NC
+
+    place bulk Cin1 node=in.rail rail=in value=cin footprint="C_1210_3225Metric"
+    place bulk Cin2 node=in.rail rail=in value=cin footprint="C_1210_3225Metric"
+    place bypass Cin-hf1 node=in.rail rail=in value="100nF" footprint="C_0603_1608Metric"
+    place bypass Cin-hf2 node=in.rail rail=in value="100nF" footprint="C_0603_1608Metric"
+    place bulk Cout1 node=out.rail rail=out value=cout footprint="C_1210_3225Metric"
+    place bulk Cout2 node=out.rail rail=out value=cout footprint="C_1210_3225Metric"
+
+    block third-output-capacitor {
+        when "output-bank == three"
+        place bulk Cout3 node=out.rail rail=out value=cout footprint="C_1210_3225Metric"
+    }
+
+    place resistor Rboot value="2.2Ω" intent=series
+    place capacitor Cboot value="100nF" intent=filter
+    circuit self.BST Rboot Cboot self.SW
+    place resistor Rilim value=rilim intent=series
+    place capacitor Cilim value=cilim intent=filter
+    circuit self.ILIM Rilim self.SW
+    circuit self.ILIM Cilim in.gnd
+    place bypass Cvcc node=self.VCC rail=in value="2.2µF" footprint="C_0805_2012Metric"
+    place bypass Css node=self.SS_TRK rail=in value=css
+    place resistor Rrt value="33.2kΩ" intent=series
+    circuit self.RT Rrt in.gnd
+    place resistor Rvin value="4.7Ω" intent=series
+    place bypass Cvin node=self.VIN rail=in value="100nF"
+    circuit in.rail Rvin self.VIN
+    place resistor Ren value="10kΩ" intent=pull-down
+    circuit self.EN_UVLO Ren in.gnd
+
+    place resistor Rfbtop value=rfbtop intent=divider
+    place resistor Rfbbottom value="10kΩ" intent=divider
+    circuit out.rail Rfbtop self.FB Rfbbottom out.gnd
+    place resistor Rc1 value=rc1 intent=series
+    place capacitor Cc1 value=cc1 intent=filter
+    circuit self.FB Rc1 Cc1 self.COMP
+    place capacitor Cc2 value=cc2 intent=filter
+    circuit self.FB Cc2 self.COMP
+    place resistor Rc2 value=rc2 intent=series
+    place capacitor Cc3 value=cc3 intent=filter
+    circuit out.rail Rc2 Cc3 self.FB
+}

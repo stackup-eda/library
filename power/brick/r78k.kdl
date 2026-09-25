@@ -1,0 +1,129 @@
+// @stackup/power/brick/r78k — Recom R-78K3.3-0.5 switching-regulator module in SIP-3: 4.5–36 V
+// input, fixed 3.3 V / 0.5 A output. The module includes the switch, inductor, feedback
+// network, and input filter.
+//
+// The input range supports a USB VBUS source as well as higher-voltage supplies; efficiency is
+// approximately 85% at 24 V. There are no enable or power-good pins. UVLO guarantees startup by
+// 4.3 V, with dropout no lower than 3.6 V. No minimum load is required.
+
+use "@stackup/passives"
+
+part r78k3v3 {
+    symbol "Converter_DCDC:R-78E3.3-0.5"   // KiCad has no R-78K; same three pins in the same order
+    value "R-78K3.3-0.5"                    // BOM part number
+    reference U
+    datasheet "https://recom-power.com/pdf/Innoline/R-78K-0.5.pdf"
+    description "500mA Step-Down DC/DC-Regulator, 4.5-36V input, 3.3V fixed Output Voltage, SIP3"
+    manufacturer "RECOM Power"
+    order mpn="R-78K3.3-0.5" mouser="919-R-78K3.3-0.5" lcsc=C5836955
+
+    pin IN power_in
+    pin GND power_in
+    pin OUT power_out
+
+    // The K variant’s square pins require larger holes than the R-78E footprint provides.
+    package sip3 footprint="Converter_DCDC_RECOM_R-78K-0.5_THT" {
+        pad IN 1
+        pad GND 2
+        pad OUT 3
+    }
+
+    // Input current from output power, efficiency, and minimum input voltage.
+    derive input "out.draw * out.voltage / (0.85 * in.voltage.min)"
+
+    // Input supply and current contribution. GND is fixed; the application block connects the
+    // input rail to IN either directly or through a filter.
+    port in type=power {
+        require net.voltage min="4.5V" max="36V"
+        add net.draw input
+        line rail
+        line gnd pin=GND
+    }
+
+    // Output voltage includes ±2% tolerance so connected loads are checked against the full
+    // range.
+    port out type=power {
+        set net.voltage "3.3V" tolerance="2%"
+        assert "draw <= 500mA" message="the R-78K3.3-0.5 is rated for 500mA; its loads draw {draw}"
+        line rail pin=OUT
+        line gnd pin=GND   // input and output share ground
+    }
+
+    // Application circuits
+
+    // Connect input directly to IN when no filter is selected.
+    block direct {
+        when "!emc-class-b"
+        circuit in.rail IN
+    }
+
+    // Recom’s suggested EN55032 Class B conducted-emissions filter: series input choke, 10 µF
+    // on each side, and 1 nF between IN and OUT. This reduces switching noise returned to the
+    // source.
+    //
+    // The specified inductance in an SRN4018 package is rated for 420 mA. Full output load at
+    // 4.5 V slightly exceeds that rating, so the assertion checks the board’s declared load at
+    // its minimum input voltage.
+    block emc-class-b {
+        assert "input <= 420mA" \
+            message="SRN4018-101M is rated for 420mA; converter input current is {input} at minimum input voltage"
+
+        place inductor L value="100µH" footprint="L_Bourns-SRN4018" intent=filter \
+            note="EN55032 filter — the input choke"
+        place bulk Csupply node=in.rail rail=in value="10µF" \
+            note="EN55032 filter — the supply side of the choke"
+        place bulk Cconv node=IN rail=in value="10µF" \
+            note="EN55032 filter — the converter side of the choke"
+        place capacitor Cft value="1nF" intent=filter \
+            note="EN55032 filter — feed-through across the converter, +Vin to +Vout"
+
+        // Connect the input through the choke to IN, then the feed-through capacitor to OUT.
+        // The 10 µF capacitors connect to `in.rail` and `IN`, on opposite sides of the choke.
+        circuit in.rail L IN Cft OUT
+    }
+}
+
+// R-78K3.3-1.0 has the same pad map and 4.5–36 V input range as the 0.5 A part.
+// Its Class B filter uses a 22 µH SRN4018 choke in place of Recom's 18 µH part.
+part r78k3v3-1a {
+    symbol "Converter_DCDC:R-78E3.3-0.5"
+    value "R-78K3.3-1.0"
+    reference U
+    datasheet "https://recom-power.com/pdf/Innoline/R-78K-1.0.pdf"
+    description "1A DC/DC regulator, 4.5-36V input, fixed 3.3V output, SIP-3"
+    manufacturer "RECOM Power"
+    order mpn="R-78K3.3-1.0" mouser="919-R-78K3.3-1.0"
+    pin IN power_in
+    pin GND power_in
+    pin OUT power_out
+    package sip3 footprint="Converter_DCDC_RECOM_R-78K-0.5_THT" {
+        pad IN 1
+        pad GND 2
+        pad OUT 3
+    }
+    derive input "out.draw * out.voltage / (0.79 * in.voltage.min)"
+    derive rated "3.3V * 1A / (0.79 * in.voltage.min)"
+    port in type=power {
+        require net.voltage min="4.5V" max="36V"
+        add net.draw input
+        line rail
+        line gnd pin=GND
+    }
+    port out type=power {
+        set net.voltage "3.3V" tolerance="2%"
+        assert "draw <= 1A" message="R-78K3.3-1.0 output load {draw} exceeds 1A"
+        line rail pin=OUT
+        line gnd pin=GND
+    }
+    block direct {
+        when "!emc-class-b"
+        circuit in.rail IN
+    }
+    block emc-class-b {
+        assert "rated <= 900mA" message="SRN4018-220M is rated 900mA; full-load input current is {rated}"
+        place inductor L value="22µH" footprint="L_Bourns-SRN4018" intent=filter
+        place bulk Csupply node=in.rail rail=in value="10µF"
+        place capacitor Cft value="1nF" intent=filter
+        circuit in.rail L IN Cft OUT
+    }
+}

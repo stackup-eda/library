@@ -1,0 +1,67 @@
+// @stackup/bus/rs485/st3485eb — ST ST3485EB, a 3.3 V half-duplex RS-485 transceiver in SOIC-8.
+// Rated for 12 Mbps and ±15 kV IEC 61000-4-2 air discharge on A/B.
+//
+// It uses the standard 75176 pinout and KiCad’s MAX3485 symbol because KiCad has no ST3485EB
+// symbol. The ST part was selected for its bus-pin ESD rating and distributor availability. The
+// plain MAX3485 has a 2 kV HBM rating.
+//
+// Logic and bus share ground. DE high enables the driver; ~RE low enables the receiver; ~RE
+// high with DE low selects shutdown. The board controls direction. Open A/B inputs produce a
+// high RO output. EB specifies the −40 to 85 °C grade.
+
+use "@stackup/passives"
+
+part st3485eb {
+    symbol "Interface_UART:MAX3485"   // MAX3485 symbol has the matching 75176 pinout
+    value "ST3485EB"                   // BOM part number
+    reference U
+    datasheet "https://www.st.com/resource/en/datasheet/st3485eb.pdf"
+    description "3.3 V powered, 15 kV ESD protected, up to 12 Mbps RS-485/RS-422 transceiver, half duplex, SO-8"
+    manufacturer STMicroelectronics
+    order mpn=ST3485EBDR mouser="511-ST3485EBDR"
+
+    pin RO output
+    pin RE input symbol="~{RE}"
+    pin DE input
+    pin DI input
+    pin GND power_in
+    pin A bidirectional
+    pin B bidirectional
+    pin VCC power_in
+
+    package soic8 footprint="SOIC-8_3.9x4.9mm_P1.27mm" {
+        pad RO 1
+        pad RE 2
+        pad DE 3
+        pad DI 4
+        pad GND 5
+        pad A 6
+        pad B 7
+        pad VCC 8
+    }
+
+    // The datasheet gives 2.2 mA maximum unloaded current with DE high, but no loaded maximum
+    // below the ±250 mA short-circuit limit. Estimate the supply budget as 3.3 V / 54 Ω plus
+    // quiescent current, assuming no series resistance.
+    port vcc type=power {
+        require net.voltage min="3.0V" max="3.6V"
+        add net.draw "65mA"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+
+    // Receiver output; high when A/B are open.
+    port ro pin=RO
+    // Driver input, active-high driver enable, and active-low receiver enable. The board must
+    // drive or strap all three; no default direction is selected.
+    port di type=output pin=DI
+    port de type=output pin=DE
+    port re type=output pin=RE
+
+    // RS-485 bus pins A and B.
+
+    block supply {
+        default
+        place bypass Cvcc node=VCC rail=vcc value="100nF"
+    }
+}

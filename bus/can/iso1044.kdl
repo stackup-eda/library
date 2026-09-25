@@ -1,0 +1,74 @@
+// @stackup/bus/can/iso1044 — TI ISO1044 isolated CAN FD transceiver in SOIC-8.
+//
+// The logic side uses VCC1/GND1 and TXD/RXD; the bus side uses VCC2/GND2 and CANH/CANL.
+// Separate power ports represent the two supplies and grounds. Keep those grounds separate to
+// preserve galvanic isolation.
+//
+// The logic supply accepts 3–5.5 V; the bus supply is 5 V. Each side’s bypass capacitors
+// connect to its own ground.
+
+use "@stackup/passives"
+
+part iso1044 {
+    symbol "Interface_CAN_LIN:ISO1044BD"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/iso1044.pdf"
+    description "Isolated CAN FD Transceiver, SOIC-8"
+    manufacturer "Texas Instruments"
+    order mpn=ISO1044BDR mouser="595-ISO1044BDR" lcsc=C2878225
+
+    pin VCC1 power_in
+    pin TXD input
+    pin RXD output
+    pin GND1 power_in
+    pin CANL bidirectional
+    pin CANH bidirectional
+    pin GND2 power_in
+    pin VCC2 power_in
+
+    package soic8 footprint="SOIC-8_3.9x4.9mm_P1.27mm" {
+        pad VCC1 1
+        pad TXD 2
+        pad RXD 3
+        pad GND1 4
+        pad CANL 5
+        pad CANH 6
+        pad GND2 7
+        pad VCC2 8
+    }
+
+    // Maximum supply currents from the datasheet with the bus dominant. The bus-side supply
+    // provides the driver current.
+    port host type=power {
+        require net.voltage min="3.0V" max="5.5V"
+        add net.draw "5mA"
+        line rail pin=VCC1
+        line gnd pin=GND1
+    }
+    port link type=power {
+        require net.voltage min="4.5V" max="5.5V"
+        add net.draw "60mA"
+        line rail pin=VCC2
+        line gnd pin=GND2
+    }
+
+    // CAN controller interface: MCU TX connects to TXD, and MCU RX to RXD. The `can` type
+    // connects matching line names without a crossover.
+    port can type=can {
+        line tx pin=TXD
+        line rx pin=RXD
+    }
+
+    // CANH and CANL are exposed directly as pins.
+
+    // Application circuits
+
+    // 0.1 µF at each VCC, plus the datasheet’s suggested bus-side bulk capacitance.
+    block supply {
+        default
+        place bypass Chost node=VCC1 rail=host value="100nF"
+        place bypass Clink node=VCC2 rail=link value="100nF"
+        place bulk Clink_bulk node=VCC2 rail=link value="4.7µF" \
+            note="datasheet-recommended bulk capacitance near VCC2, returning to bus-side ground"
+    }
+}

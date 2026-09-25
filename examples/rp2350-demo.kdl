@@ -1,0 +1,10 @@
+// A minimal RP2350A supply circuit with its default QSPI flash and 12 MHz clock.
+// The buck regulator still needs the PCB layout described in the RP2350 datasheet.
+use "@stackup/micro/rp2350"
+use "@stackup/connector/power-jack"
+
+design rp2350-minimal {
+    stock { packages imperial="0402" }
+    place power-jack input voltage="3.3V"
+    place rp2350a mcu vdd=input.out
+}

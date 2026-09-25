@@ -1,0 +1,79 @@
+// @stackup/bus/can/mcp2518fd — Microchip SPI CAN FD controller. A separate CAN transceiver
+// connects to TXCAN/RXCAN. OSC1 needs a 40 MHz clock; the default clock block uses ECS-2520MV.
+
+use "@stackup/passives"
+use "@stackup/clock/ecs2520mv"
+
+part mcp2518fd {
+    symbol "Interface_CAN_LIN:MCP2518FD-xQBB"
+    reference U
+    datasheet "https://ww1.microchip.com/downloads/aemDocuments/documents/OTH/ProductDocuments/DataSheets/External-CAN-FD-Controller-with-SPI-Interface-DS20006027B.pdf"
+    description "SPI CAN FD controller, up to 8 Mbps, VDFN-14"
+    manufacturer "Microchip Technology"
+    order mpn="MCP2518FDT-H/QBB" mouser="579-MCP2518FDT-H/QBB"
+
+    pin TXCAN output
+    pin RXCAN input
+    pin CLKO_SOF output symbol="CLKO/SOF"
+    pin INT output symbol="~{INT}"
+    pin OSC2 output
+    pin OSC1 input
+    pin VSS power_in
+    pin INT1_GPIO1 bidirectional symbol="~{INT1}/GPIO1"
+    pin INT0_GPIO0_XSTBY bidirectional symbol="~{INT0}/GPIO0/XSTBY"
+    pin SCK input
+    pin SDI input
+    pin SDO output
+    pin CS input symbol="~{CS}"
+    pin VDD power_in
+
+    package vdfn14 footprint="DFN-14-1EP_3x4.5mm_P0.65mm_EP1.65x4.25mm" {
+        pad TXCAN 1
+        pad RXCAN 2
+        pad CLKO_SOF 3
+        pad INT 4
+        pad OSC2 5
+        pad OSC1 6
+        pad VSS 7
+        pad INT1_GPIO1 8
+        pad INT0_GPIO0_XSTBY 9
+        pad SCK 10
+        pad SDI 11
+        pad SDO 12
+        pad CS 13
+        pad VDD 14
+        pad VSS 15
+    }
+
+    port vdd type=power {
+        require net.voltage min="2.7V" max="5.5V"
+        add net.draw "20mA"
+        line rail pin=VDD
+        line gnd pin=VSS
+    }
+    port spi type=spi {
+        line sck pin=SCK
+        line mosi pin=SDI
+        line miso pin=SDO
+        line nss pin=CS
+    }
+    port can type=can {
+        line tx pin=TXCAN
+        line rx pin=RXCAN
+    }
+    port int pin=INT
+    port clock pin=OSC1
+
+    block supply {
+        default
+        place bypass Cvdd node=VDD rail=vdd value="100nF"
+        place pull-up Rint node=INT rail=vdd value="4.7kΩ"
+    }
+    // Replace this block when the board supplies OSC1 from another 40 MHz source.
+    block reference-clock {
+        default
+        place ecs2520mv clock value="40MHz"
+        circuit clock.out OSC1
+        connect power from=vdd to=clock.vdd
+    }
+}

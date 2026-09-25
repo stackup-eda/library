@@ -1,0 +1,20 @@
+// @stackup/passive/fuse — replaceable ATO blade fuse in a holder by default, or directly
+// soldered by explicit package selection. State the fuse family and current rating as `value`.
+// A board must size the fuse to protect its connected conductors.
+part fuse {
+    symbol "Device:Fuse"
+    reference F
+    description "ATO blade fuse"
+    pin A passive
+    pin B passive
+    port a pin=A
+    port b pin=B
+    package blade-ato footprint="Fuse:Fuseholder_Blade_ATO_Littelfuse_Pudenz_2_Pin" {
+        pad A 1
+        pad B 2
+    }
+    package blade-direct footprint="Fuse:Fuse_Blade_ATO_directSolder" {
+        pad A 1
+        pad B 2
+    }
+}

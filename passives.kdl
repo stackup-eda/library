@@ -1,0 +1,128 @@
+// @stackup/passives — generic passive components and common application blocks.
+//
+// Resistors, capacitors, and inductors are ordinary library parts. The board selects their
+// packages through its stock rules. Decouple, bypass, bulk, filter, pull-up, and pull-down are
+// ordinary blocks; units, expression functions, contract kinds, and checks are provided by the
+// engine.
+//
+// KDL conventions used here:
+//
+// - Contracts group named lines. The default `terminal` port has one line, `node`. A `circuit`
+// unwraps it automatically, so write `node`, not `node.node`. An element with `a` and `b` lines
+// connects in series, from `a` to `b`.
+// - Parts expose pins through ports. The resistor has physical pins `A`/`B` and ports `a`/`b`,
+// which allow it to connect in series.
+// - Ports can be connected at placement: `place pull-up sda-up node=i2c.sda rail=vcc
+// value="2.2kΩ"`. This is shorthand for a `circuit` or `connect` statement; separate wiring is
+// also supported.
+// - `as=self` places a block’s root part at the block’s path: `Cvdd`, rather than `Cvdd/C`. The
+// block inherits that part’s parameters, such as `value`, but exposes only its own ports.
+// - A block’s power port consumes power from the caller and supplies it to the block’s
+// children.
+
+// Generic parts
+
+part resistor {
+    symbol "Device:R"
+    reference R
+    pin A passive
+    pin B passive
+    port a pin=A
+    port b pin=B
+    // Two pads; the board’s stock rules select the package for each use.
+    package chip {
+        pad A 1
+        pad B 2
+    }
+}
+
+part capacitor {
+    symbol "Device:C"
+    reference C
+    pin A passive
+    pin B passive
+    port a pin=A
+    port b pin=B
+    package chip {
+        pad A 1
+        pad B 2
+    }
+}
+
+part inductor {
+    symbol "Device:L"
+    reference L
+    pin A passive
+    pin B passive
+    port a pin=A
+    port b pin=B
+    package chip {
+        pad A 1
+        pad B 2
+    }
+}
+
+// Shunt blocks
+//
+// Each block connects a terminal to one line of a power port. A terminal can also appear in the
+// middle of a circuit: `circuit src r p dest` connects `p` at the node between `r` and `dest`.
+//
+// The rail supplies the voltage used to select capacitor ratings and check pull-up levels. Its
+// `gnd` line provides the return, including in isolated sections; there is no global ground.
+//
+// The terminal also sets the placement anchor: `node=VDD@4` puts the capacitor beside pad 4.
+
+// High-frequency decoupling at a supply pin.
+block decouple {
+    port node
+    port rail type=power
+    place capacitor as=self intent=decouple
+    circuit node self rail.gnd
+}
+
+// Bypass on a signal or reference pin, to its return.
+block bypass {
+    port node
+    port rail type=power
+    place capacitor as=self intent=bypass
+    circuit node self rail.gnd
+}
+
+// Bulk capacitance for a power rail. Ceramic by default; the board’s stock rules select the
+// type and package.
+block bulk {
+    port node
+    port rail type=power
+    place capacitor as=self intent=bulk
+    circuit node self rail.gnd
+}
+
+// Capacitor for an RC filter or glitch filter.
+block filter {
+    port node
+    port rail type=power
+    place capacitor as=self intent=filter
+    circuit node self rail.gnd
+}
+
+// Pull-up to the rail’s voltage. The checker reports voltage incompatibilities, such as a 5 V
+// pull-up on a pin that is not 5 V tolerant. Multiple pull-ups contribute their parallel
+// conductance, which I²C checks use to calculate the effective resistance.
+block pull-up {
+    port node {
+        add net.pull "1 / value"
+    }
+    port rail type=power
+    place resistor as=self intent=pull-up
+    circuit node self rail.rail
+}
+
+// Pull-down to the rail’s ground.
+block pull-down {
+    port node {
+        add net.pull-down "1 / value"
+    }
+    port rail type=power
+    place resistor as=self intent=pull-down
+    circuit node self rail.gnd
+}

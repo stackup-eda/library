@@ -1,0 +1,59 @@
+// @stackup/discrete/led/ws2812b — Worldsemi WS2812B-2020 addressable RGB LED in a 2 × 2 mm
+// package. DIN receives a single-wire data stream; DOUT forwards data to the next LED.
+//
+// KDL has no repetition construct, so place and connect each LED explicitly. This gives every
+// pixel a stable path, such as `bar/pixels/p3`, and makes chain order visible in the source.
+//
+// The 2020 pad order is DOUT / VSS / DIN / VDD, matching the V1.0 and V6 datasheets and KiCad’s
+// symbol and footprint. The 5050 version uses VDD / DOUT / VSS / DIN and is not pin-compatible.
+// A clone with a different pinout needs a separate definition.
+
+use "@stackup/passives"
+
+part ws2812b-2020 {
+    symbol "LED:WS2812B-2020"
+    reference D
+    datasheet "https://www.lcsc.com/datasheet/C52917434.pdf"
+    description "Addressable RGB LED with integrated driver, 5 V, 2.0x2.0mm"
+    manufacturer Worldsemi
+    // The sourcing entry uses LCSC’s V6 revision, which has the same package and pinout as the
+    // original.
+    order mpn="WS2812B-2020-V6" lcsc=C52917434
+
+    pin DOUT output
+    pin VSS power_in
+    pin DIN input
+    pin VDD power_in
+
+    package plcc4 footprint="LED_WS2812B-2020_PLCC4_2.0x2.0mm" {
+        pad DOUT 1
+        pad VSS 2
+        pad DIN 3
+        pad VDD 4
+    }
+
+    // The model retains the V1.0 datasheet’s 3.7–5.3 V range, listed there under absolute
+    // maximum ratings. V6 lowers the minimum to 3.3 V, but this definition keeps 3.7 V for
+    // margin. The full-brightness budget is 60 mA per pixel, without assuming a firmware
+    // brightness limit.
+    port vdd type=power {
+        require net.voltage min="3.7V" max="5.3V"
+        add net.draw "60mA"
+        line rail pin=VDD
+        line gnd pin=VSS
+    }
+
+    // DIN requires 70% of VDD for a high: 3.5 V on a 5 V supply. Use a suitable level shifter,
+    // such as AHCT, for a 3.3 V source. Connect DOUT to the next pixel or declare it unused.
+    port din type=output pin=DIN
+    port dout type=output pin=DOUT
+
+    // 100 nF between VDD and VSS at each pixel, following Worldsemi’s application circuit.
+    // Local bypassing supplies switching current from the approximately 2 kHz PWM; a bulk
+    // capacitor at the start of the chain does not replace it.
+    block supply {
+        default
+        place bypass Cbypass node=VDD rail=vdd value="100nF" \
+            note="local bypass for the pixel's PWM switching current"
+    }
+}

@@ -1,0 +1,70 @@
+// @stackup/storage/eeprom/cat24c256 — onsemi CAT24C256, a 256 kbit I²C EEPROM in SOIC-8.
+// A HAT identification EEPROM uses address 0x50 (all three address pins low). A jumper can
+// ground WP while programming a board that normally keeps the memory read-only.
+
+use "@stackup/passives"
+
+part cat24c256 {
+    symbol "Memory_EEPROM:CAT24C256"
+    reference U
+    datasheet "https://www.onsemi.com/pdf/datasheet/cat24c256-d.pdf"
+    description "256 kbit I²C EEPROM"
+    manufacturer onsemi
+    order mpn=CAT24C256WI-GT3 mouser="698-CAT24C256WI-GT3"
+
+    param address number default=0
+
+    pin A0 input required
+    pin A1 input required
+    pin A2 input required
+    pin GND power_in
+    pin SDA bidirectional
+    pin SCL input
+    pin WP input required
+    pin VCC power_in
+
+    package soic8 footprint="SOIC-8_3.9x4.9mm_P1.27mm" {
+        pad A0 1
+        pad A1 2
+        pad A2 3
+        pad GND 4
+        pad SDA 5
+        pad SCL 6
+        pad WP 7
+        pad VCC 8
+    }
+
+    assert "address >= 0 && address <= 7" message="CAT24C256 address offset must be 0–7"
+    derive bus-address "0x50 + address"
+
+    port vdd type=power {
+        add net.draw "5mA"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+    port i2c type=i2c {
+        claim signal.address bus-address
+        line sda pin=SDA
+        line scl pin=SCL
+    }
+    port write-protect pin=WP
+
+    block supply {
+        default
+        place decouple Cvcc node=VCC rail=vdd value="100nF"
+    }
+    block a0-low { when "address == 0 || address == 2 || address == 4 || address == 6"; circuit A0 vdd.gnd }
+    block a0-high { when "address == 1 || address == 3 || address == 5 || address == 7"; circuit A0 vdd.rail }
+    block a1-low { when "address == 0 || address == 1 || address == 4 || address == 5"; circuit A1 vdd.gnd }
+    block a1-high { when "address == 2 || address == 3 || address == 6 || address == 7"; circuit A1 vdd.rail }
+    block a2-low { when "address < 4"; circuit A2 vdd.gnd }
+    block a2-high { when "address >= 4"; circuit A2 vdd.rail }
+
+    block writable {
+        default
+        circuit WP vdd.gnd
+    }
+    block write-protected {
+        place pull-up Rwp node=WP rail=vdd value="10kΩ" note="WP high makes EEPROM read-only; ground it through a jumper to write"
+    }
+}

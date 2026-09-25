@@ -1,0 +1,29 @@
+// A 24 V isolated supply fed from a 24 V input. The secondary return stays separate.
+
+use "@stackup/connector/power-jack"
+use "@stackup/connector/header"
+use "@stackup/power/isolated/tri20"
+
+// The attached equipment draws 500 mA through the output connector.
+block load {
+    param current current
+    port supply type=power {
+        add net.draw current
+    }
+}
+
+design isolated-supply {
+    stock {
+        packages imperial="0603"
+    }
+
+    place power-jack input voltage="24V"
+    place tri20-2415 converter in=input.out
+    place conn-1x2 output
+    circuit converter.out.rail output.1
+    circuit converter.out.gnd output.2
+    place load secondary current="500mA" supply=converter.out
+
+    assert "converter.in.draw > 568mA && converter.in.draw < 569mA" message="primary draw should include converter losses"
+    assert "converter.out.draw == 500mA" message="secondary draw should stay on the isolated rail"
+}

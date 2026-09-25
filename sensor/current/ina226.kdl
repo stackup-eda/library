@@ -1,0 +1,127 @@
+// @stackup/sensor/current/ina226 — TI INA226 bidirectional current and power monitor in
+// VSSOP-10. Measures external shunt voltage on VIN+/VIN− and bus voltage on VBUS. A0/A1 select
+// the I²C address; ~Alert is open-drain.
+//
+// The `ina226-sense` block adds a high-side shunt. Its `a`/`b` ports allow series placement in
+// a rail, for example `circuit switch.out sense vlink.rail`. Separate ports expose I²C, supply,
+// and alert.
+//
+// Address parameters select strap blocks and determine the I²C address claim. Two monitors with
+// the same straps on one bus produce an address conflict.
+
+use "@stackup/passives"
+
+part ina226 {
+    symbol "Sensor_Energy:INA226"
+    reference U
+    datasheet "http://www.ti.com/lit/ds/symlink/ina226.pdf"
+    description "High-Side or Low-Side Measurement, Bi-Directional Current and Power Monitor (0-36V) with I2C Compatible Interface, TSSOP-10 (Texas DGS0010A / VSSOP)"
+    manufacturer "Texas Instruments"
+    order mpn=INA226AIDGSR mouser="595-INA226AIDGSR" lcsc=C49851
+
+    // Address straps: `gnd` is low and `vs` is high. The chip also supports SDA/SCL straps for
+    // sixteen addresses; this definition supports only the four rail-strapped combinations.
+    param a0 strap default=gnd
+    param a1 strap default=vs
+
+    pin A1 input
+    pin A0 input
+    pin ALERT open_collector symbol="~{Alert}"
+    pin SDA bidirectional
+    pin SCL input
+    pin VS power_in
+    pin GND power_in
+    pin VBUS input symbol=Vbus
+    pin VIN- input symbol="Vin-"
+    pin VIN+ input symbol="Vin+"
+
+    package vssop10 footprint="TSSOP-10_3x3mm_P0.5mm" {
+        pad A1 1
+        pad A0 2
+        pad ALERT 3
+        pad SDA 4
+        pad SCL 5
+        pad VS 6
+        pad GND 7
+        pad VBUS 8
+        pad VIN- 9
+        pad VIN+ 10
+    }
+
+    // Datasheet Table 2: base address 0x40 with both straps low; A0 selects the low bit.
+    derive address "match(a1, gnd: match(a0, gnd: 64, vs: 65), vs: match(a0, gnd: 68, vs: 69))"
+
+    // Active current is below 0.5 mA; use a rounded 1 mA budget.
+    port vs type=power {
+        require net.voltage min="2.7V" max="5.5V"
+        add net.draw "1mA"
+        line rail pin=VS
+        line gnd pin=GND
+    }
+
+    port i2c type=i2c {
+        claim signal.address address
+        line sda pin=SDA
+        line scl pin=SCL
+    }
+
+    // Active-low open-drain alert. The sense block supplies the pull-up; the board may connect
+    // it to an interrupt input.
+    port alert pin=ALERT
+
+    // Application circuits
+
+    block supply {
+        default
+        place bypass Cvs node=VS rail=vs value="100nF"
+    }
+
+    // Conditional address straps for each pin and level.
+    block a0-low {
+        when "a0 == gnd"
+        circuit A0 vs.gnd
+    }
+    block a0-high {
+        when "a0 == vs"
+        circuit A0 vs.rail
+    }
+    block a1-low {
+        when "a1 == gnd"
+        circuit A1 vs.gnd
+    }
+    block a1-high {
+        when "a1 == vs"
+        circuit A1 vs.rail
+    }
+}
+
+// High-side current monitor and shunt. `a` connects to the supply and `b` to the load. VBUS
+// measures the downstream voltage.
+//
+// The block parameter sets shunt resistance. Shunt tolerance limits current-measurement
+// accuracy in addition to the INA226’s own error. KDL has no placement `tolerance=` property
+// yet, so the required tolerance is recorded in a note.
+block ina226-sense {
+    param shunt resistance
+
+    port a
+    port b
+    port vs type=power
+    port i2c type=i2c
+    port alert
+
+    place ina226 as=self vs=vs i2c=i2c alert=alert
+
+    // Use a 2512 shunt for fault-current dissipation. At 5 A through 20 mΩ, dissipation is 0.5
+    // W, half the assumed 1 W rating. The board’s default pull-up resistor package is
+    // unsuitable.
+    place resistor Rshunt value=shunt intent=shunt footprint="R_2512_6332Metric" \
+        note="current-sense shunt — tolerance limits measurement accuracy"
+    circuit a Rshunt b
+    circuit a self.VIN+
+    circuit b self.VIN- self.VBUS
+
+    // Provide the alert pull-up even if the board does not use the output.
+    place pull-up Ralert node=self.ALERT rail=vs value="1kΩ" \
+        note="pull-up for the open-drain alert"
+}

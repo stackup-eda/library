@@ -1,0 +1,53 @@
+// @stackup/discrete/led/sk6812mini-e — SK6812MINI-E addressable RGB LED in a 3.2 × 2.8 mm
+// reverse-mount package, using the single-wire WS2812 protocol.
+//
+// The custom footprint, SnipsControllers_Custom:SK6812MINI-E-012, was made for PCBWay assembly
+// after the stock PLCC4 footprint was rejected. Pad order follows LED:SK6812: VSS, DIN, VDD,
+// DOUT.
+//
+// The szledcolor SK6812 datasheet used for this definition characterises the part at 4.5–5.5 V
+// and specifies a 3.4 V input-high threshold at 5 V. It gives no minimum operating supply
+// voltage. The model therefore requires 4.5–5.5 V; operation at 3.3 V is not established by
+// that datasheet.
+
+use "@stackup/passives"
+
+part sk6812mini-e {
+    symbol "LED:SK6812"
+    reference D
+    value "SK6812MINI-E"
+    datasheet "https://cdn-shop.adafruit.com/product-files/4960/4960_SK6812MINI-E_REV02_EN.pdf"
+    description "Addressable RGB LED with integrated driver, reverse-mount 3.2x2.8mm"
+    manufacturer "OPSCO Optoelectronics"
+    order mpn="SK6812MINI-E" lcsc=C5149201
+
+    pin VSS power_in
+    pin DIN input
+    pin VDD power_in
+    pin DOUT output
+
+    package mini-e footprint="SK6812MINI-E-012" {
+        pad VSS 1
+        pad DIN 2
+        pad VDD 3
+        pad DOUT 4
+    }
+
+    // Estimated full-brightness current. The datasheet gives 1 mA static current but no RGB
+    // total; related parts use 12–20 mA per colour.
+    port vdd type=power {
+        require net.voltage min="4.5V" max="5.5V"
+        add net.draw "40mA"
+        line rail pin=VDD
+        line gnd pin=VSS
+    }
+
+    port din type=output pin=DIN
+    port dout type=output pin=DOUT
+
+    block supply {
+        default
+        place bypass Cbypass node=VDD rail=vdd value="100nF" \
+            note="local bypass for the pixel's PWM switching current"
+    }
+}

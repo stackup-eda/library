@@ -1,0 +1,9 @@
+RJ11_Stewart_SS-90000-006_Horizontal.step — Stewart Connector (Bel) SS-90000-006, RJ11 right-angle jack, 4 contact,
+6 position, unshielded, panel stop.
+
+Source: SnapMagic, download 510211 (SS-90000-006--3DModel-STEP-510211.STEP), 2026-09-15.
+Drawn in SolidWorks 2021, exported as STEP AP214. The file is unmodified.
+
+Licence: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0),
+https://creativecommons.org/licenses/by-sa/4.0/ — SnapMagic's terms for its model artifacts.
+Attribution: model by SnapMagic (https://www.snapmagic.com/).

@@ -1,0 +1,21 @@
+// @stackup/discrete/fet/buk9m53 — Nexperia BUK9M53-60EX, 60 V / 17 A N-channel MOSFET in
+// LFPAK33. Rds(on) is 46 mΩ; specifications include 4.5 V gate drive. A 3.3 V GPIO can
+// switch it, but may not fully enhance it under heavy load.
+part buk9m53 {
+    symbol "Transistor_FET:BUK9M53-60EX"
+    reference Q
+    datasheet "https://assets.nexperia.com/documents/data-sheet/BUK9M53-60E.pdf"
+    description "60 V, 17 A N-channel MOSFET, 46 mΩ, LFPAK33"
+    manufacturer Nexperia
+    order mpn=BUK9M53-60EX mouser="771-BUK9M53-60EX" lcsc=C179364
+    pin S passive
+    pin G input
+    pin D passive
+    package lfpak33 footprint="Package_TO_SOT_SMD:LFPAK33" {
+        pad S 1
+        pad S 2
+        pad S 3
+        pad G 4
+        pad D 5
+    }
+}

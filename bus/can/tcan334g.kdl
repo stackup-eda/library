@@ -1,0 +1,68 @@
+// @stackup/bus/can/tcan334g — TI TCAN334G, a 3.3 V, 5 Mbps CAN FD transceiver in SOIC-8.
+//
+// The G grade supports CAN FD data rates; the plain TCAN334 is rated for 1 Mbps classic CAN.
+// Logic and bus pins share VCC/GND. Use the ISO1044 for an isolated interface.
+//
+// Internal pull-downs on both mode pins select normal operation when the pins are unconnected.
+// Declare unused mode pins with `nc`.
+
+use "@stackup/passives"
+
+part tcan334g {
+    symbol "Interface_CAN_LIN:TCAN334G"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/tcan334g.pdf"
+    description "High-Speed CAN Transceiver with CAN FD, 5Mbps, 3.3V supply, low power standby mode, shutdown mode, SOIC-8"
+    manufacturer "Texas Instruments"
+    // TCAN334GDR uses SOIC-8 (`D`) and reel packaging (`R`). The SOT-23-8 TCAN334GDCN would
+    // need a separate package definition.
+    order mpn=TCAN334GDR mouser="595-TCAN334GDR"
+
+    pin TXD input
+    pin GND power_in
+    pin VCC power_in
+    pin RXD tri_state
+    pin SHDN input
+    pin CANL bidirectional
+    pin CANH bidirectional
+    pin STB input
+
+    package soic8 footprint="SOIC-8_3.9x4.9mm_P1.27mm" {
+        pad TXD 1
+        pad GND 2
+        pad VCC 3
+        pad RXD 4
+        pad SHDN 5
+        pad CANL 6
+        pad CANH 7
+        pad STB 8
+    }
+
+    // Maximum supply current from the datasheet with the bus dominant and terminated.
+    port vcc type=power {
+        require net.voltage min="3.0V" max="3.6V"
+        add net.draw "70mA"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+
+    // CAN controller interface: MCU TX connects to TXD, and MCU RX to RXD. The `can` type
+    // connects matching line names without a crossover.
+    port can type=can {
+        line tx pin=TXD
+        line rx pin=RXD
+    }
+
+    // STB high selects listen-only standby; SHDN high shuts down the transceiver. Drive these
+    // pins or declare them `nc` to use the internal pull-downs and normal mode.
+    port stb type=output pin=STB
+    port shdn type=output pin=SHDN
+
+    // CANH and CANL are exposed directly as pins.
+
+    // 0.1 µF close to VCC, per the datasheet's layout guidance.
+    block supply {
+        default
+        place bypass Cvcc node=VCC rail=vcc value="100nF"
+    }
+}

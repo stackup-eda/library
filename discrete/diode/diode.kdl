@@ -1,0 +1,26 @@
+// @stackup/discrete/diode/diode — generic small-signal diode using Device:D_Small. Set the
+// specific part, such as 1N4148W or BAT54, through the placement’s `value`.
+//
+// Series ports `a` and `b` connect to the anode and cathode, respectively. Circuit order
+// follows forward current flow.
+
+part diode {
+    symbol "Device:D_Small"
+    reference D
+    description "Small-signal diode"
+
+    pin K passive
+    pin A passive
+
+    port a pin=A
+    port b pin=K
+
+    package sod123 footprint="D_SOD-123" {
+        pad K 1
+        pad A 2
+    }
+    package sod323 footprint="D_SOD-323" {
+        pad K 1
+        pad A 2
+    }
+}

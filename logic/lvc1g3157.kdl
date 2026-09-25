@@ -1,0 +1,39 @@
+// Nexperia 74LVC1G3157 analog switch. S=0 connects Z to Y0; S=1 connects Z to Y1.
+
+use "@stackup/passives"
+
+part lvc1g3157 {
+    symbol "74xGxx:74LVC1G3157"
+    reference U
+    datasheet "https://assets.nexperia.com/documents/data-sheet/74LVC1G3157.pdf"
+    description "SPDT analog switch, low-voltage CMOS"
+    manufacturer Nexperia
+    order mpn="74LVC1G3157GW,125" mouser="771-LVC1G3157GW125" lcsc=C265126
+    pin Y1 bidirectional
+    pin Z bidirectional
+    pin Y0 bidirectional
+    pin S input
+    pin GND power_in
+    pin VCC power_in
+    package sc70 footprint="SOT-363_SC-70-6" {
+        pad Y1 1
+        pad GND 2
+        pad Y0 3
+        pad Z 4
+        pad VCC 5
+        pad S 6
+    }
+    port vcc type=power {
+        require net.voltage min="1.65V" max="5.5V"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+    port in0 pin=Y0
+    port in1 pin=Y1
+    port common pin=Z
+    port select pin=S
+    block supply {
+        default
+        place bypass Cvcc node=VCC rail=vcc value="100nF"
+    }
+}

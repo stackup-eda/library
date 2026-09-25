@@ -1,0 +1,47 @@
+// @stackup/discrete/diode/usblc6 — ST USBLC6-2P6 low-capacitance ESD protection for one USB 2.0
+// data pair, in SOT-666. It includes a VBUS clamp and steering diodes on both data lines. Each
+// line’s two pads are internally connected, allowing flow-through routing on a single net.
+//
+// Connect the array in parallel with the USB pair, for example `connect usb from=connector
+// to=esd`, and connect VBUS separately.
+//
+// The 2P6 uses a 1.6 × 1.6 mm SOT-666 package; the 2SC6 uses SOT-23-6 with the same pinout. The
+// smaller package was selected for distributor availability.
+
+use "@stackup/types"
+
+part usblc6 {
+    symbol "Power_Protection:USBLC6-2P6"
+    reference U
+    datasheet "https://www.st.com/resource/en/datasheet/usblc6-2.pdf"
+    description "Very low capacitance ESD protection diode, 2 data-line, SOT-666"
+    manufacturer STMicroelectronics
+    order mpn="USBLC6-2P6" mouser="511-USBLC6-2P6" lcsc=C15999
+
+    // The symbol uses `I/O1` and `I/O2`; local names omit `/` because it is a path separator.
+    pin IO1 passive symbol="I/O1"
+    pin GND passive
+    pin IO2 passive symbol="I/O2"
+    pin VBUS passive
+
+    package sot666 footprint="SOT-666" {
+        pad IO1 1
+        pad IO1 6
+        pad GND 2
+        pad IO2 3
+        pad IO2 4
+        pad VBUS 5
+    }
+
+    // The data channels are symmetric; either can protect D+ or D−.
+    port usb type=usb {
+        line dp pin=IO1
+        line dm pin=IO2
+    }
+
+    // VBUS and ground connections for the protection diodes.
+    port vbus type=power {
+        line rail pin=VBUS
+        line gnd pin=GND
+    }
+}

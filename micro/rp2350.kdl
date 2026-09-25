@@ -1,0 +1,251 @@
+// @stackup/micro/rp2350 — RP2350A microcontroller with external QSPI flash and a 12 MHz clock.
+// Its built-in buck regulator needs an inductor, input/output capacitors, and an analog filter.
+// Review the regulator layout rules in the datasheet when placing these components.
+
+use "@stackup/passives"
+use "@stackup/passive/ferrite"
+use "@stackup/storage/flash/w25q128"
+use "@stackup/clock/ecs2520mv"
+use "@stackup/types"
+
+part rp2350a {
+    symbol "MCU_RaspberryPi:RP2350A"
+    reference U
+    datasheet "https://datasheets.raspberrypi.com/rp2350/rp2350-datasheet.pdf"
+    description "RP2350A dual-core MCU, 150 MHz, 520 KB SRAM, external flash, QFN-60"
+    pin GPIO0 bidirectional once
+    pin GPIO1 bidirectional once
+    pin GPIO2 bidirectional once
+    pin GPIO3 bidirectional once
+    pin GPIO4 bidirectional once
+    pin GPIO5 bidirectional once
+    pin GPIO6 bidirectional once
+    pin GPIO7 bidirectional once
+    pin GPIO8 bidirectional once
+    pin GPIO9 bidirectional once
+    pin GPIO10 bidirectional once
+    pin GPIO11 bidirectional once
+    pin GPIO12 bidirectional once
+    pin GPIO13 bidirectional once
+    pin GPIO14 bidirectional once
+    pin GPIO15 bidirectional once
+    pin GPIO16 bidirectional once
+    pin GPIO17 bidirectional once
+    pin GPIO18 bidirectional once
+    pin GPIO19 bidirectional once
+    pin GPIO20 bidirectional once
+    pin GPIO21 bidirectional once
+    pin GPIO22 bidirectional once
+    pin GPIO23 bidirectional once
+    pin GPIO24 bidirectional once
+    pin GPIO25 bidirectional once
+    pin GPIO26_ADC0 bidirectional once symbol="GPIO26/ADC0"
+    pin GPIO27_ADC1 bidirectional once symbol="GPIO27/ADC1"
+    pin GPIO28_ADC2 bidirectional once symbol="GPIO28/ADC2"
+    pin GPIO29_ADC3 bidirectional once symbol="GPIO29/ADC3"
+    pin QSPI_SCLK output
+    pin QSPI_SS output symbol="~{QSPI_SS}"
+    pin QSPI_SD0 bidirectional
+    pin QSPI_SD1 bidirectional
+    pin QSPI_SD2 bidirectional
+    pin QSPI_SD3 bidirectional
+    pin USB_DM bidirectional
+    pin USB_DP bidirectional
+    pin SWCLK input
+    pin SWDIO bidirectional
+    pin RUN input {
+        role reset active=low pull=none
+        require net.rest not=low
+    }
+    pin XIN input
+    pin XOUT output
+    pin IOVDD power_in
+    pin DVDD power_in
+    pin QSPI_IOVDD power_in
+    pin USB_OTP_VDD power_in
+    pin ADC_AVDD power_in
+    pin VREG_VIN power_in
+    pin VREG_AVDD power_in
+    pin VREG_LX power_out
+    pin VREG_FB passive
+    pin VREG_PGND power_in
+    pin GND power_in
+
+    package qfn60 footprint="QFN-60-1EP_7x7mm_P0.4mm_EP3.4x3.4mm" {
+        pad IOVDD 1
+        pad GPIO0 2
+        pad GPIO1 3
+        pad GPIO2 4
+        pad GPIO3 5
+        pad DVDD 6
+        pad GPIO4 7
+        pad GPIO5 8
+        pad GPIO6 9
+        pad GPIO7 10
+        pad IOVDD 11
+        pad GPIO8 12
+        pad GPIO9 13
+        pad GPIO10 14
+        pad GPIO11 15
+        pad GPIO12 16
+        pad GPIO13 17
+        pad GPIO14 18
+        pad GPIO15 19
+        pad IOVDD 20
+        pad XIN 21
+        pad XOUT 22
+        pad DVDD 23
+        pad SWCLK 24
+        pad SWDIO 25
+        pad RUN 26
+        pad GPIO16 27
+        pad GPIO17 28
+        pad GPIO18 29
+        pad IOVDD 30
+        pad GPIO19 31
+        pad GPIO20 32
+        pad GPIO21 33
+        pad GPIO22 34
+        pad GPIO23 35
+        pad GPIO24 36
+        pad GPIO25 37
+        pad IOVDD 38
+        pad DVDD 39
+        pad GPIO26_ADC0 40
+        pad GPIO27_ADC1 41
+        pad GPIO28_ADC2 42
+        pad GPIO29_ADC3 43
+        pad ADC_AVDD 44
+        pad IOVDD 45
+        pad VREG_AVDD 46
+        pad VREG_PGND 47
+        pad VREG_LX 48
+        pad VREG_VIN 49
+        pad VREG_FB 50
+        pad USB_DM 51
+        pad USB_DP 52
+        pad USB_OTP_VDD 53
+        pad QSPI_IOVDD 54
+        pad QSPI_SD3 55
+        pad QSPI_SCLK 56
+        pad QSPI_SD0 57
+        pad QSPI_SD2 58
+        pad QSPI_SD1 59
+        pad QSPI_SS 60
+        pad GND 61
+    }
+
+    port vdd type=power {
+        require net.voltage min="3.0V" max="3.6V"
+        line rail pin=IOVDD
+        line gnd pin=GND
+    }
+    port core type=power {
+        set net.voltage "1.1V"
+        line rail pin=DVDD
+        line gnd pin=GND
+    }
+    port qspi type=qspi {
+        line sck pin=QSPI_SCLK
+        line cs pin=QSPI_SS
+        line io0 pin=QSPI_SD0
+        line io1 pin=QSPI_SD1
+        line io2 pin=QSPI_SD2
+        line io3 pin=QSPI_SD3
+    }
+    port usb type=usb {
+        line dp pin=USB_DP
+        line dm pin=USB_DM
+    }
+    port reset pin=RUN
+    peripheral SWD swd {
+        swdio SWDIO
+        swclk SWCLK
+    }
+    peripheral GPIO gpio {
+        io GPIO0 GPIO1 GPIO2 GPIO3 GPIO4 GPIO5 GPIO6 GPIO7 GPIO8 GPIO9 GPIO10 GPIO11 GPIO12
+        io GPIO13 GPIO14 GPIO15 GPIO16 GPIO17 GPIO18 GPIO19 GPIO20 GPIO21 GPIO22 GPIO23 GPIO24 GPIO25
+        io GPIO26_ADC0 GPIO27_ADC1 GPIO28_ADC2 GPIO29_ADC3
+    }
+    peripheral I2C0 i2c {
+        sda GPIO0 GPIO4 GPIO8 GPIO12 GPIO16 GPIO20 GPIO24 GPIO28_ADC2
+        scl GPIO1 GPIO5 GPIO9 GPIO13 GPIO17 GPIO21 GPIO25 GPIO29_ADC3
+    }
+    peripheral I2C1 i2c {
+        sda GPIO2 GPIO6 GPIO10 GPIO14 GPIO18 GPIO22 GPIO26_ADC0
+        scl GPIO3 GPIO7 GPIO11 GPIO15 GPIO19 GPIO23 GPIO27_ADC1
+    }
+    peripheral UART0 uart {
+        tx GPIO0 GPIO12 GPIO16
+        rx GPIO1 GPIO13 GPIO17
+        cts GPIO2 GPIO14 GPIO18
+        rts GPIO3 GPIO15 GPIO19
+    }
+    peripheral UART1 uart {
+        tx GPIO4 GPIO8 GPIO20 GPIO24
+        rx GPIO5 GPIO9 GPIO21 GPIO25
+        cts GPIO6 GPIO10 GPIO22 GPIO26_ADC0
+        rts GPIO7 GPIO11 GPIO23 GPIO27_ADC1
+    }
+    peripheral SPI0 spi {
+        miso GPIO0 GPIO4 GPIO16
+        sck GPIO2 GPIO6 GPIO18
+        mosi GPIO3 GPIO7 GPIO19
+    }
+    peripheral ADC adc {
+        in GPIO26_ADC0 GPIO27_ADC1 GPIO28_ADC2 GPIO29_ADC3
+    }
+
+    block supply {
+        default
+        place decouple Ciovdd1 node=IOVDD@1 rail=vdd value="100nF"
+        place decouple Ciovdd11 node=IOVDD@11 rail=vdd value="100nF"
+        place decouple Ciovdd20 node=IOVDD@20 rail=vdd value="100nF"
+        place decouple Ciovdd30 node=IOVDD@30 rail=vdd value="100nF"
+        place decouple Ciovdd38 node=IOVDD@38 rail=vdd value="100nF"
+        place decouple Ciovdd45 node=IOVDD@45 rail=vdd value="100nF"
+        place bulk Cbulk node=IOVDD rail=vdd value="10µF"
+        circuit QSPI_IOVDD IOVDD
+        place decouple Cqspi node=QSPI_IOVDD rail=vdd value="100nF"
+        circuit USB_OTP_VDD IOVDD
+        place decouple Cusb node=USB_OTP_VDD rail=vdd value="100nF"
+    }
+    block regulator {
+        default
+        circuit VREG_VIN IOVDD
+        place bulk Cvin node=VREG_VIN rail=vdd value="4.7µF"
+        circuit VREG_PGND GND
+        place inductor L value="3.3µH"
+        circuit VREG_LX L.b
+        circuit L.a DVDD
+        circuit VREG_FB DVDD
+        place bulk Cout node=DVDD rail=core value="4.7µF" note="place beside regulator feedback pin; ESR <=250 mΩ, ESL <=6 nH"
+        place bulk Cout_far node=DVDD@23 rail=core value="4.7µF"
+        place decouple Cdvdd6 node=DVDD@6 rail=core value="100nF"
+        place decouple Cdvdd23 node=DVDD@23 rail=core value="100nF"
+        place decouple Cdvdd39 node=DVDD@39 rail=core value="100nF"
+        place resistor Ravdd value="33Ω"
+        circuit IOVDD Ravdd.a
+        circuit Ravdd.b VREG_AVDD
+        place bypass Cavdd node=VREG_AVDD rail=vdd value="4.7µF"
+    }
+    block analog {
+        default
+        place ferrite-bead FB value="600Ω@100MHz"
+        circuit IOVDD FB.a
+        circuit FB.b ADC_AVDD
+        place bulk Cadc node=ADC_AVDD rail=vdd value="1µF"
+        place bypass Cadc_hf node=ADC_AVDD rail=vdd value="100nF"
+    }
+    block flash {
+        default
+        place w25q128 flash vdd=vdd
+        connect qspi from=qspi to=flash.qspi
+    }
+    block clock {
+        default
+        place ecs2520mv osc value="12MHz"
+        connect power from=vdd to=osc.vdd
+        circuit osc.out XIN
+    }
+}

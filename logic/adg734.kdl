@@ -1,0 +1,65 @@
+// ADG734 quad SPDT analog switch. A high select connects D to A; low connects D to B.
+// Single-supply use connects VSS to ground.
+
+use "@stackup/passives"
+
+part adg734 {
+    symbol "Analog_Switch:ADG734"
+    reference U
+    datasheet "https://www.analog.com/media/en/technical-documentation/data-sheets/ADG733_734.pdf"
+    description "Quad SPDT analog switch with independent selects"
+    manufacturer "Analog Devices"
+    order mpn=ADG734BRUZ-REEL7 mouser="584-ADG734BRUZ-R7"
+    pin IN1 input
+    pin S1A passive
+    pin D1 passive
+    pin S1B passive
+    pin VSS power_in
+    pin GND power_in
+    pin S2B passive
+    pin D2 passive
+    pin S2A passive
+    pin IN2 input
+    pin IN3 input
+    pin S3A passive
+    pin D3 passive
+    pin S3B passive
+    pin NC no_connect
+    pin VDD power_in
+    pin S4B passive
+    pin D4 passive
+    pin S4A passive
+    pin IN4 input
+    package tssop20 footprint="TSSOP-20_4.4x6.5mm_P0.65mm" {
+        pad IN1 1
+        pad S1A 2
+        pad D1 3
+        pad S1B 4
+        pad VSS 5
+        pad GND 6
+        pad S2B 7
+        pad D2 8
+        pad S2A 9
+        pad IN2 10
+        pad IN3 11
+        pad S3A 12
+        pad D3 13
+        pad S3B 14
+        pad NC 15
+        pad VDD 16
+        pad S4B 17
+        pad D4 18
+        pad S4A 19
+        pad IN4 20
+    }
+    port vdd type=power {
+        require net.voltage min="1.8V" max="5.5V"
+        line rail pin=VDD
+        line gnd pin=GND
+    }
+    block supply {
+        default
+        place bypass Cvdd node=VDD rail=vdd value="100nF"
+        circuit VSS vdd.gnd
+    }
+}

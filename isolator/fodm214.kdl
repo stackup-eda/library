@@ -1,0 +1,45 @@
+// @stackup/isolator/fodm214 — onsemi FODM214 AC-input optocoupler. Two inverse-parallel LEDs
+// drive one phototransistor, so either input polarity can assert a signal across the 3.75 kVrms
+// barrier. The input circuit and observer circuit have no electrical connection.
+
+use "@stackup/passives"
+
+part fodm214 {
+    symbol "Isolator:FODM214"
+    reference U
+    datasheet "https://www.onsemi.com/pdf/datasheet/fodm214-d.pdf"
+    description "AC-input phototransistor optocoupler, SOP-4"
+    manufacturer onsemi
+    order mpn=FODM214R2 mouser="863-FODM214R2"
+    pin IN1 passive
+    pin IN2 passive
+    pin E passive
+    pin C passive
+    package sop4 footprint="SOP-4_4.4x2.6mm_P1.27mm" {
+        pad IN1 1
+        pad IN2 2
+        pad E 3
+        pad C 4
+    }
+}
+
+// Active-low flag for an alternating pair. `swing` states the differential amplitude at the
+// placement; KDL has no differential voltage fact to derive it from the two input nodes.
+block pair-flag {
+    param swing voltage
+    param current current default="1mA"
+    param pullup resistance default="100kΩ"
+    derive r "e24((swing - 1.2V) / current)"
+    assert "swing > 1.2V" message="FODM214 input swing must exceed its LED forward voltage"
+    port a
+    port b
+    port observer type=power
+    port out
+    place fodm214 as=self
+    place resistor R_in value=r intent=series
+    circuit a R_in self.IN1
+    circuit self.IN2 b
+    place pull-up R_out node=out rail=observer value=pullup
+    circuit self.C out
+    circuit self.E observer.gnd
+}

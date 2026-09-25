@@ -1,0 +1,33 @@
+// Espressif ESP-Prog's 2x3 programming header. TXD and RXD are named from the target's view.
+
+part esp-prog-header {
+    symbol "Connector_Generic:Conn_02x03_Odd_Even"
+    reference J
+    description "ESP programming header, 2x3, 2.54 mm"
+    pin EN passive
+    pin VDD passive
+    pin TXD passive
+    pin GND passive
+    pin RXD passive
+    pin IO0 passive
+    package header footprint="PinHeader_2x03_P2.54mm_Vertical" {
+        pad EN 1
+        pad VDD 2
+        pad TXD 3
+        pad GND 4
+        pad RXD 5
+        pad IO0 6
+    }
+    port vdd type=power {
+        add net.draw "0A"
+        line rail pin=VDD
+        line gnd pin=GND
+    }
+    // These lines describe the adapter end; connecting it to the target UART crosses TX/RX.
+    port uart type=uart {
+        line tx pin=RXD
+        line rx pin=TXD
+    }
+    port en pin=EN
+    port io0 pin=IO0
+}

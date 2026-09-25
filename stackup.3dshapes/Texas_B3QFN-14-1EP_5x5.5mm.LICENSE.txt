@@ -1,0 +1,11 @@
+Texas_B3QFN-14-1EP_5x5.5mm.step — Texas Instruments TPSM53603RDAR, the B3QFN-15 (RDA) power
+module with a 5.0 × 5.5 × 4.1 mm body, fifteen pads, and a pin-1 dimple. The filename matches
+the model reference in KiCad's Texas_B3QFN-14-1EP_5x5.5mm_P0.65mm footprint, which does not
+include a model.
+
+Source: SnapMagic, TPSM53603RDAR (TPSM53603RDAR.STEP), 2026-09-19.
+Drawn in SolidWorks 2017, exported as STEP AP214. The file is unmodified.
+
+Licence: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0),
+https://creativecommons.org/licenses/by-sa/4.0/ — SnapMagic's terms for its model artifacts.
+Attribution: model by SnapMagic (https://www.snapmagic.com/).

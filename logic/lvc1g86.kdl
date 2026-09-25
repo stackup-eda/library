@@ -1,0 +1,44 @@
+// TI SN74LVC1G86 single XOR gate. SC-70 is the default; SOT-23 is easier to hand solder.
+
+use "@stackup/passives"
+
+part lvc1g86 {
+    symbol "74xGxx:74LVC1G86"
+    reference U
+    datasheet "https://www.ti.com/lit/gpn/sn74lvc1g86"
+    description "Single 2-input XOR gate"
+    manufacturer "Texas Instruments"
+    pin A input
+    pin B input
+    pin GND power_in
+    pin Y output
+    pin VCC power_in
+    package sc70 footprint="SOT-353_SC-70-5" {
+        pad A 1
+        pad B 2
+        pad GND 3
+        pad Y 4
+        pad VCC 5
+        order mpn=SN74LVC1G86DCKR mouser="595-SN74LVC1G86DCKR" lcsc=C52350
+    }
+    package sot23 footprint="SOT-23-5" {
+        pad A 1
+        pad B 2
+        pad GND 3
+        pad Y 4
+        pad VCC 5
+        order mpn=SN74LVC1G86DBVR mouser="595-SN74LVC1G86DBVR" lcsc=C402161
+    }
+    port vcc type=power {
+        require net.voltage min="1.65V" max="5.5V"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+    port a pin=A
+    port b pin=B
+    port y type=output pin=Y
+    block supply {
+        default
+        place bypass Cvcc node=VCC rail=vcc value="100nF"
+    }
+}

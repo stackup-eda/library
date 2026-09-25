@@ -1,0 +1,106 @@
+// Arduino Uno R3 shield headers. A4/SDA and A5/SCL are separate header positions.
+
+part uno-shield-header {
+    symbol "MCU_Module:Arduino_UNO_R3"
+    reference J
+    description "Arduino Uno R3 shield headers"
+    datasheet "https://docs.arduino.cc/resources/pinouts/A000066-full-pinout.pdf"
+    pin NC no_connect
+    pin IOREF power_in
+    pin RESET bidirectional
+    pin P3V3 power_in symbol="3V3"
+    pin P5V power_in symbol="5V"
+    pin GND power_in
+    pin VIN power_in
+    pin A0 bidirectional
+    pin A1 bidirectional
+    pin A2 bidirectional
+    pin A3 bidirectional
+    pin A4 bidirectional
+    pin A5 bidirectional
+    pin D0 bidirectional
+    pin D1 bidirectional
+    pin D2 bidirectional
+    pin D3 bidirectional
+    pin D4 bidirectional
+    pin D5 bidirectional
+    pin D6 bidirectional
+    pin D7 bidirectional
+    pin D8 bidirectional
+    pin D9 bidirectional
+    pin D10 bidirectional
+    pin D11 bidirectional
+    pin D12 bidirectional
+    pin D13 bidirectional
+    pin AREF passive
+    pin SDA bidirectional
+    pin SCL bidirectional
+    package standard footprint="stackup:Arduino_UNO_R3_Shield" {
+        pad NC 1
+        pad IOREF 2
+        pad RESET 3
+        pad P3V3 4
+        pad P5V 5
+        pad GND 6
+        pad GND 7
+        pad VIN 8
+        pad A0 9
+        pad A1 10
+        pad A2 11
+        pad A3 12
+        pad A4 13
+        pad A5 14
+        pad D0 15
+        pad D1 16
+        pad D2 17
+        pad D3 18
+        pad D4 19
+        pad D5 20
+        pad D6 21
+        pad D7 22
+        pad D8 23
+        pad D9 24
+        pad D10 25
+        pad D11 26
+        pad D12 27
+        pad D13 28
+        pad GND 29
+        pad AREF 30
+        pad SDA 31
+        pad SCL 32
+    }
+    package pins footprint="stackup:Arduino_UNO_R3_Pins" {
+        pad NC 1
+        pad IOREF 2
+        pad RESET 3
+        pad P3V3 4
+        pad P5V 5
+        pad GND 6
+        pad GND 7
+        pad VIN 8
+        pad A0 9
+        pad A1 10
+        pad A2 11
+        pad A3 12
+        pad A4 13
+        pad A5 14
+        pad D0 15
+        pad D1 16
+        pad D2 17
+        pad D3 18
+        pad D4 19
+        pad D5 20
+        pad D6 21
+        pad D7 22
+        pad D8 23
+        pad D9 24
+        pad D10 25
+        pad D11 26
+        pad D12 27
+        pad D13 28
+        pad GND 29
+        pad AREF 30
+        pad SDA 31
+        pad SCL 32
+    }
+}

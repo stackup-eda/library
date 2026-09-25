@@ -1,0 +1,46 @@
+// @stackup/discrete/led/rgb — Cree CLV1A-FKB common-anode RGB LED in PLCC-4. The host sinks
+// current on RK, GK, and BK. Its footprint numbering is specific to this LED family.
+
+use "@stackup/passives"
+
+part rgb-led {
+    symbol "Device:LED_RGBA"
+    reference D
+    datasheet "https://assets.cree-led.com/a/ds/h/HB-CLV1A-FKB.pdf"
+    description "Common-anode RGB LED, PLCC-4"
+    pin RK passive
+    pin GK passive
+    pin BK passive
+    pin A passive
+    package plcc4 footprint="LED_SMD:LED_Cree-PLCC4_3.2x2.8mm_CCW" {
+        pad RK 1
+        pad GK 2
+        pad BK 3
+        pad A 4
+    }
+}
+
+// Three cathode resistors are sized from the stated minimum rail voltage: the red die drops
+// about 2 V, and the green and blue dies about 3 V. Each sink turns on its colour when low.
+block rgb-indicator {
+    param current current default="2mA"
+    param design-rail-min voltage
+    port rail type=power
+    port red
+    port green
+    port blue
+
+    derive red-r "e24((design-rail-min - 2V) / current)"
+    derive gb-r "e24((design-rail-min - 3V) / current)"
+    assert "design-rail-min > 3V" message="RGB LED needs more than 3 V to light green and blue"
+    assert "rail.voltage.min >= design-rail-min" message="RGB rail is below the voltage used to size its resistors"
+
+    place rgb-led as=self
+    circuit rail.rail self.A
+    place resistor Rred value=red-r intent=series
+    place resistor Rgreen value=gb-r intent=series
+    place resistor Rblue value=gb-r intent=series
+    circuit self.RK Rred red
+    circuit self.GK Rgreen green
+    circuit self.BK Rblue blue
+}

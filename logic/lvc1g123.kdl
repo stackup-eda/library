@@ -1,0 +1,53 @@
+// TI SN74LVC1G123 retriggerable one-shot. The optional stretcher block sets the pulse width
+// with R and C (approximately R × C) and triggers on a falling edge at A.
+
+use "@stackup/passives"
+
+part lvc1g123 {
+    symbol "74xGxx:74LVC1G123"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/sn74lvc1g123.pdf"
+    description "Single retriggerable monostable multivibrator"
+    manufacturer "Texas Instruments"
+    order mpn=SN74LVC1G123DCTR mouser="595-SN74LVC1G123DCTR"
+    param resistance resistance default="10kΩ"
+    param capacitance capacitance default="100nF"
+    assert "resistance >= 1kΩ" message="LVC1G123 timing resistor must be at least 1 kΩ at 3.3 V"
+    pin A input symbol="~{A}"
+    pin B input
+    pin CLR input symbol="~{CLR}"
+    pin GND power_in
+    pin Q output
+    pin CEXT input symbol=Cext
+    pin RCEXT input symbol=RCext
+    pin VCC power_in
+    package ssop8 footprint="SSOP-8_2.95x2.8mm_P0.65mm" {
+        pad A 1
+        pad B 2
+        pad CLR 3
+        pad GND 4
+        pad Q 5
+        pad CEXT 6
+        pad RCEXT 7
+        pad VCC 8
+    }
+    port vcc type=power {
+        require net.voltage min="3.0V" max="3.6V"
+        add net.draw "1mA"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+    port trigger pin=A
+    port out type=output pin=Q
+    block supply {
+        default
+        place bypass Cvcc node=VCC rail=vcc value="100nF"
+    }
+    block stretcher {
+        place resistor R value=resistance intent=timing
+        place capacitor C value=capacitance intent=timing
+        circuit vcc.rail R RCEXT C CEXT
+        circuit B vcc.rail
+        circuit CLR vcc.rail
+    }
+}

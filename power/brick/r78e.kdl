@@ -1,0 +1,265 @@
+// @stackup/power/brick/r78e — Recom R-78E 5 V switching-regulator modules in SIP-3. Includes
+// the 1 A R-78E5.0-1.0 and 0.5 A R-78E5.0-0.5.
+//
+// The R-78E has a narrower input range than the R-78K (4.5–36 V) and R-78HB (9–72 V). Check the
+// selected variant against the board’s input range.
+//
+// Both variants share a footprint but have different ratings and filter circuits. The 1 A
+// version accepts 8–28 V, specifies 85–93% efficiency, requires no minimum load, and allows at
+// most 220 µF total output capacitance. The 0.5 A version accepts 7–28 V and recommends at
+// least 10 mA load.
+
+use "@stackup/passives"
+
+part r78e5v0-1a {
+    symbol "Converter_DCDC:R-78E5.0-1.0"
+    reference U
+    datasheet "https://recom-power.com/pdf/Innoline/R-78E-1.0.pdf"
+    description "1A Step-Down DC/DC-Regulator, 8-28V input, 5.0V fixed Output Voltage, SIP3"
+    manufacturer "RECOM Power"
+    order mpn="R-78E5.0-1.0" mouser="919-R-78E5.0-1.0"
+
+    pin IN power_in
+    pin GND power_in
+    pin OUT power_out
+
+    // The 1 A and 0.5 A versions use the same three-hole, 2.54 mm-pitch footprint. KiCad’s 1 A
+    // symbol references the 0.5 A footprint.
+    package sip3 footprint="Converter_DCDC_RECOM_R-78E-0.5_THT" {
+        pad IN 1
+        pad GND 2
+        pad OUT 3
+    }
+
+    // Calculate input current for both the declared load and the full 1 A rating at minimum
+    // input voltage. Use 85%, the lower full-load efficiency in the selection guide. That
+    // figure is specified at maximum input voltage, so applying it at minimum input adds
+    // roughly 10% margin.
+    derive input "out.draw * out.voltage / (0.85 * in.voltage.min)"
+    derive rated "5V * 1A / (0.85 * in.voltage.min)"
+
+    port in type=power {
+        require net.voltage min="8V" max="28V"
+        add net.draw input
+        line rail
+        line gnd pin=GND
+    }
+
+    // Output shares input ground. The 220 µF limit applies to total rail capacitance for
+    // startup. Capacitance is not summed by the checker yet, so the limit is recorded as a
+    // note.
+    port out type=power {
+        set net.voltage "5V" tolerance="2%"
+        assert "draw <= 1A" message="the R-78E5.0-1.0 is rated for 1A; its loads draw {draw}"
+        line rail pin=OUT
+        line gnd pin=GND
+    }
+
+    // Application circuits
+
+    // Connect input directly to IN when no filter is selected.
+    block direct {
+        when "!emc-class-b"
+        circuit in.rail IN
+    }
+
+    // Recom Class B filter for the 1 A variant (R-78E-1.0, Rev. 9/2024): 68 µH in series, 10 µF
+    // before the choke, and 2.2 µF at IN.
+    //
+    // The SRN4018 68 µH choke is rated for 0.5 A. At full output load, the converter exceeds
+    // this input current below about 12 V. An assertion checks the choke against full-rated
+    // input current at the board’s minimum input voltage.
+    block emc-class-b {
+        assert "rated <= 500mA" \
+            message="SRN4018-680M is rated for 500mA; converter input current is {rated} at full 1A output and minimum input voltage — use a higher minimum input voltage or the Class A configuration"
+
+        place inductor L value="68µH" footprint="L_Bourns-SRN4018" intent=filter \
+            note="EN55032 Class B filter — the input choke"
+        place bulk Csupply node=in.rail rail=in value="10µF" \
+            note="EN55032 Class B filter — the supply side of the input choke"
+        place bulk Cconv node=IN rail=in value="2.2µF" \
+            note="EN55032 Class B filter — the converter side of the input choke"
+
+        // Place the choke between the input rail and IN so the capacitors connect to opposite
+        // sides.
+        circuit in.rail L IN
+    }
+}
+
+// R-78E5.0-0.5: 7–28 V input, 5 V / 500 mA output, and 82% minimum efficiency. Datasheet note 3
+// recommends more than 2% load (10 mA) to keep ripple within specification. The board must
+// provide this load, for example with a resistor or power indicator.
+part r78e5v0-0a5 {
+    symbol "Converter_DCDC:R-78E5.0-0.5"
+    reference U
+    datasheet "https://recom-power.com/pdf/Innoline/R-78E-0.5.pdf"
+    description "500mA Step-Down DC/DC-Regulator, 7-28V input, 5.0V fixed Output Voltage, SIP3"
+    manufacturer "RECOM Power"
+    order mpn="R-78E5.0-0.5" mouser="919-R-78E5.0-0.5"
+
+    pin IN power_in
+    pin GND power_in
+    pin OUT power_out
+
+    package sip3 footprint="Converter_DCDC_RECOM_R-78E-0.5_THT" {
+        pad IN 1
+        pad GND 2
+        pad OUT 3
+    }
+
+    // Use minimum input voltage and 82% efficiency for a conservative current estimate. The
+    // selection guide gives 92% at minimum input voltage.
+    derive input "out.draw * out.voltage / (0.82 * in.voltage.min)"
+    derive rated "5V * 0.5A / (0.82 * in.voltage.min)"
+
+    port in type=power {
+        require net.voltage min="7V" max="28V"
+        add net.draw input
+        line rail
+        line gnd pin=GND
+    }
+
+    // Check minimum load against declared consumers. An incomplete load budget is reported as a
+    // lower bound; a declared load above 10 mA already satisfies the requirement.
+    port out type=power {
+        set net.voltage "5V" tolerance="2%"
+        assert "draw <= 500mA" message="the R-78E5.0-0.5 is rated for 500mA; its loads draw {draw}"
+        assert "draw >= 10mA" \
+            message="R-78E5.0-0.5 load {draw} is below the recommended 10mA minimum for specified ripple"
+        line rail pin=OUT
+        line gnd pin=GND
+    }
+
+    // Application circuits
+
+    block direct {
+        when "!emc-class-a && !emc-class-b"
+        circuit in.rail IN
+    }
+
+    // Recom Class A filter (R-78E-0.5, Rev. 9/2025): 4.7 µF before a 3.9 µH choke, with no
+    // capacitor at IN. This uses 4.7 µH because SRN4018 values follow E6; the higher value
+    // increases attenuation at the 570 kHz switching frequency. Current rating is 1.9 A.
+    block emc-class-a {
+        assert "rated <= 1.9A" \
+            message="SRN4018-4R7M is rated for 1.9A; converter input current is {rated} at full 500mA output and minimum input voltage"
+
+        place inductor L value="4.7µH" footprint="L_Bourns-SRN4018" intent=filter \
+            note="EN55032 Class A filter — the input choke"
+        place bulk Csupply node=in.rail rail=in value="4.7µF" \
+            note="EN55032 Class A filter — the supply side of the input choke"
+        circuit in.rail L IN
+    }
+
+    // Recom Class B filter: 10 µF before a 12 µH choke and 4.7 µF at IN. This uses the next E6
+    // value, 15 µH, rated for 1.0 A—about twice the converter’s full-load input current at
+    // minimum input voltage.
+    block emc-class-b {
+        assert "rated <= 1A" \
+            message="SRN4018-150M is rated for 1A; converter input current is {rated} at full 500mA output and minimum input voltage"
+
+        place inductor L value="15µH" footprint="L_Bourns-SRN4018" intent=filter \
+            note="EN55032 Class B filter — the input choke"
+        place bulk Csupply node=in.rail rail=in value="10µF" \
+            note="EN55032 Class B filter — the supply side of the input choke"
+        place bulk Cconv node=IN rail=in value="4.7µF" \
+            note="EN55032 Class B filter — the converter side of the input choke"
+        circuit in.rail L IN
+    }
+}
+
+// The 3.3 V members use the same SIP-3 pad map as the 5 V members.
+part r78e3v3-0a5 {
+    symbol "Converter_DCDC:R-78E3.3-0.5"
+    reference U
+    datasheet "https://recom-power.com/pdf/Innoline/R-78E-0.5.pdf"
+    description "500mA DC/DC regulator, 7-28V input, fixed 3.3V output, SIP-3"
+    manufacturer "RECOM Power"
+    order mpn="R-78E3.3-0.5" mouser="919-R-78E3.3-0.5"
+    pin IN power_in
+    pin GND power_in
+    pin OUT power_out
+    package sip3 footprint="Converter_DCDC_RECOM_R-78E-0.5_THT" {
+        pad IN 1
+        pad GND 2
+        pad OUT 3
+    }
+    derive input "out.draw * out.voltage / (0.82 * in.voltage.min)"
+    port in type=power {
+        require net.voltage min="7V" max="28V"
+        add net.draw input
+        line rail
+        line gnd pin=GND
+    }
+    port out type=power {
+        set net.voltage "3.3V" tolerance="2%"
+        assert "draw <= 500mA" message="R-78E3.3-0.5 output load {draw} exceeds 500mA"
+        assert "draw >= 10mA" message="R-78E3.3-0.5 recommends at least 10mA load for specified ripple"
+        line rail pin=OUT
+        line gnd pin=GND
+    }
+    block direct {
+        when "!emc-class-a && !emc-class-b"
+        circuit in.rail IN
+    }
+    block emc-class-a {
+        place inductor L value="4.7µH" footprint="L_Bourns-SRN4018" intent=filter
+        place bulk Csupply node=in.rail rail=in value="4.7µF"
+        circuit in.rail L IN
+    }
+    block emc-class-b {
+        place inductor L value="15µH" footprint="L_Bourns-SRN4018" intent=filter
+        place bulk Csupply node=in.rail rail=in value="10µF"
+        place bulk Cconv node=IN rail=in value="4.7µF"
+        circuit in.rail L IN
+    }
+}
+
+part r78e3v3-1a {
+    symbol "Converter_DCDC:R-78E3.3-1.0"
+    reference U
+    datasheet "https://recom-power.com/pdf/Innoline/R-78E-1.0.pdf"
+    description "1A DC/DC regulator, 3.3V fixed output, SIP-3"
+    manufacturer "RECOM Power"
+    order mpn="R-78E3.3-1.0" mouser="919-R-78E3.3-1.0"
+    pin IN power_in
+    pin GND power_in
+    pin OUT power_out
+    package sip3 footprint="Converter_DCDC_RECOM_R-78E-0.5_THT" {
+        pad IN 1
+        pad GND 2
+        pad OUT 3
+    }
+    derive input "out.draw * out.voltage / (0.85 * in.voltage.min)"
+    derive rated "3.3V * 1A / (0.85 * in.voltage.min)"
+    port in type=power {
+        require net.voltage min="8V" max="28V"
+        add net.draw input
+        line rail
+        line gnd pin=GND
+    }
+    port out type=power {
+        set net.voltage "3.3V" tolerance="2%"
+        assert "draw <= 1A" message="R-78E3.3-1.0 output load {draw} exceeds 1A"
+        line rail pin=OUT
+        line gnd pin=GND
+    }
+    block direct {
+        when "!emc-class-a && !emc-class-b"
+        circuit in.rail IN
+    }
+    block emc-class-a {
+        assert "rated <= 1A" message="Class A choke rated 1A; full-load input current is {rated}"
+        place inductor L value="15µH" footprint="L_Bourns-SRN4018" intent=filter
+        place bulk Csupply node=in.rail rail=in value="10µF"
+        place bulk Cconv node=IN rail=in value="10µF"
+        circuit in.rail L IN
+    }
+    block emc-class-b {
+        assert "rated <= 500mA" message="Class B choke rated 500mA; full-load input current is {rated}"
+        place inductor L value="68µH" footprint="L_Bourns-SRN4018" intent=filter
+        place bulk Csupply node=in.rail rail=in value="10µF"
+        place bulk Cconv node=IN rail=in value="2.2µF"
+        circuit in.rail L IN
+    }
+}

@@ -1,0 +1,105 @@
+// @stackup/power/buck/isl8117 — Renesas 4.5–60 V synchronous buck controller.
+// The application circuit uses two external N-channel FETs and a 10 µH inductor.
+// Check FET voltage and current ratings against the actual input and load.
+
+use "@stackup/passives"
+use "@stackup/discrete/fet/bsc030n08ns5"
+
+part isl8117 {
+    symbol "Regulator_Switching:ISL8117FRZ"
+    reference U
+    datasheet "https://www.renesas.com/en/document/dst/isl8117-datasheet?r=501691"
+    description "4.5-60V synchronous buck controller, QFN-16"
+    manufacturer Renesas
+    pin CLKOUT input
+    pin MOD_SYNC input symbol="MOD/SYNC"
+    pin PGOOD open_collector
+    pin RT input
+    pin SS_TRK input symbol="SS/TRK"
+    pin FB input
+    pin PGND power_in
+    pin LGATE_OCS input symbol="LGATE/OCS"
+    pin VCC5V power_in
+    pin ISEN input
+    pin PHASE input
+    pin UGATE output
+    pin BOOT input
+    pin VIN power_in
+    pin EXTBIAS input
+    pin EN input
+    pin SGND power_in
+    package qfn16 footprint="Package_DFN_QFN:QFN-16-1EP_4x4mm_P0.5mm_EP2.45x2.45mm" {
+        pad CLKOUT 1
+        pad MOD_SYNC 2
+        pad PGOOD 3
+        pad RT 4
+        pad SS_TRK 5
+        pad FB 6
+        pad PGND 7
+        pad LGATE_OCS 8
+        pad VCC5V 9
+        pad ISEN 10
+        pad PHASE 11
+        pad UGATE 12
+        pad BOOT 13
+        pad VIN 14
+        pad EXTBIAS 15
+        pad EN 16
+        pad SGND 17
+    }
+    port vin type=power {
+        require net.voltage min="4.5V" max="60V"
+        line rail pin=VIN
+        line gnd pin=PGND
+    }
+    port en pin=EN
+    port fb pin=FB
+    port pgood pin=PGOOD
+    port phase pin=PHASE
+}
+
+block isl8117-buck {
+    param vout voltage default="5V"
+    derive rtop "10kΩ * (vout / 0.6V - 1)"
+    derive input "out.draw * out.voltage / (0.9 * in.voltage.min)"
+    port in type=power {
+        require net.voltage min="4.5V" max="60V"
+        add net.draw input
+    }
+    port out type=power {
+        set net.voltage vout
+    }
+    port en
+    port pgood
+    place isl8117 as=self
+    place bsc030n08ns5 Qhs
+    place bsc030n08ns5 Qls
+    place inductor L value="10µH" footprint="L_Bourns-SRN8040TA" intent=filter
+    circuit in.rail self.VIN Qhs.DRAIN
+    circuit Qhs.SOURCE self.PHASE Qls.DRAIN L
+    circuit Qhs.GATE self.UGATE
+    circuit Qls.SOURCE self.PGND in.gnd
+    circuit Qls.GATE self.LGATE_OCS
+    circuit L out.rail
+    circuit self.SGND in.gnd
+    circuit self.EXTBIAS in.gnd
+    circuit self.RT in.gnd
+    circuit en self.EN
+    circuit pgood self.PGOOD
+    place resistor Ren value="10kΩ" intent=pull-down
+    circuit self.EN Ren in.gnd
+    place resistor Rboot value="2.2Ω" intent=series
+    place capacitor Cboot value="220nF" intent=filter
+    circuit self.BOOT Rboot Cboot self.PHASE
+    place resistor Risen value="4.22kΩ" intent=series
+    circuit self.PHASE Risen self.ISEN
+    place resistor Rocs value="13.6kΩ" intent=series
+    circuit self.LGATE_OCS Rocs in.gnd
+    circuit self.MOD_SYNC self.VCC5V
+    place bypass Cvcc node=self.VCC5V rail=in value="4.7µF"
+    place bypass Css node=self.SS_TRK rail=in value="27nF"
+    place bypass Cin node=self.VIN rail=in value="100nF"
+    place resistor Rfb-top value=rtop intent=divider
+    place resistor Rfb-bottom value="10kΩ" intent=divider
+    circuit out.rail Rfb-top self.FB Rfb-bottom out.gnd
+}

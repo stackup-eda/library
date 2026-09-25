@@ -1,0 +1,91 @@
+// @stackup/power/buck/tpsm53603 — TI TPSM53603 3 A buck power module.
+// The inductor is inside the module. Input/output capacitors and the feedback
+// divider remain external. The exposed PGND pad needs a good thermal connection.
+
+use "@stackup/passives"
+
+part tpsm53603 {
+    symbol "Converter_DCDC:TPSM53603RDA"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/tpsm53603.pdf"
+    description "36V, 3A adjustable buck module with integrated inductor, B3QFN-15"
+    manufacturer "Texas Instruments"
+    order mpn=TPSM53603RDAR mouser="595-TPSM53603RDAR"
+
+    param vout voltage default="5V"
+    param enable-above voltage default="0V"
+    derive rbottom "10kΩ / (vout / 1V - 1)"
+    derive renbottom "100kΩ / (enable-above / 1.23V - 1)"
+    derive input "out.draw * out.voltage / (0.9 * in.voltage.min)"
+
+    pin VIN power_in
+    pin EN input required
+    pin PGND power_in
+    pin DNC no_connect
+    pin PGOOD open_collector
+    pin VOUT power_out
+    pin FB input required
+    pin AGND power_in
+    pin V5V output
+    package b3qfn footprint="Package_DFN_QFN:Texas_B3QFN-14-1EP_5x5.5mm_P0.65mm" {
+        pad VIN 1
+        pad VIN 14
+        pad EN 2
+        pad PGND 3
+        pad PGND 10
+        pad PGND 11
+        pad PGND 15
+        pad DNC 4
+        pad DNC 5
+        pad PGOOD 6
+        pad VOUT 7
+        pad VOUT 8
+        pad FB 9
+        pad AGND 12
+        pad V5V 13
+    }
+
+    port in type=power {
+        require net.voltage min="3.8V" max="36V"
+        add net.draw input
+        line rail pin=VIN
+        line gnd pin=PGND
+    }
+    port out type=power {
+        set net.voltage vout
+        assert "vout >= 1V && vout <= 7V" message="TPSM53603 output setting must be 1-7V"
+        assert "draw <= 3A" message="TPSM53603 output load {draw} exceeds 3A"
+        line rail pin=VOUT
+        line gnd pin=PGND
+    }
+    port pgood pin=PGOOD
+
+    block supply {
+        default
+        place bulk Cin1 node=VIN rail=in value="10µF" footprint="C_1210_3225Metric"
+        place bulk Cin2 node=VIN rail=in value="10µF" footprint="C_1210_3225Metric"
+        place bulk Cout1 node=VOUT rail=out value="47µF" footprint="C_1210_3225Metric"
+        place bulk Cout2 node=VOUT rail=out value="47µF" footprint="C_1210_3225Metric"
+        circuit AGND PGND
+    }
+    block feedback {
+        default
+        place resistor Rtop value="10kΩ" intent=divider
+        place resistor Rbottom value=rbottom intent=divider
+        circuit VOUT Rtop FB Rbottom AGND
+    }
+    block always-on {
+        when "enable-above == 0V"
+        circuit EN VIN
+    }
+    block uvlo {
+        when "enable-above > 0V"
+        place resistor Ren-top value="100kΩ" intent=divider
+        place resistor Ren-bottom value=renbottom intent=divider
+        circuit VIN Ren-top EN Ren-bottom PGND
+    }
+    block unused {
+        default
+        nc DNC V5V note="V5V is the internal LDO output; leave it unloaded"
+    }
+}

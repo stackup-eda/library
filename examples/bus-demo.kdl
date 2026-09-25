@@ -1,0 +1,90 @@
+// STM32C011 example with two TMP102 sensors on I²C and two SPI flash devices.
+//
+// Each `connect` joins two endpoints. Additional devices can connect from any endpoint already
+// on the bus, such as `connect i2c from=inside to=outside`. MCU pins are assigned in the first
+// connection only. Connection order does not prescribe PCB routing.
+//
+// SPI chip selects are separate output connections, so they can come from GPIOs, an expander,
+// or a decoder. Each select is named under its device, such as `fw/cs`.
+//
+// `set` defines a single value, `add` accumulates contributions, and `claim` requires unique
+// values across a bus. Two sensors claiming address 0x48 on the same I²C bus produce an error.
+//
+// The built-in I²C type checks pull-ups. GPIO `once` checks catch reuse of a chip-select
+// output, but two selects joined explicitly by a `circuit` are not detected as a bus conflict
+// because chip selects are separate from the bus.
+//
+// Type lines connect by matching names unless `match` specifies a crossover. SPI uses `sck`,
+// `mosi`, and `miso` at both ends. UART matches `tx` to `rx` and optional `rts` to `cts`; each
+// port names signals from its own perspective. CAN connects TX to TXD without a crossover. The
+// engine checks that every required line has a counterpart.
+//
+// Pull-ups add conductance to the node’s `pull` fact. Two 4.7 kΩ pull-ups have an effective
+// resistance of 2.35 kΩ, which bus assertions can check.
+
+use "@stackup/passives"
+use "@stackup/connector/power-jack"
+use "@stackup/types"
+use "@stackup/micro/stm32c011"
+use "@stackup/sensor/temp/tmp102"
+use "@stackup/storage/flash/w25q32"
+
+// Imports
+
+// Board
+
+design bus-demo {
+    stock {
+        packages imperial="0603"
+    }
+
+    place power-jack V3V3 voltage="3.3V"
+
+    place stm32c011f6 mcu vdd=V3V3.out
+
+    // Different ADD0 straps select different addresses. Setting both to `gnd` produces
+    // duplicate 0x48 claims; the error identifies both placements.
+    place tmp102 inside vdd=V3V3.out add0=gnd
+    place tmp102 outside vdd=V3V3.out add0=vplus
+    place i2c-pull-ups pulls rail=V3V3.out
+
+    place w25q32 fw vdd=V3V3.out {
+        with single-spi
+    }
+    place w25q32 log vdd=V3V3.out {
+        with single-spi
+    }
+
+    // I²C
+
+    // Assign I2C1 to PB7/PB6.
+    connect i2c {
+        from mcu sda=PB7 scl=PB6
+        to inside
+    }
+
+    // Connect the remaining devices through their I²C ports. Removing `pulls` fails the pull-up
+    // check; adding another pair changes the effective parallel resistance.
+    connect i2c from=inside to=outside
+    connect i2c from=inside to=pulls
+
+    // SPI
+
+    // Assign SPI1 to PA5/PA7/PA6. Change SCK here to move it.
+    connect spi {
+        from mcu sck=PA5 mosi=PA7 miso=PA6
+        to fw
+    }
+    connect spi from=fw to=log
+
+    // Connect each chip select to a separate output. These use MCU GPIOs; an expander output
+    // would work too. Assigning both to PA4 fails the pin-reuse check.
+    connect output {
+        from mcu node=PA4
+        to fw.cs
+    }
+    connect output {
+        from mcu node=PA8
+        to log.cs
+    }
+}

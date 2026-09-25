@@ -1,0 +1,75 @@
+// @stackup/power/ldo/tps7a1601 — TI 60 V, 100 mA adjustable LDO.
+// Set the output with a 1.13 MΩ bottom resistor and a calculated top resistor.
+// At high input voltage, check dissipation: (Vin − Vout) × load current.
+
+use "@stackup/passives"
+
+part tps7a1601 {
+    symbol "TPS7A16:TPS7A1601DGN"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/tps7a16.pdf"
+    description "60V, 100mA adjustable LDO, 5µA quiescent current, MSOP-8 PowerPAD"
+    manufacturer "Texas Instruments"
+    order mpn=TPS7A1601ADGNR mouser="595-TPS7A1601ADGNR"
+
+    param vout voltage default="4.5V"
+    derive rtop "1.13MΩ * (vout / 1.193V - 1)"
+
+    pin IN power_in
+    pin GND power_in
+    pin OUT power_out
+    pin FB input required
+    pin EN input required
+    pin PG output
+    pin DELAY output
+    pin NC no_connect
+    package msop8 footprint="Package_SO:MSOP-8-1EP_3x3mm_P0.65mm_EP1.5x1.8mm" {
+        pad OUT 1
+        pad FB 2
+        pad PG 3
+        pad GND 4
+        pad GND 9
+        pad EN 5
+        pad NC 6
+        pad DELAY 7
+        pad IN 8
+    }
+
+    port in type=power {
+        require net.voltage min="3V" max="60V"
+        add net.draw "out.draw + 5µA"
+        line rail pin=IN
+        line gnd pin=GND
+    }
+    port out type=power {
+        set net.voltage vout tolerance="2.5%"
+        assert "vout >= 1.194V && vout <= 20V" message="TPS7A1601 output must be 1.194-20V"
+        assert "draw <= 100mA" message="TPS7A1601 output load {draw} exceeds 100mA"
+        line rail pin=OUT
+        line gnd pin=GND
+    }
+    port en pin=EN
+    port pg pin=PG
+    port delay pin=DELAY
+
+    block supply {
+        default
+        place bypass Cin node=IN rail=in value="1µF"
+        place bypass Cout node=OUT rail=out value="2.2µF"
+        circuit GND in.gnd
+    }
+    block feedback {
+        default
+        place resistor Rtop value=rtop intent=divider
+        place resistor Rbottom value="1.13MΩ" intent=divider
+        circuit OUT Rtop FB Rbottom GND
+    }
+    block always-on {
+        default
+        circuit EN IN
+    }
+    block unused {
+        default
+        nc NC DELAY note="DELAY can be fitted with a capacitor for longer PG delay"
+    }
+}

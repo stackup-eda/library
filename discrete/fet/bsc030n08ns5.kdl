@@ -1,0 +1,24 @@
+// @stackup/discrete/fet/bsc030n08ns5 — Infineon 80 V / 100 A N-channel power MOSFET in
+// PG-TDSON-8. Maximum on-resistance is 3.0 mΩ at 10 V gate drive; typical charge is 61 nC.
+// Check switch-node overshoot against the 80 V rating in converter designs.
+part bsc030n08ns5 {
+    symbol "Transistor_FET:BSC030N08NS5"
+    reference Q
+    datasheet "http://www.infineon.com/dgdl/Infineon-BSC030N08NS5-DS-v02_02-EN.pdf?fileId=5546d4624ad04ef9014aed52f4210acf"
+    description "80 V, 100 A N-channel power MOSFET, 3 mΩ at VGS=10 V"
+    manufacturer Infineon
+    order mpn=BSC030N08NS5ATMA1 mouser="726-BSC030N08NS5ATMA"
+    pin SOURCE passive
+    pin GATE input
+    pin DRAIN passive
+    port source pin=SOURCE
+    port gate pin=GATE
+    port drain pin=DRAIN
+    package tdson8 footprint="Package_TO_SOT_SMD:TDSON-8-1" {
+        pad SOURCE 1
+        pad SOURCE 2
+        pad SOURCE 3
+        pad GATE 4
+        pad DRAIN 5
+    }
+}

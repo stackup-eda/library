@@ -1,0 +1,71 @@
+// @stackup/bus/rs485/adm2483 — isolated half-duplex RS-485 transceiver. Host and bus supplies
+// have separate grounds. PV must be held high for normal operation; the default block ties it
+// to the host supply.
+
+use "@stackup/passives"
+
+part adm2483 {
+    symbol "Interface_UART:ADM2483xRW"
+    reference U
+    datasheet "https://www.analog.com/media/en/technical-documentation/data-sheets/adm2483.pdf"
+    description "Isolated half-duplex RS-485/RS-422 transceiver, 500 kbps, SOIC-16W"
+    manufacturer "Analog Devices"
+    order mpn=ADM2483BRWZ mouser="584-ADM2483BRWZ" lcsc=C386280
+
+    pin VDD1 power_in
+    pin GND1 power_in
+    pin RxD output
+    pin RE input symbol="~{RE}"
+    pin DE input
+    pin TxD input
+    pin PV input
+    pin GND2 power_in
+    pin NC no_connect
+    pin A bidirectional
+    pin B bidirectional
+    pin VDD2 power_in
+
+    package soic16w footprint="SOIC-16W_7.5x10.3mm_P1.27mm" {
+        pad VDD1 1
+        pad GND1 2
+        pad RxD 3
+        pad RE 4
+        pad DE 5
+        pad TxD 6
+        pad PV 7
+        pad GND1 8
+        pad GND2 9
+        pad NC 10
+        pad NC 11
+        pad A 12
+        pad B 13
+        pad NC 14
+        pad GND2 15
+        pad VDD2 16
+    }
+
+    port host type=power {
+        require net.voltage min="3.0V" max="5.5V"
+        line rail pin=VDD1
+        line gnd pin=GND1
+    }
+    port link type=power {
+        require net.voltage min="5V" max="5V"
+        line rail pin=VDD2
+        line gnd pin=GND2
+    }
+    port rxd pin=RxD
+    port txd type=output pin=TxD
+    port de type=output pin=DE
+    port re type=output pin=RE
+
+    block supply {
+        default
+        place bypass Chost node=VDD1 rail=host value="100nF"
+        place bypass Clink node=VDD2 rail=link value="100nF"
+    }
+    block power-valid {
+        default
+        circuit PV VDD1
+    }
+}

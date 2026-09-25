@@ -1,0 +1,70 @@
+// @stackup/sensor/current/ina240 — TI INA240A2 bidirectional current-sense amplifier, with
+// 50 V/V gain and −4 to 80 V input common-mode range. The shunt block defaults to mid-supply
+// output at zero current; `without midpoint` supports a ground-referenced one-way reading.
+
+use "@stackup/passives"
+
+part ina240a2 {
+    symbol "Amplifier_Current:INA240A2PW"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/ina240.pdf"
+    description "50 V/V current-sense amplifier with PWM rejection, TSSOP-8"
+    manufacturer "Texas Instruments"
+    order mpn=INA240A2PWR mouser="595-INA240A2PWR"
+
+    // KiCad calls pad 1 GND; TI marks it NC and permits grounding it.
+    pin GND power_in
+    pin P input symbol="+"
+    pin N input symbol="-"
+    pin V+ power_in
+    pin REF2 passive required
+    pin REF1 passive required
+    pin OUT output
+
+    package tssop8 footprint="Package_SO:TSSOP-8_4.4x3mm_P0.65mm" {
+        pad GND 1
+        pad P 2
+        pad N 3
+        pad GND 4
+        pad V+ 5
+        pad REF2 6
+        pad REF1 7
+        pad OUT 8
+    }
+
+    port vdd type=power {
+        require net.voltage min="2.7V" max="5.5V"
+        add net.draw "3mA"
+        line rail pin=V+
+        line gnd pin=GND
+    }
+    port output pin=OUT
+
+    block supply {
+        default
+        place bypass Cvdd node=V+ rail=vdd value="100nF"
+        circuit REF2 vdd.gnd
+    }
+    block midpoint {
+        default
+        circuit REF1 vdd.rail
+    }
+    block ground-reference {
+        when "!midpoint"
+        circuit REF1 vdd.gnd
+    }
+}
+
+block ina240-sense {
+    param shunt resistance
+    port a
+    port b
+    port vdd type=power
+    port signal
+
+    place ina240a2 as=self vdd=vdd output=signal
+    place resistor Rshunt value=shunt intent=shunt footprint="R_2512_6332Metric" note="current-sense shunt; specify tolerance in purchasing data"
+    circuit a Rshunt b
+    circuit a self.P
+    circuit b self.N
+}

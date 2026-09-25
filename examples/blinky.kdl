@@ -1,0 +1,36 @@
+// The 555 blinker: a 2 Hz astable driving an indicator LED off 5 V.
+
+use "@stackup/passives"
+use "@stackup/connector/power-jack"
+use "@stackup/timer/ne555"
+use "@stackup/discrete/led/led"
+
+design blinky {
+    // Board stock rules select packages for generic passives by their intended use.
+    stock {
+        packages imperial="0603"
+    }
+
+    // The power connector declares the supply voltage.
+    place power-jack V5 voltage="5V"
+
+    place ne555-astable timer freq="2Hz" vcc=V5.out
+
+    scope indicator {
+        place led D
+        place resistor Rled value="330Ω" intent=series note="LED current limit"
+
+        // LED current is approximately (5 V − 2 V) / 330 Ω. Rled and D connect in series to V5
+        // ground; their shared node needs no explicit name.
+        circuit timer.out Rled D V5.out.gnd current="9mA"
+    }
+}
+
+// The same oscillator with a different frequency parameter.
+design fast {
+    stock {
+        packages imperial="0603"
+    }
+    place power-jack V5 voltage="5V"
+    place ne555-astable timer freq="1kHz" vcc=V5.out
+}

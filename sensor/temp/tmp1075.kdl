@@ -1,0 +1,64 @@
+// @stackup/sensor/temp/tmp1075 — TI TMP1075 digital temperature sensor in WSON-8.
+// Three address straps select 0x48–0x4F. The exposed pad connects to ground and conducts
+// heat from the PCB into the die, so placement and copper around it affect the reading.
+
+use "@stackup/passives"
+
+part tmp1075 {
+    symbol "Sensor_Temperature:TMP1075DSG"
+    reference U
+    datasheet "https://www.ti.com/lit/gpn/tmp1075"
+    description "±1 °C I²C temperature sensor, WSON-8"
+    manufacturer "Texas Instruments"
+    order mpn=TMP1075DSGR mouser="595-TMP1075DSGR" lcsc=C2870250
+
+    param offset number default=0
+    assert "offset >= 0 && offset <= 7" message="TMP1075 address offset must be 0–7"
+    derive address "0x48 + offset"
+
+    pin SDA bidirectional
+    pin SCL input
+    pin ALERT open_collector
+    pin GND power_in
+    pin A2 input required
+    pin A1 input required
+    pin A0 input required
+    pin V+ power_in
+    pin EP passive
+
+    package wson8 footprint="WSON-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm" {
+        pad SDA 1
+        pad SCL 2
+        pad ALERT 3
+        pad GND 4
+        pad A2 5
+        pad A1 6
+        pad A0 7
+        pad V+ 8
+        pad EP 9
+    }
+
+    port vdd type=power {
+        line rail pin=V+
+        line gnd pin=GND
+    }
+    port i2c type=i2c {
+        claim signal.address address
+        line sda pin=SDA
+        line scl pin=SCL
+    }
+    port alert pin=ALERT
+    port thermal-pad pin=EP
+
+    block supply {
+        default
+        place decouple Cvdd node=V+ rail=vdd value="100nF"
+        circuit EP vdd.gnd
+    }
+    block a0-low { when "offset == 0 || offset == 2 || offset == 4 || offset == 6"; circuit A0 vdd.gnd }
+    block a0-high { when "offset == 1 || offset == 3 || offset == 5 || offset == 7"; circuit A0 vdd.rail }
+    block a1-low { when "offset == 0 || offset == 1 || offset == 4 || offset == 5"; circuit A1 vdd.gnd }
+    block a1-high { when "offset == 2 || offset == 3 || offset == 6 || offset == 7"; circuit A1 vdd.rail }
+    block a2-low { when "offset < 4"; circuit A2 vdd.gnd }
+    block a2-high { when "offset >= 4"; circuit A2 vdd.rail }
+}

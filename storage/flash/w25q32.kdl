@@ -1,0 +1,58 @@
+// @stackup/storage/flash/w25q32 — Winbond's W25Q32, 32 Mbit SPI NOR flash.
+
+use "@stackup/passives"
+
+// W25Q32JV in SOIC-8, configured for standard SPI. /WP and /HOLD become IO2/IO3 in quad mode.
+// Both pins require connections; the default block ties them high for standard SPI.
+part w25q32 {
+    symbol "Memory_Flash:W25Q32JVSS"
+    reference U
+    datasheet "https://www.winbond.com/resource-files/w25q32jv%20revg%2003272018%20plus.pdf"
+
+    pin CS input required symbol="~{CS}"
+    pin DO output
+    pin WP input required symbol="~{WP}"
+    pin GND power_in
+    pin DI input
+    pin CLK input
+    pin HOLD input required symbol="~{HOLD}/~{RESET}"
+    pin VCC power_in
+
+    package soic8 footprint="Package_SO:SOIC-8_5.23x5.23mm_P1.27mm" {
+        pad CS 1
+        pad DO 2
+        pad WP 3
+        pad GND 4
+        pad DI 5
+        pad CLK 6
+        pad HOLD 7
+        pad VCC 8
+    }
+
+    port vdd type=power {
+        require net.voltage min="2.7V" max="3.6V"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+
+    // SPI uses the same line names at both ends: DI maps to `mosi` and DO to `miso`.
+    port spi type=spi {
+        line sck pin=CLK
+        line mosi pin=DI
+        line miso pin=DO
+    }
+
+    // Chip select is separate from the SPI bus and must connect to an output.
+    port cs type=output pin=CS
+
+    block supply {
+        default
+        place decouple Cin node=VCC rail=vdd value="100nF"
+    }
+
+    // Tie /WP and /HOLD high to disable write protection and hold in standard SPI mode.
+    block single-spi {
+        place pull-up Rwp node=WP rail=vdd value="10kΩ"
+        place pull-up Rhold node=HOLD rail=vdd value="10kΩ"
+    }
+}

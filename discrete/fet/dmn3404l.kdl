@@ -1,0 +1,26 @@
+// @stackup/discrete/fet/dmn3404l — Diodes DMN3404L, a 30 V / 5.7 A N-channel MOSFET in SOT-23.
+// Rds(on) is 35 mΩ at Vgs = 4.5 V and is also specified at 2.5 V, supporting 3.3 V gate drive.
+// This provides more load capacity than the BSS138 without a larger package.
+
+part dmn3404l {
+    symbol "Transistor_FET:DMN3404L"
+    reference Q
+    datasheet "https://www.diodes.com/assets/Datasheets/DMN3404L.pdf"
+    description "30V Vds, 5.7A Id, N-Channel Logic-Level MOSFET, SOT-23"
+    manufacturer "Diodes Incorporated"
+    order mpn="DMN3404L-7" mouser="621-DMN3404L-7" lcsc=C155257
+
+    pin G input
+    pin S passive
+    pin D passive
+
+    package sot23 footprint="SOT-23" {
+        pad G 1
+        pad S 2
+        pad D 3
+    }
+
+    port gate pin=G
+    port source pin=S
+    port drain pin=D
+}

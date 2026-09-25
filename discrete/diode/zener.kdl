@@ -1,0 +1,15 @@
+// @stackup/discrete/diode/zener — generic Zener diode for voltage clamps. Select a specific
+// voltage and power rating with the placement value and package.
+part zener {
+    symbol "Device:D_Zener"
+    reference D
+    description "Zener diode"
+    pin K passive
+    pin A passive
+    port a pin=A
+    port b pin=K
+    package sod123 footprint="Diode_SMD:D_SOD-123" { pad K 1; pad A 2 }
+    package sod323 footprint="Diode_SMD:D_SOD-323" { pad K 1; pad A 2 }
+    package sod523 footprint="Diode_SMD:D_SOD-523" { pad K 1; pad A 2 }
+    package sma footprint="Diode_SMD:D_SMA" { pad K 1; pad A 2 }
+}

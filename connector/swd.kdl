@@ -1,0 +1,38 @@
+// @stackup/connector/swd — the 5-pin SWD debug header.
+
+// 5-pin, 0.1-inch debug header: SWDIO, SWCLK, nRESET, VTREF, GND. This pin order is
+// library-specific. VTREF lets the probe sense the target’s logic voltage; it supplies no power
+// and declares no current draw. nRESET supports attaching under reset.
+
+part swd-header {
+    symbol "Connector_Generic:Conn_01x05"
+    reference J
+    description "SWD debug header — SWDIO, SWCLK, nRESET, VTREF, GND on 0.1in pins"
+
+    pin SWDIO passive
+    pin SWCLK passive
+    pin RESET passive
+    pin VTREF passive
+    pin GND passive
+
+    package header footprint="PinHeader_1x05_P2.54mm_Vertical" {
+        pad SWDIO 1
+        pad SWCLK 2
+        pad RESET 3
+        pad VTREF 4
+        pad GND 5
+    }
+
+    port swd type=swd {
+        line swdio pin=SWDIO
+        line swclk pin=SWCLK
+        line nrst pin=RESET
+    }
+
+    // Target voltage reference and ground.
+    port vref type=power {
+        add net.draw "0A"
+        line rail pin=VTREF
+        line gnd pin=GND
+    }
+}

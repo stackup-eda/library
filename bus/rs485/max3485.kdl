@@ -1,0 +1,48 @@
+// @stackup/bus/rs485/max3485 — 3.3 V half-duplex RS-485 transceiver. Logic and bus share
+// one ground. The board controls DE and RE to select transmit, receive, or shutdown.
+
+use "@stackup/passives"
+
+part max3485 {
+    symbol "Interface_UART:MAX3485"
+    reference U
+    datasheet "https://datasheets.maximintegrated.com/en/ds/MAX3483-MAX3491.pdf"
+    description "3.3 V half-duplex RS-485/RS-422 transceiver, 10 Mbps, SOIC-8"
+    manufacturer "Maxim Integrated"
+
+    pin RO output
+    pin RE input symbol="~{RE}"
+    pin DE input
+    pin DI input
+    pin GND power_in
+    pin A bidirectional
+    pin B bidirectional
+    pin VCC power_in
+
+    package soic8 footprint="SOIC-8_3.9x4.9mm_P1.27mm" {
+        pad RO 1
+        pad RE 2
+        pad DE 3
+        pad DI 4
+        pad GND 5
+        pad A 6
+        pad B 7
+        pad VCC 8
+    }
+
+    port vcc type=power {
+        require net.voltage min="3.0V" max="3.6V"
+        add net.draw "60mA"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+    port ro pin=RO
+    port di type=output pin=DI
+    port de type=output pin=DE
+    port re type=output pin=RE
+
+    block supply {
+        default
+        place bypass Cvcc node=VCC rail=vcc value="100nF"
+    }
+}

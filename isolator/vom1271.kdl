@@ -1,0 +1,50 @@
+// @stackup/isolator/vom1271 — Vishay VOM1271T photovoltaic MOSFET driver in SOP-4. LED current
+// generates a floating gate voltage across the 3.75 kVrms barrier. An internal circuit turns
+// the MOSFETs off when LED current stops.
+
+use "@stackup/passives"
+use "@stackup/discrete/fet/dmn3404l"
+
+part vom1271 {
+    symbol "VOM1271:VOM1271"
+    reference U
+    datasheet "https://www.vishay.com/docs/83469/vom1271.pdf"
+    description "Photovoltaic MOSFET driver with fast turn-off, SOP-4"
+    manufacturer "Vishay Semiconductors"
+    order mpn=VOM1271T mouser="78-VOM1271T"
+    pin A passive
+    pin K passive
+    pin VO- passive
+    pin VO+ passive
+    package sop4 footprint="SOP-4_4.4x2.6mm_P1.27mm" {
+        pad A 1
+        pad K 2
+        pad VO- 3
+        pad VO+ 4
+    }
+}
+
+// Bidirectional switch using two source-to-source MOSFETs. DMN3404L is the
+// default; the caller can select another part with gate, source, and drain ports.
+block vom1271-ac-switch {
+    param current current default="10mA"
+    param design-lamp-min voltage
+    param fet part default=dmn3404l
+    port lamp type=power
+    port a
+    port b
+    port control
+    derive r "e24((design-lamp-min - 1.4V) / current)"
+    assert "design-lamp-min > 1.4V" message="VOM1271 LED supply is too low"
+    assert "lamp.voltage.min >= design-lamp-min" message="VOM1271 lamp rail is below the voltage used to size its resistor"
+    place vom1271 as=self
+    place fet fet-a
+    place fet fet-b
+    circuit fet-a.source fet-b.source self.VO-
+    circuit fet-a.gate fet-b.gate self.VO+
+    circuit a fet-a.drain
+    circuit b fet-b.drain
+    place resistor R_led value=r intent=series
+    circuit lamp.rail R_led self.A
+    circuit self.K control
+}

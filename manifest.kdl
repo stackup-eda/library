@@ -1,0 +1,7 @@
+// Library name and required stackup version.
+//
+// Imports resolve relative to this directory: `@stackup/sensor/current/ina226` loads
+// `sensor/current/ina226.kdl`. This library has no external library dependencies.
+
+name stackup
+stackup "0.1"

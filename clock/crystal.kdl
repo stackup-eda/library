@@ -1,0 +1,20 @@
+// Passive 3225 crystal. The host circuit must provide the oscillator and load capacitors.
+// Set the placement value to the frequency and specified load capacitance for the BOM.
+
+part crystal-3225 {
+    symbol "Device:Crystal_GND24"
+    reference Y
+    description "Quartz crystal, 3225 four-pad body"
+    pin XTAL1 passive symbol="1"
+    pin G passive symbol="G"
+    pin XTAL2 passive symbol="3"
+    package smd3225 footprint="Crystal_SMD_3225-4Pin_3.2x2.5mm" {
+        pad XTAL1 1
+        pad G 2
+        pad XTAL2 3
+        pad G 4
+    }
+    port xtal1 pin=XTAL1
+    port xtal2 pin=XTAL2
+    port ground pin=G
+}

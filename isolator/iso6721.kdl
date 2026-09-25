@@ -1,0 +1,74 @@
+// @stackup/isolator/iso6721 — TI ISO6721B two-channel digital isolator in SOIC-8, with one
+// channel in each direction and 3 kVrms basic isolation. Side 1 has VCC1/GND1, OUTA, and INB;
+// side 2 has VCC2/GND2, INA, and OUTB. Channel A runs from side 2 to side 1; B runs from side 1
+// to side 2. Each supply accepts 1.8–5.5 V independently.
+//
+// This variant defaults its outputs high when the input side is unpowered, matching UART idle.
+// The F variant defaults low. The two UART ports expose one channel in each direction.
+//
+// The ISO7721 shares the pinout and footprint and provides reinforced 5 kVrms isolation.
+
+use "@stackup/passives"
+
+part iso6721b {
+    symbol "Isolator:ISO6721BD"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/iso6721.pdf"
+    description "Dual-channel digital isolator, 1/1, default high, 3 kVrms, SOIC-8"
+    manufacturer "Texas Instruments"
+    order mpn=ISO6721BDR mouser="595-ISO6721BDR"
+
+    pin VCC1 power_in
+    pin OUTA output
+    pin INB input
+    pin GND1 power_in
+    pin GND2 power_in
+    pin OUTB output
+    pin INA input
+    pin VCC2 power_in
+
+    package soic8 footprint="SOIC-8_3.9x4.9mm_P1.27mm" {
+        pad VCC1 1
+        pad OUTA 2
+        pad INB 3
+        pad GND1 4
+        pad GND2 5
+        pad OUTB 6
+        pad INA 7
+        pad VCC2 8
+    }
+
+    // Separate power ports preserve the two ground connections. The 3 mA per-side budget is the
+    // datasheet maximum at 3.3 V and 1 Mbps.
+    port host type=power {
+        require net.voltage min="1.8V" max="5.5V"
+        add net.draw "3mA"
+        line rail pin=VCC1
+        line gnd pin=GND1
+    }
+    port far type=power {
+        require net.voltage min="1.8V" max="5.5V"
+        add net.draw "3mA"
+        line rail pin=VCC2
+        line gnd pin=GND2
+    }
+
+    // Side 1 sends on OUTA and receives on INB. The UART crossover connects host TXD to INB and
+    // host RXD to OUTA.
+    port host-uart type=uart {
+        line tx pin=OUTA
+        line rx pin=INB
+    }
+    // Side 2 sends on OUTB and receives on INA.
+    port far-uart type=uart {
+        line tx pin=OUTB
+        line rx pin=INA
+    }
+
+    // 0.1 µF at each VCC, returning to that side’s ground (§9.2.1).
+    block supply {
+        default
+        place bypass Chost node=VCC1 rail=host value="100nF"
+        place bypass Cfar node=VCC2 rail=far value="100nF"
+    }
+}

@@ -1,0 +1,125 @@
+// @stackup/timer/ne555 — 555 timer and astable oscillator block.
+//
+// KDL conventions used here:
+//
+// - In `place ne555 u`, `place` is the statement, `ne555` names a part or block, and `u` is the
+// instance name. Parameters and ports use properties such as `freq="2Hz"` and `vcc=V5`.
+// - Values are expressions: `value="10nF"` is a literal and `value=ra` references a calculated
+// value. Write-back edits only literal expressions.
+// - Parts define pins, requirements, and child application blocks. `default` selects support
+// circuitry placed automatically; optional blocks require an explicit `with`.
+// - `circuit` connects a path. Elements with `node` are terminals; elements with `a`/`b`
+// connect in series from `a` to `b`. Consecutive terminals share a node, which can remain
+// unnamed.
+// - Definitions may be referenced before they appear in the file.
+
+use "@stackup/passives"
+
+// TI LMC555 CMOS timer in DIP-8. Supply requirements use datasheet SNAS558.
+part ne555 {
+    symbol "Timer:LMC555xN"
+    reference U
+    datasheet "http://www.ti.com/lit/ds/symlink/lmc555.pdf"
+    description "CMOS Timer, 555 compatible, PDIP-8"
+
+    pin GND power_in
+    pin VCC power_in
+
+    port vcc type=power {
+        require net.voltage min="1.5V" max="15V"
+        add net.draw "100µA"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+
+    // Reset must be connected through wiring, a port, or an application block. It is active
+    // low; tie it high if unused. The `required` check catches an omitted connection.
+    pin RST input required symbol="~{RST}" {
+        role reset active=low
+    }
+
+    // Comparator reference, normally 2/3 VCC from the internal divider. Driving CONT modulates
+    // the thresholds; otherwise bypass it to ground to reduce noise.
+    pin CONT passive required
+
+    // Timing comparator inputs must be connected by the application circuit.
+    pin TRIG input required
+    pin THRES input required
+
+    // Open-drain N-channel output to ground. KiCad labels it `input`; this definition uses its
+    // electrical function so a missing pull-up is checked.
+    pin DISCH open_collector symbol-kind=input
+
+    pin OUT output
+
+    package dip8 footprint="DIP-8_W7.62mm" {
+        pad GND 1
+        pad TRIG 2
+        pad OUT 3
+        pad RST 4
+        pad CONT 5
+        pad THRES 6
+        pad DISCH 7
+        pad VCC 8
+    }
+
+    // Application circuits
+
+    // Default supply decoupling at the pin.
+    block supply {
+        default
+        place decouple Cin node=VCC rail=vcc value="100nF"
+    }
+
+    // Explicitly select support blocks for unused reset and control pins: `place ne555 u { with
+    // unused-rst; with unused-cont }`. Neither is automatic because the application may drive
+    // these pins. An omitted connection fails the `required` check.
+
+    block unused-rst {
+        circuit RST vcc.rail
+    }
+
+    block unused-cont {
+        place bypass Ccont node=CONT rail=vcc value="10nF"
+    }
+}
+
+// Astable oscillator with RC values calculated for the requested frequency. The original solver
+// chose a capacitor that kept Rb near 100 kΩ. Since Rb is proportional to 1/C, this can be
+// calculated by rounding the ideal capacitance to E3 (1, 2.2, 4.7 per decade) and clamping it
+// to 1 nF–10 µF.
+block ne555-astable {
+    param freq frequency
+    param duty ratio default="0.5"
+
+    port vcc type=power
+    port out type=output
+
+    // Clamp the ratio to keep Ra positive and within a practical range. This astable
+    // configuration requires duty cycle above 50%.
+    derive ratio "clamp((2 * duty - 1) / (1 - duty), 0.05, 50)"
+    derive c "clamp(e3(1 / (ln2 * freq * (ratio + 2) * 100kΩ)), 1nF, 10µF)"
+    derive rb_ideal "1 / (ln2 * freq * (ratio + 2) * c)"
+    derive rb "e24(rb_ideal)"
+    derive ra "e24(ratio * rb_ideal)"
+
+    // Calculate actual timing from the rounded component values for notes and queries.
+    derive achieved "1 / (ln2 * (ra + 2 * rb) * c)"
+    derive achieved_duty "(ra + rb) / (ra + 2 * rb)"
+    text summary "555 astable {achieved} @ {achieved_duty:.0%} (target {freq})"
+
+    // The astable uses neither reset control nor threshold modulation, so select both support
+    // blocks.
+    place ne555 u vcc=vcc {
+        with unused-rst
+        with unused-cont
+    }
+    place resistor Ra value=ra intent=timing note="charge R — {summary}"
+    place resistor Rb value=rb intent=timing note="discharge R — {summary}"
+    place capacitor C value=c intent=timing note="timing C — {summary}"
+
+    // C charges through Ra and Rb and discharges through Rb into DISCH. Adjacent THRES and TRIG
+    // terminals connect to the same timing node.
+    circuit vcc.rail Ra u.DISCH Rb u.THRES u.TRIG C vcc.gnd
+    circuit u.OUT out
+}

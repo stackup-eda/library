@@ -1,0 +1,22 @@
+// Two photovoltaic switches with different MOSFETs selected at placement.
+
+use "@stackup/connector/power-jack"
+use "@stackup/connector/header"
+use "@stackup/isolator/vom1271"
+use "@stackup/discrete/fet/2n7002"
+
+design mosfet-selection {
+    stock { packages imperial="0603" }
+
+    place power-jack V5 voltage="5V"
+
+    place vom1271-ac-switch standard design-lamp-min="5V" lamp=V5.out control=V5.out.gnd
+    place conn-1x2 standard-terminals
+    circuit standard.a standard-terminals.1
+    circuit standard.b standard-terminals.2
+
+    place vom1271-ac-switch alternate fet=nfet-2n7002 design-lamp-min="5V" lamp=V5.out control=V5.out.gnd
+    place conn-1x2 alternate-terminals
+    circuit alternate.a alternate-terminals.1
+    circuit alternate.b alternate-terminals.2
+}

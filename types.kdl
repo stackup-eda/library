@@ -1,0 +1,32 @@
+// @stackup/types — shared bus types and termination blocks.
+
+use "@stackup/passives"
+
+// I²C pull-ups with a single `i2c` port for connecting both lines. The `rail` sets the pull-up
+// voltage, which the checker compares with the connected devices’ voltage limits.
+block i2c-pull-ups {
+    param value resistance default="4.7kΩ"
+    port i2c type=i2c
+    port rail type=power
+
+    place pull-up sda node=i2c.sda rail=rail value=value
+    place pull-up scl node=i2c.scl rail=rail value=value
+}
+
+// USB 2.0 data pair: D+ connects to D+ and D− to D−. An ESD array connects to the same pair;
+// use two `connect` statements to join a connector, the array, and the device.
+type usb {
+    line dp
+    line dm
+}
+
+// QSPI connection between a controller and flash. The four data lines are bidirectional;
+// `cs` is included because a boot flash has a dedicated chip select.
+type qspi {
+    line sck
+    line cs
+    line io0
+    line io1
+    line io2
+    line io3
+}

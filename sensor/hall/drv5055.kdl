@@ -1,0 +1,43 @@
+// @stackup/sensor/hall/drv5055 — TI DRV5055A2 ratiometric linear Hall sensor in TO-92. Output
+// is VCC/2 at zero field; at 5 V, sensitivity is 50 mV/mT with a ±42 mT range.
+//
+// The datasheet specifies separate supply ranges of 3.0–3.63 V and 4.5–5.5 V. This model checks
+// only the outer limits, so it does not reject voltages in the gap.
+
+use "@stackup/passives"
+
+part drv5055a2 {
+    symbol "Sensor_Magnetic:DRV5055A2xLPGxQ1"
+    reference U
+    value "DRV5055A2"
+    datasheet "https://www.ti.com/lit/ds/symlink/drv5055.pdf"
+    description "Ratiometric linear Hall effect sensor, 50mV/mT, 3.3V/5V, TO-92"
+    manufacturer "Texas Instruments"
+    order mpn=DRV5055A2QLPGM
+
+    pin VCC power_in
+    pin GND power_in
+    pin OUT output
+
+    package to92 footprint="TO-92_Inline" {
+        pad VCC 1
+        pad GND 2
+        pad OUT 3
+    }
+
+    // Maximum supply current: 10 mA.
+    port vcc type=power {
+        require net.voltage min="3.0V" max="5.5V"
+        add net.draw "10mA"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+
+    // Analog output proportional to the supply voltage, for an ADC input.
+    port out type=analog pin=OUT
+
+    block supply {
+        default
+        place decouple Cvcc node=VCC rail=vcc value="100nF" note="VCC decoupling, close to the pin"
+    }
+}

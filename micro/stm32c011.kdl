@@ -1,0 +1,212 @@
+// @stackup/micro/stm32c011 — STM32C011 in TSSOP-20, with default support circuitry and
+// peripheral pin mappings.
+//
+// The default `supply` block places decoupling and reset filtering. `place stm32c011f6 mcu
+// vdd=V3V3` connects the supply and places components under paths such as `mcu/supply/Cvdd`.
+// Each VDD pad has its own capacitor.
+//
+// The `vdd` power port maps VDD/VSS, specifies the supply range, and provides power to child
+// blocks.
+//
+// Some physical pins have alternate names. Pads 16/17 are PA11/PA12 at reset and PA9/PA10 after
+// a SYSCFG remap; pad 6 is NRST or PF2 depending on an option byte. `also` declares these
+// aliases. Using both aliases independently fails the same pin’s `once` check.
+//
+// Peripheral kinds in the engine define signal lines, relationships, and supported
+// capabilities. This file lists valid pin mappings and `has` capabilities for each peripheral
+// instance. A board’s `connect` must match an instance that satisfies all pin and capability
+// requirements. Firmware details such as AF numbers are not modeled here. The board selects
+// actual pin assignments.
+
+use "@stackup/passives"
+
+part stm32c011f6 {
+    symbol "MCU_ST_STM32C0:STM32C011F6Px"
+    reference U
+    datasheet "https://www.st.com/resource/en/datasheet/stm32c011f6.pdf"
+    description "Arm Cortex-M0+ MCU, 32KB flash, 6KB RAM, 48 MHz, 2.0-3.6V, 18 GPIO, TSSOP20"
+    manufacturer STMicroelectronics
+    order mpn=STM32C011F6P6 mouser="511-STM32C011F6P6"
+
+    // Supply
+
+    // VDD/VDDA share one pad, as do VSS/VSSA. The same capacitor bypasses the digital and
+    // analog supplies.
+    pin VDD power_in
+    pin VSS power_in
+
+    // Power port over VDD/VSS. Current draw depends on the application and is not declared
+    // here.
+    port vdd type=power {
+        require net.voltage min="2.0V" max="3.6V"
+        line rail pin=VDD
+        line gnd pin=VSS
+    }
+
+    // Reset and debug
+
+    // PF2-NRST defaults to reset with an internal pull-up. An option byte enables PF2 GPIO
+    // operation.
+    pin NRST bidirectional once {
+        role reset active=low pull=internal
+        also PF2
+    }
+
+    // PA14 is SWCLK or BOOT0, depending on nBOOT_SEL. Factory defaults boot from flash without
+    // a BOOT0 strap.
+    pin PA13 bidirectional once
+    pin PA14 bidirectional once
+
+    // Application circuit
+    //
+    // Placed by default; disable with `without supply`. Parent pins and ports are in scope:
+    // `VDD@4` means pad 4 of this MCU, and `vdd` is its power port. The decoupling capacitor
+    // anchors beside pad 4. Packages with multiple VDD pads need one explicitly anchored
+    // capacitor per pad.
+
+    block supply {
+        default
+
+        place decouple Cvdd node=VDD@4 rail=vdd value="100nF"
+        place bulk Cbulk node=VDD rail=vdd value="4.7µF" note="VDD bulk capacitance"
+        place filter Cnrst node=NRST rail=vdd value="100nF" \
+            note="NRST glitch filter — the pull-up is internal"
+    }
+
+    // GPIO pins
+    //
+    // Each GPIO is marked `once` to reject conflicting assignments. Unused pins remain
+    // unconnected.
+
+    pin PA0 bidirectional once
+    pin PA1 bidirectional once
+    pin PA2 bidirectional once
+    pin PA3 bidirectional once
+    pin PA4 bidirectional once
+    pin PA5 bidirectional once
+    pin PA6 bidirectional once
+    pin PA7 bidirectional once
+    pin PA8 bidirectional once
+    pin PA11 bidirectional once { also PA9 }
+    pin PA12 bidirectional once { also PA10 }
+    pin PB6 bidirectional once
+    pin PB7 bidirectional once
+    pin PC14 bidirectional once
+    pin PC15 bidirectional once
+
+    package tssop20 footprint="TSSOP-20_4.4x6.5mm_P0.65mm" {
+        pad PB7 1
+        pad PC14 2
+        pad PC15 3
+        pad VDD 4
+        pad VSS 5
+        pad NRST 6
+        pad PA0 7
+        pad PA1 8
+        pad PA2 9
+        pad PA3 10
+        pad PA4 11
+        pad PA5 12
+        pad PA6 13
+        pad PA7 14
+        pad PA8 15
+        pad PA11 16
+        pad PA12 17
+        pad PA13 18
+        pad PA14 19
+        pad PB6 20
+    }
+
+    // Peripherals
+    //
+    // Each row lists the pins available for one signal on one peripheral instance. Aliases
+    // resolve to physical pads: `tx PA9` selects pad 16 through `also`. Mappings came from ST’s
+    // open pin data via the Rust tables, with PB7 as SCL and PB6 as MISO restored.
+    //
+    // Capabilities become signal facts. Timer channels provide `counter` and, where supported,
+    // `dma`; GPIOs provide neither. Types can use `require signal.dma` or compare counters with
+    // `assert "red.counter == green.counter"`.
+    //
+    // DMA flags were entered from memory of RM0490’s DMAMUX list and need verification:
+    // TIM1/TIM3/TIM16/TIM17 channels, but not TIM14. `break` identifies the advanced timer’s
+    // break input. Complementary `chXn` lines imply dead-time support.
+
+    // The debug peripheral has one valid pin mapping, so the normal connection check enforces
+    // its fixed pins.
+    peripheral SWD swd {
+        swdio PA13
+        swclk PA14
+        nrst NRST
+    }
+
+    // All port pins support GPIO. A plain digital connection can use any available compatible
+    // pin.
+    peripheral GPIO gpio {
+        io PA0 PA1 PA2 PA3 PA4 PA5 PA6 PA7 PA8 PA9 PA10 PA11 PA12 PA13 PA14
+        io PB6 PB7 PC14 PC15 PF2
+    }
+
+    peripheral I2C1 i2c {
+        sda PA10 PB7 PC14
+        scl PA9 PB6 PB7
+    }
+
+    peripheral SPI1 spi {
+        sck PA1 PA5 PB6
+        mosi PA2 PA7 PA12 PB6
+        miso PA6 PA11 PB6
+        nss PA4 PA8 PA14
+    }
+
+    peripheral USART1 uart {
+        tx PA0 PA9 PB6 PC14
+        rx PA1 PA8 PA10 PB7
+        rts PA12 PA14 PB6
+        cts PA11 PB6
+    }
+
+    peripheral USART2 uart {
+        tx PA2 PA4 PA8 PA14
+        rx PA3 PA5 PA13 PA14
+        rts PA1 PC14
+        cts PA0 PB7
+    }
+
+    peripheral ADC1 adc {
+        in PA0 PA1 PA2 PA3 PA4 PA5 PA6 PA7 PA8 PA11 PA12 PA13 PA14
+    }
+
+    peripheral TIM1 timer {
+        has break
+        ch1 PA0 PA5 PA8 PA14 { has dma }
+        ch2 PA1 PA9 PB6 { has dma }
+        ch3 PA2 PA10 PB6 { has dma }
+        ch4 PA3 PA11 PB7 PF2 { has dma }
+        ch1n PA3 PA7
+        ch2n PA4 PA8
+        ch3n PA5 PA8
+    }
+
+    peripheral TIM3 timer {
+        ch1 PA6 PB6 PB7 { has dma }
+        ch2 PA7 PB6 PC14 { has dma }
+        ch3 PA8 PB6 PC15 { has dma }
+        ch4 PA8 PB7 { has dma }
+    }
+
+    peripheral TIM14 timer {
+        ch1 PA4 PA7 PA8
+    }
+
+    peripheral TIM16 timer {
+        has break
+        ch1 PA0 PA6 PB7 { has dma }
+        ch1n PA2 PB6
+    }
+
+    peripheral TIM17 timer {
+        has break
+        ch1 PA1 PA7 PC14 { has dma }
+        ch1n PA4 PB7
+    }
+}

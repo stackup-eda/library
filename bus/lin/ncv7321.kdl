@@ -1,0 +1,97 @@
+// @stackup/bus/lin/ncv7321 — onsemi NCV7321 LIN 2.x / SAE J2602 transceiver in SOIC-8, rated
+// for 1–20 kbps. Use it when the node has a separate logic supply; the NCV7428 includes a
+// regulator.
+//
+// There is no logic supply pin. EN, TxD, and RxD support 0–5.5 V. RxD is open-drain, so its
+// external pull-up sets the host logic level. TxD and EN accept 2.0 V as high. The application
+// must provide the RxD pull-up; `open_collector` enables the missing-pull-up check.
+//
+// VBB is rated for 5–27 V operation and 45 V load dump. Receiver thresholds are 40% and 60% of
+// VBB, so the nodes must use a compatible bus supply.
+//
+// EN high selects normal operation: the transmitter is enabled, RxD reports the bus state, and
+// INH connects to VBB. EN low selects sleep: the transmitter is disabled, INH floats, and a bus
+// wake-up current source is enabled. The internal EN pull-down selects sleep if EN is
+// unconnected. Drive EN from the host or tie it to the logic supply for continuous operation. A
+// weak TxD pull-down selects recessive operation when undriven; a 15–50 ms dominant timeout
+// prevents a stuck host from holding the bus low indefinitely.
+//
+// The application supplies the RxD pull-up, master termination (1 kΩ and a diode), and LIN
+// filter capacitor. A slave uses the internal 30 kΩ termination. Size the filter capacitor for
+// the node’s share of the network capacitance budget.
+//
+// This definition uses the D12 ESD-improved grade. KiCad has no matching symbol; the symbol
+// name is retained as netlist metadata.
+
+use "@stackup/passives"
+
+part ncv7321 {
+    symbol "NCV7321:NCV7321D12R2G"
+    reference U
+    datasheet "https://www.onsemi.com/pdf/datasheet/ncv7321-d.pdf"
+    description "LIN 2.x / J2602 transceiver, 1-20 kbps, 5-27 V supply, open-drain RxD, SOIC-8"
+    manufacturer onsemi
+    order mpn=NCV7321D12R2G mouser="863-NCV7321D12R2G"
+
+    pin RxD open_collector
+    pin EN input
+    pin WAKE input
+    pin TxD input
+    pin GND power_in
+    pin LIN bidirectional
+    pin VBB power_in
+    pin INH output
+
+    package soic8 footprint="SOIC-8_3.9x4.9mm_P1.27mm" {
+        pad RxD 1
+        pad EN 2
+        pad WAKE 3
+        pad TxD 4
+        pad GND 5
+        pad LIN 6
+        pad VBB 7
+        pad INH 8
+    }
+
+    // VBB supplies the transceiver and sets its receiver thresholds. No current draw is
+    // declared here: the transceiver uses a few milliamps, while master termination adds a load
+    // defined by the application.
+    port vbb type=power {
+        require net.voltage min="5V" max="27V"
+        line rail pin=VBB
+        line gnd pin=GND
+    }
+
+    // UART interface to the host. RxD sends received LIN data to the host, so it is this port’s
+    // `tx`; TxD accepts host data, so it is `rx`. The UART type’s crossover connects host TX to
+    // TxD and host RX to RxD.
+    port uart type=uart {
+        line tx pin=RxD
+        line rx pin=TxD
+    }
+
+    // LIN bus connection.
+    port lin pin=LIN
+
+    // EN high selects normal operation; low selects sleep. An internal pull-down selects sleep
+    // when unconnected. The 2.0 V high threshold supports a 3.3 V GPIO or a direct connection
+    // to the logic rail.
+    port en type=output pin=EN
+
+    // Local wake input: falling-edge sensitive in sleep mode, with an internal pull-up current
+    // source to VBB. Tie it to VBB if sleep is unused.
+    port wake pin=WAKE
+
+    // INH connects to VBB in normal mode and floats in sleep. It can control an external
+    // regulator or master pull-up. Declare it `nc` if unused.
+    port inh pin=INH
+
+    // Application circuits
+
+    // VBB bypass capacitor. The NCV7321 application diagram gives no value; this uses the
+    // related system-basis chip’s recommendation of more than 100 nF ceramic.
+    block supply {
+        default
+        place bypass Cvbb node=VBB rail=vbb value="100nF"
+    }
+}

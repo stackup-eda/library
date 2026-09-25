@@ -1,0 +1,133 @@
+// @stackup/bus/usb/cp2102n — Silicon Labs CP2102N USB 2.0 full-speed UART bridge in QFN-24,
+// with modem signals and an internal 5 V-to-3.3 V regulator.
+//
+// This definition uses the A02 revision. QFN-24 is pin-compatible with the CP2104.
+//
+// The default circuit powers the bridge from USB: VBUS feeds the regulator, its output supplies
+// VDD/VIO, and external components provide VBUS sensing and the reset pull-up. All pins
+// reference cable ground. In an isolated interface, `vdd` can supply the USB side of the
+// isolator.
+
+use "@stackup/passives"
+use "@stackup/types"
+
+part cp2102n {
+    symbol "Interface_USB:CP2102N-Axx-xQFN24"
+    reference U
+    datasheet "https://www.silabs.com/documents/public/data-sheets/cp2102n-datasheet.pdf"
+    description "USB to UART bridge, USB 2.0 full-speed, integrated 3.3 V regulator, QFN-24"
+    manufacturer "Silicon Labs"
+    order mpn="CP2102N-A02-GQFN24R" mouser="634-CP2102NA02QFN24R"
+
+    pin RI input
+    pin GND power_in
+    pin D+ bidirectional
+    pin D- bidirectional
+    pin VIO power_in
+    pin VDD power_in
+    pin VREGIN power_in
+    pin VBUS input
+    pin RSTB input
+    pin NC no_connect
+    pin GPIO3 bidirectional
+    pin GPIO2 bidirectional
+    pin GPIO1 bidirectional
+    pin GPIO0 bidirectional
+    pin SUSPENDB output
+    pin SUSPEND output
+    pin CTS input
+    pin RTS output
+    pin RXD input
+    pin TXD output
+    pin DSR input
+    pin DTR output
+    pin DCD input
+
+    // Exposed pad 25 must connect to ground.
+    package qfn24 footprint="VQFN-24-1EP_4x4mm_P0.5mm_EP2.45x2.45mm" {
+        pad RI 1
+        pad GND 2
+        pad GND 25
+        pad D+ 3
+        pad D- 4
+        pad VIO 5
+        pad VDD 6
+        pad VREGIN 7
+        pad VBUS 8
+        pad RSTB 9
+        pad NC 10
+        pad NC 16
+        pad GPIO3 11
+        pad GPIO2 12
+        pad GPIO1 13
+        pad GPIO0 14
+        pad SUSPENDB 15
+        pad SUSPEND 17
+        pad CTS 18
+        pad RTS 19
+        pad RXD 20
+        pad TXD 21
+        pad DSR 22
+        pad DTR 23
+        pad DCD 24
+    }
+
+    // USB 5 V input to the internal LDO. The input budget includes external output load plus 15
+    // mA for the bridge: Table 3.2’s normal-operation current at 3 Mbaud and the USB pull-up,
+    // rounded up.
+    port vbus type=power {
+        require net.voltage min="3.6V" max="5.25V"
+        add net.draw "vdd.draw + 15mA"
+        line rail pin=VREGIN
+        line gnd pin=GND
+    }
+
+    // 3.3 V output referenced to cable ground. The 100 mA regulator limit includes the bridge’s
+    // own consumption; only the remainder is available to external loads.
+    port vdd type=power {
+        set net.voltage min="3.0V" max="3.6V"
+        assert "draw <= 85mA" message="CP2102N external load {draw} exceeds 85mA available after the bridge's 15mA consumption"
+        line rail pin=VDD
+        line gnd pin=GND
+    }
+
+    port usb type=usb {
+        line dp pin=D+
+        line dm pin=D-
+    }
+
+    // UART TXD/RXD interface, with optional hardware flow control.
+    port uart type=uart {
+        line tx pin=TXD
+        line rx pin=RXD
+        line rts pin=RTS
+        line cts pin=CTS
+    }
+
+    // Application circuit
+
+    // USB-powered configuration: 4.7 µF + 0.1 µF at the regulator input and output, VIO tied to
+    // VDD, a 1 kΩ reset pull-up (§2.1), and the VBUS sense divider (§2.3). VBUS has an absolute
+    // maximum of VIO + 2.5 V and a high threshold of VIO − 0.6 V. The 22.1 kΩ / 47.5 kΩ divider
+    // scales 5 V to about 3.4 V for VIO = 3.3 V.
+    block bus-powered {
+        default
+
+        place bypass Cregin node=VREGIN rail=vbus value="100nF"
+        place bulk Cregin_bulk node=VREGIN rail=vbus value="4.7µF"
+
+        circuit VIO VDD
+        place bypass Cvdd node=VDD rail=vdd value="100nF"
+        place bulk Cvdd_bulk node=VDD rail=vdd value="4.7µF"
+
+        place pull-up Rrst node=RSTB rail=vdd value="1kΩ" \
+            note="RSTB pull-up — 1 kΩ to VIO, per §2.1"
+        circuit RSTB name="rstb"
+
+        place resistor Rsense_top value="22.1kΩ" intent=divider \
+            note="VBUS sense divider — 5 V onto a VIO-referenced input, per §2.3"
+        place resistor Rsense_bot value="47.5kΩ" intent=divider
+        circuit vbus.rail Rsense_top VBUS Rsense_bot vbus.gnd
+        circuit VBUS name="vbus_sense"
+    }
+}

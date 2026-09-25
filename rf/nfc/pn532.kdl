@@ -1,0 +1,211 @@
+// NXP PN532 NFC controller. The reader block below adds the 27.12 MHz crystal, supplies,
+// SPI straps, receiver bias, and a configurable matching network for an external antenna.
+
+use "@stackup/passives"
+use "@stackup/passive/ferrite"
+use "@stackup/clock/crystal"
+
+part pn532 {
+    symbol "RF_NFC:PN5321A3HN_C1xx"
+    reference U
+    datasheet "https://www.nxp.com/docs/en/nxp/data-sheets/PN532_C1.pdf"
+    description "13.56 MHz NFC controller, HVQFN-40"
+    manufacturer NXP
+    order mpn="PN5321A3HN/C106,55"
+    pin DVSS power_in
+    pin LOADMOD output
+    pin TVSS1 power_in
+    pin TX1 output
+    pin TVDD power_in
+    pin TX2 output
+    pin TVSS2 power_in
+    pin AVDD power_in
+    pin VMID output
+    pin RX input
+    pin AVSS power_in
+    pin AUX1 output
+    pin AUX2 output
+    pin OSCIN input
+    pin OSCOUT output
+    pin I0 passive
+    pin I1 passive
+    pin TESTEN passive
+    pin P35 bidirectional
+    pin NC no_connect symbol="N.C."
+    pin PVDD power_in
+    pin P30_UART_RX bidirectional symbol="P30/UART_RX"
+    pin P70_IRQ bidirectional
+    pin RSTOUT output symbol="~{RSTOUT}"
+    pin NSS_P50_SCL_HSU_RX bidirectional symbol="NSS/P50_SCL/HSU_RX"
+    pin MOSI_SDA_HSU_TX bidirectional symbol="MOSI/SDA/HSU_TX"
+    pin MISO_P71 bidirectional symbol="MISO/P71"
+    pin SCK_P72 bidirectional symbol="SCK/P72"
+    pin P31_UART_TX bidirectional symbol="P31/UART_TX"
+    pin P32_INT0 bidirectional
+    pin P33_INT1 bidirectional
+    pin SIC_CLK_P34 bidirectional symbol="SIC_CLK/P34"
+    pin SIGOUT output
+    pin SIGIN input
+    pin SVDD output
+    pin RSTPD input symbol="~{RSTPD}"
+    pin DVDD power_out
+    pin VBAT power_in
+    package hvqfn40 footprint="HVQFN-40-1EP_6x6mm_P0.5mm_EP4.1x4.1mm" {
+        pad DVSS 1
+        pad LOADMOD 2
+        pad TVSS1 3
+        pad TX1 4
+        pad TVDD 5
+        pad TX2 6
+        pad TVSS2 7
+        pad AVDD 8
+        pad VMID 9
+        pad RX 10
+        pad AVSS 11
+        pad AUX1 12
+        pad AUX2 13
+        pad OSCIN 14
+        pad OSCOUT 15
+        pad I0 16
+        pad I1 17
+        pad TESTEN 18
+        pad P35 19
+        pad NC 20
+        pad NC 21
+        pad NC 22
+        pad PVDD 23
+        pad P30_UART_RX 24
+        pad P70_IRQ 25
+        pad RSTOUT 26
+        pad NSS_P50_SCL_HSU_RX 27
+        pad MOSI_SDA_HSU_TX 28
+        pad MISO_P71 29
+        pad SCK_P72 30
+        pad P31_UART_TX 31
+        pad P32_INT0 32
+        pad P33_INT1 33
+        pad SIC_CLK_P34 34
+        pad SIGOUT 35
+        pad SIGIN 36
+        pad SVDD 37
+        pad RSTPD 38
+        pad DVDD 39
+        pad VBAT 40
+        pad AVSS 41
+    }
+    port vbat type=power {
+        require net.voltage min="2.7V" max="5.5V"
+        add net.draw "200mA"
+        line rail pin=VBAT
+        line gnd pin=DVSS
+    }
+    port pvdd type=power {
+        require net.voltage min="1.6V" max="3.6V"
+        line rail pin=PVDD
+        line gnd pin=DVSS
+    }
+    port dvdd type=power {
+        set net.voltage "3V"
+        line rail pin=DVDD
+        line gnd pin=DVSS
+    }
+    port spi type=spi {
+        line sck pin=SCK_P72
+        line mosi pin=MOSI_SDA_HSU_TX
+        line miso pin=MISO_P71
+    }
+    port cs pin=NSS_P50_SCL_HSU_RX
+    port irq pin=P70_IRQ
+    port reset pin=RSTPD
+}
+
+// PN532 reader with SPI host interface and an external differential antenna. Matching values
+// are NXP's starting values for a roughly 1.83 µH loop; tune them for the actual board antenna.
+// The 50 V C0G requirement for antenna capacitors and 5% L0 tolerance are purchase constraints.
+block pn532-reader {
+    param l0 inductance default="560nH"
+    param c0 capacitance default="220pF"
+    param c1 capacitance default="22pF"
+    param c2 capacitance default="100pF"
+    param rq resistance default="1.5Ω"
+
+    port vbat type=power
+    port host type=power
+    port spi type=spi
+    port cs
+    port irq
+    port reset
+    port ant1
+    port ant2
+
+    place pn532 as=self
+    circuit vbat.rail self.VBAT
+    circuit vbat.gnd self.DVSS self.TVSS1 self.TVSS2 self.AVSS self.TESTEN
+    circuit host.rail self.PVDD self.I1
+    circuit host.gnd vbat.gnd
+    circuit self.I0 vbat.gnd
+    circuit irq self.P70_IRQ
+    circuit reset self.RSTPD
+    circuit spi.sck self.SCK_P72
+    circuit spi.mosi self.MOSI_SDA_HSU_TX
+    circuit spi.miso self.MISO_P71
+    circuit cs self.NSS_P50_SCL_HSU_RX
+
+    // Keep the regulator output separate from the host rail. Beads isolate the analog and
+    // transmitter supplies from its digital supply.
+    place bypass Cvbat node=self.VBAT rail=vbat value="100nF"
+    place bulk Cvbat-bulk node=self.VBAT rail=vbat value="10µF"
+    place bypass Cdvdd node=self.DVDD rail=vbat value="100nF"
+    place ferrite-bead FBtvdd value="600Ω@100MHz"
+    place ferrite-bead FBavdd value="600Ω@100MHz"
+    circuit self.DVDD FBtvdd self.TVDD
+    circuit self.DVDD FBavdd self.AVDD
+    place bypass Ctvdd node=self.TVDD rail=vbat value="100nF"
+    place bulk Ctvdd-bulk node=self.TVDD rail=vbat value="10µF"
+    place bypass Cavdd node=self.AVDD rail=vbat value="100nF"
+    place bulk Cavdd-bulk node=self.AVDD rail=vbat value="10µF"
+    place bypass Cpvdd node=self.PVDD rail=host value="100nF"
+
+    // A 27.12 MHz crystal with two 15 pF load capacitors and a grounded lid.
+    place crystal-3225 X value="27.12MHz 10pF"
+    circuit self.OSCIN X.xtal1
+    circuit self.OSCOUT X.xtal2
+    circuit X.ground vbat.gnd
+    place capacitor Cx1 value="15pF" intent=timing
+    place capacitor Cx2 value="15pF" intent=timing
+    circuit self.OSCIN Cx1 vbat.gnd
+    circuit self.OSCOUT Cx2 vbat.gnd
+
+    // The two matching branches are symmetric: TX → 560 nH → shunt C0 → series C1 →
+    // shunt C2 → 1.5 Ω → antenna. Antenna capacitors need C0G dielectric and 50 V rating.
+    place inductor L1 value=l0 intent=filter footprint="L_0603_1608Metric" note="EMC filter, 5% inductor"
+    place inductor L2 value=l0 intent=filter footprint="L_0603_1608Metric" note="EMC filter, 5% inductor"
+    place capacitor C01 value=c0 intent=filter note="C0G, 50 V antenna filter"
+    place capacitor C02 value=c0 intent=filter note="C0G, 50 V antenna filter"
+    place capacitor C11 value=c1 intent=filter note="C0G, 50 V series matching"
+    place capacitor C12 value=c1 intent=filter note="C0G, 50 V series matching"
+    place capacitor C21 value=c2 intent=filter note="C0G, 50 V parallel matching"
+    place capacitor C22 value=c2 intent=filter note="C0G, 50 V parallel matching"
+    place resistor Rq1 value=rq intent=series note="antenna Q damping"
+    place resistor Rq2 value=rq intent=series note="antenna Q damping"
+    circuit self.TX1 L1 C11 Rq1 ant1
+    circuit self.TX2 L2 C12 Rq2 ant2
+    circuit L1.b C01 vbat.gnd
+    circuit L2.b C02 vbat.gnd
+    circuit C11.b C21 vbat.gnd
+    circuit C12.b C22 vbat.gnd
+
+    // Receive from TX2 after its EMC inductor, before its matching capacitor.
+    place resistor Rrx value="1.8kΩ" intent=series
+    place capacitor Crx value="1nF" intent=filter note="C0G, 50 V receiver coupling"
+    place resistor Rvmid value="1kΩ" intent=series
+    circuit L2.b Rrx Crx self.RX
+    circuit self.RX Rvmid self.VMID
+    place bypass Cvmid node=self.VMID rail=vbat value="100nF"
+
+    place pull-up Rrst node=self.RSTPD rail=host value="10kΩ"
+    place pull-up Rirq node=self.P70_IRQ rail=host value="10kΩ"
+    nc self.LOADMOD self.AUX1 self.AUX2 self.P35 self.NC self.P30_UART_RX \
+        self.RSTOUT self.P31_UART_TX self.P32_INT0 self.P33_INT1 self.SIC_CLK_P34 \
+        self.SIGOUT self.SIGIN self.SVDD
+}

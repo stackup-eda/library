@@ -1,0 +1,80 @@
+// Raspberry Pi 40-pin GPIO header on a HAT. Positions with the same power name share one electrical pin.
+
+part pi-header {
+    symbol "RPi_Hat:RPi_GPIO"
+    reference J
+    description "Raspberry Pi 40-pin GPIO header on a HAT"
+    pin P3V3 power_in symbol="3.3V"
+    pin P5V power_in symbol="5V"
+    pin GND power_in
+    pin BCM0_ID_SD bidirectional
+    pin BCM1_ID_SC bidirectional
+    pin BCM2_SDA bidirectional
+    pin BCM3_SCL bidirectional
+    pin BCM4_GPCLK0 bidirectional
+    pin BCM5 bidirectional
+    pin BCM6 bidirectional
+    pin BCM7_CE1 bidirectional
+    pin BCM8_CE0 bidirectional
+    pin BCM9_MISO bidirectional
+    pin BCM10_MOSI bidirectional
+    pin BCM11_SCLK bidirectional
+    pin BCM12_PWM0 bidirectional
+    pin BCM13_PWM1 bidirectional
+    pin BCM14_TXD bidirectional
+    pin BCM15_RXD bidirectional
+    pin BCM16 bidirectional
+    pin BCM17 bidirectional
+    pin BCM18_PCM_C bidirectional
+    pin BCM19_MISO_PCM_FS bidirectional
+    pin BCM20_MOSI_PCM_DI bidirectional
+    pin BCM21_SCLK_PCM_DO bidirectional
+    pin BCM22 bidirectional
+    pin BCM23 bidirectional
+    pin BCM24 bidirectional
+    pin BCM25 bidirectional
+    pin BCM26 bidirectional
+    pin BCM27 bidirectional
+    package standard footprint="stackup:RPI_Hat_B+" {
+        pad P3V3 1
+        pad P5V 2
+        pad BCM2_SDA 3
+        pad P5V 4
+        pad BCM3_SCL 5
+        pad GND 6
+        pad BCM4_GPCLK0 7
+        pad BCM14_TXD 8
+        pad GND 9
+        pad BCM15_RXD 10
+        pad BCM17 11
+        pad BCM18_PCM_C 12
+        pad BCM27 13
+        pad GND 14
+        pad BCM22 15
+        pad BCM23 16
+        pad P3V3 17
+        pad BCM24 18
+        pad BCM10_MOSI 19
+        pad GND 20
+        pad BCM9_MISO 21
+        pad BCM25 22
+        pad BCM11_SCLK 23
+        pad BCM8_CE0 24
+        pad GND 25
+        pad BCM7_CE1 26
+        pad BCM0_ID_SD 27
+        pad BCM1_ID_SC 28
+        pad BCM5 29
+        pad GND 30
+        pad BCM6 31
+        pad BCM12_PWM0 32
+        pad BCM13_PWM1 33
+        pad GND 34
+        pad BCM19_MISO_PCM_FS 35
+        pad BCM16 36
+        pad BCM26 37
+        pad BCM20_MOSI_PCM_DI 38
+        pad GND 39
+        pad BCM21_SCLK_PCM_DO 40
+    }
+}

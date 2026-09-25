@@ -1,0 +1,98 @@
+// @stackup/power/buck/tlv62569 — TI TLV62569, a 2 A synchronous buck regulator in SOT-23-5.
+// Input is 2.5–5.5 V; a feedback divider sets output from 0.6–5.5 V. Switching frequency is 1.5
+// MHz. The application block adds the external converter components.
+//
+// EN must not float (pin table and §7.4.1). Its requirement checks for a defined resting level;
+// an open-drain driver alone is insufficient without a pull resistor.
+//
+// The output voltage is calculated from the two resistor parameters, so the power model agrees
+// with the selected divider values.
+
+use "@stackup/passives"
+
+part tlv62569 {
+    symbol "Regulator_Switching:TLV62569DBV"
+    reference U
+    value "TLV62569"
+    datasheet "https://www.ti.com/lit/ds/symlink/tlv62569.pdf"
+    description "2A synchronous step-down converter, 2.5-5.5V input, adjustable 0.6-5.5V output, SOT-23-5"
+    manufacturer "Texas Instruments"
+    order mpn=TLV62569DBVR lcsc=C141836
+
+    // EN high enables the converter; low shuts it down. The high threshold is 0.95–1.2 V.
+    // Provide a defined resting level to prevent unintended operation.
+    pin EN input required {
+        role enable active=high pull=none
+        require net.rest not=float
+    }
+    pin GND power_in
+    pin SW passive
+    pin VIN power_in
+    pin FB input required
+
+    package sot23-5 footprint="SOT-23-5" {
+        pad EN 1
+        pad GND 2
+        pad SW 3
+        pad VIN 4
+        pad FB 5
+    }
+
+    port vin type=power {
+        require net.voltage min="2.5V" max="5.5V"
+        line rail pin=VIN
+        line gnd pin=GND
+    }
+    port en pin=EN
+    port sw pin=SW
+    port fb pin=FB
+}
+
+// Buck converter with inductor, input/output capacitors, and feedback divider. Ports `in` and
+// `out` expose the input and regulated output.
+block tlv62569-buck {
+    param inductance inductance default="2.2µH"
+    param cin capacitance default="10µF"
+    param cout capacitance default="22µF"
+    param rtop resistance default="255kΩ"
+    param rbottom resistance default="56.2kΩ"
+    // Efficiency used for the worst-case input-current estimate at minimum input voltage.
+    param efficiency ratio default="85%"
+
+    // VOUT = VFB × (1 + Rtop / Rbottom), VFB = 0.6 V.
+    derive vout "0.6V * (1 + rtop / rbottom)"
+    derive input "out.draw * vout / (efficiency * in.voltage.min)"
+
+    port in type=power {
+        require net.voltage min="2.5V" max="5.5V"
+        add net.draw input
+    }
+    port out type=power {
+        set net.voltage vout
+        assert "draw <= 2A" message="the TLV62569 is rated for 2A; its loads draw {draw}"
+    }
+    // Enable terminal for an external rail, switch, or GPIO connection.
+    port en
+
+    place tlv62569 as=self
+    circuit in.rail self.vin.rail
+    circuit in.gnd self.vin.gnd out.gnd
+    circuit en self.en
+
+    // Inductor recommended with 22 µF for outputs of at least 1.8 V (Table 4). Default package
+    // is Bourns SRN4018, 4 × 4 mm, with 3 A saturation current.
+    place inductor L value=inductance intent=filter footprint="L_Bourns-SRN4018" \
+        note="buck inductor — datasheet value for VOUT >= 1.8 V with a 22 µF output"
+    circuit self.sw L out.rail
+
+    // 10 µF input and 22 µF output capacitors, with packages selected for those values.
+    place bulk Cin node=self.vin.rail rail=in value=cin footprint="C_0805_2012Metric" \
+        note="input capacitor, at VIN"
+    place bulk Cout node=out.rail rail=out value=cout footprint="C_0805_2012Metric" \
+        note="output capacitor — datasheet specifies 22 µF with this inductor"
+
+    // Feedback divider from output through FB to ground.
+    place resistor Rtop value=rtop intent=divider note="feedback divider, top — sets {vout}"
+    place resistor Rbottom value=rbottom intent=divider note="feedback divider, bottom"
+    circuit out.rail Rtop self.fb Rbottom out.gnd
+}

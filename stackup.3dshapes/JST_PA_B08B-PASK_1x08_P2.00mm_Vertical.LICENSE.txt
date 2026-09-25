@@ -1,0 +1,9 @@
+JST_PA_B08B-PASK_1x08_P2.00mm_Vertical.step — JST B08B-PASK, PA series 8-circuit header, 2.0 mm pitch,
+top entry, through-hole, without boss.
+
+Source: SnapMagic, download 56544 (B08B-PASK--3DModel-STEP-56544.STEP), 2026-09-17.
+Drawn in SolidWorks 2021, exported as STEP AP214. The file is unmodified.
+
+Licence: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0),
+https://creativecommons.org/licenses/by-sa/4.0/ — SnapMagic's terms for its model artifacts.
+Attribution: model by SnapMagic (https://www.snapmagic.com/).

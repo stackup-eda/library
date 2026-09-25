@@ -1,0 +1,98 @@
+// @stackup/bus/lin/ncv7428 — onsemi NCV7428 LIN 2.2 transceiver with a 70 mA LDO in SOIC-8.
+//
+// The regulator can supply a small MCU and its support circuitry directly from the bus supply.
+// Keep the total load within 70 mA.
+//
+// All logic signals reference VOUT: RxD is push-pull, TxD and EN have pulls to VOUT, and RSTN
+// is open-drain with a pull-up to VOUT. This definition uses the 3.3 V version.
+
+use "@stackup/passives"
+
+// NCV7428D13R2G: 3.3 V regulator and normal LIN slew rate.
+part ncv7428d13 {
+    symbol "NCV7428:NCV7428D13R2G"   // no standard KiCad symbol; symbol correspondence is not checked
+    reference U
+    datasheet "https://www.onsemi.com/pdf/datasheet/ncv7428-d.pdf"
+    description "LIN 2.2 system basis chip — transceiver with 3.3V 70mA LDO, SOIC-8"
+    manufacturer onsemi
+    order mpn=NCV7428D13R2G mouser="863-NCV7428D13R2G"
+
+    pin VS power_in
+    pin EN input required
+    pin GND power_in
+    pin LIN bidirectional
+    pin RxD output
+    pin TxD input
+    pin RSTN open_collector
+    pin VOUT power_out
+
+    package soic8 footprint="SOIC-8_3.9x4.9mm_P1.27mm" {
+        pad VS 1
+        pad EN 2
+        pad GND 3
+        pad LIN 4
+        pad RxD 5
+        pad TxD 6
+        pad RSTN 7
+        pad VOUT 8
+    }
+
+    // Input range from Table 4. The part operates down to 4 V, but bus levels are guaranteed
+    // only above 5.5 V. Input current includes the regulator load and quiescent current.
+    port vs type=power {
+        require net.voltage min="5.5V" max="28V"
+        add net.draw "vout.draw + 1mA"
+        line rail pin=VS
+        line gnd pin=GND
+    }
+
+    // 3.3 V, 70 mA regulator output. Input and output share GND.
+    port vout type=power {
+        set net.voltage "3.3V" tolerance="3%"
+        assert "draw <= 70mA" message="NCV7428 regulator load {draw} exceeds its 70mA rating"
+        line rail pin=VOUT
+        line gnd pin=GND
+    }
+
+    // UART interface to the MCU. RxD sends received LIN data, so it is this port’s `tx`; TxD
+    // accepts MCU data, so it is `rx`. The UART crossover connects MCU TX to TxD.
+    port uart type=uart {
+        line tx pin=RxD
+        line rx pin=TxD
+    }
+
+    // LIN bus pin. The supply block includes its filter capacitor.
+    port lin pin=LIN
+
+    // Open-drain reset output with a pull-up. It stays low while VOUT is below threshold and
+    // for a few milliseconds afterward, and can connect directly to MCU reset.
+    port reset pin=RSTN
+
+    // Active-high transceiver enable. The default block ties it high.
+    port en type=output pin=EN
+
+    // Application circuits
+
+    // Datasheet support components: CVS >100 nF ceramic (Table 2); CVOUT ≥1.8 µF, typically 10
+    // µF (Table 6); CLIN_S 100–220 pF for a slave (EMC specifications require at least 82 pF,
+    // note 6); and a nominal 10 kΩ RSTN pull-up. The internal 100 kΩ pull-up is too weak for a
+    // shared MCU reset filter and debug header.
+    block supply {
+        default
+        place bypass Cvs node=VS rail=vs value="100nF"
+        place bulk Cvout node=VOUT rail=vout value="10µF" \
+            note="regulator output stability and bulk capacitance"
+        place filter Clin node=LIN rail=vs value="220pF" \
+            note="LIN slave filter capacitor; contributes to total bus capacitance"
+        place pull-up Rrstn node=RSTN rail=vout value="10kΩ" \
+            note="RSTN pull-up for the shared reset circuit; supplements the internal 100k"
+    }
+
+    // Tie EN to VOUT for continuous operation. Its internal pull-down otherwise selects Standby
+    // after reset: VOUT remains on, but the receiver reports only wake-up pulses. To control
+    // Standby or Sleep from firmware, place `without always-active` and drive `en`.
+    block always-active {
+        default
+        circuit EN vout.rail
+    }
+}

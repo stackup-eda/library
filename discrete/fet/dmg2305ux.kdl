@@ -1,0 +1,27 @@
+// @stackup/discrete/fet/dmg2305ux — Diodes DMG2305UX, a −20 V / −4.2 A P-channel MOSFET in
+// SOT-23 for high-side switching on a single-cell supply. Rds(on) is 52 mΩ at Vgs = −4.5 V; it
+// also supports −2.5 V gate drive. Vgs(th) is −0.5 to −0.9 V; the gate rating is ±8 V.
+
+part dmg2305ux {
+    symbol "Transistor_FET:Q_PMOS_GSD"
+    reference Q
+    value "DMG2305UX"
+    datasheet "https://www.diodes.com/assets/Datasheets/DMG2305UX.pdf"
+    description "-4.2A Id, -20V Vds, P-Channel MOSFET, 52mOhm at -4.5V, SOT-23"
+    manufacturer "Diodes Incorporated"
+    order mpn="DMG2305UX-13" lcsc=C144153
+
+    pin GATE input symbol=G
+    pin SOURCE passive symbol=S
+    pin DRAIN passive symbol=D
+
+    package sot23 footprint="SOT-23" {
+        pad GATE 1
+        pad SOURCE 2
+        pad DRAIN 3
+    }
+
+    port gate pin=GATE
+    port source pin=SOURCE
+    port drain pin=DRAIN
+}

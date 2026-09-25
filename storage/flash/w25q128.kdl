@@ -1,0 +1,54 @@
+// @stackup/storage/flash/w25q128 — Winbond W25Q128JV, 128 Mbit (16 MiB) NOR flash in SOIC-8.
+// The four data pins support standard, dual, and quad SPI. RP2350 uses this as program flash.
+
+use "@stackup/passives"
+use "@stackup/types"
+
+part w25q128 {
+    symbol "Memory_Flash:W25Q128JVS"
+    reference U
+    datasheet "https://www.winbond.com/resource-files/w25q128jv_dtr%20revc%2003272018%20plus.pdf"
+    description "128 Mbit serial NOR flash, 2.7–3.6 V, SOIC-8"
+    manufacturer Winbond
+
+    pin CS input required symbol="~{CS}"
+    pin IO1 bidirectional symbol="DO/IO_{1}"
+    pin IO2 bidirectional symbol="~{WP}/IO_{2}"
+    pin GND power_in
+    pin IO0 bidirectional symbol="DI/IO_{0}"
+    pin CLK input
+    pin IO3 bidirectional symbol="~{HOLD}/~{RESET}/IO_{3}"
+    pin VCC power_in
+
+    package soic8 footprint="SOIC-8_5.23x5.23mm_P1.27mm" {
+        pad CS 1
+        pad IO1 2
+        pad IO2 3
+        pad GND 4
+        pad IO0 5
+        pad CLK 6
+        pad IO3 7
+        pad VCC 8
+    }
+
+    port vdd type=power {
+        require net.voltage min="2.7V" max="3.6V"
+        add net.draw "25mA"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+
+    port qspi type=qspi {
+        line sck pin=CLK
+        line cs pin=CS
+        line io0 pin=IO0
+        line io1 pin=IO1
+        line io2 pin=IO2
+        line io3 pin=IO3
+    }
+
+    block supply {
+        default
+        place decouple Cvcc node=VCC rail=vdd value="100nF"
+    }
+}

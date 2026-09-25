@@ -1,0 +1,83 @@
+// @stackup/discrete/fet/dmp3013 — Diodes DMP3013SFV, a −30 V / −12 A P-channel MOSFET in
+// PowerDI3333-8, with 9.5 mΩ on-resistance. Includes a soft-start load-switch block.
+//
+// The block places the FET `as=self`; its gate resistors and capacitor are children of that
+// placement. The output voltage follows the input, and output load contributes to the input
+// current budget. Both power ports share a return, connected inside the block because the FET
+// itself has no ground pin.
+
+use "@stackup/passives"
+
+part dmp3013 {
+    symbol "Transistor_FET:DMP3013SFV"
+    reference Q
+    datasheet "https://www.diodes.com/assets/Datasheets/DMP3013SFV.pdf"
+    description "-12A Id, -30V Vds, P-Channel Power MOSFET, 9.5mOhm Ron, 33.7nC Qg (typ), PowerDI3333-8"
+    manufacturer "Diodes Incorporated"
+
+    pin SOURCE passive
+    pin GATE passive
+    pin DRAIN passive
+
+    // Three pads connect to the source.
+    package powerdi3333 footprint="Diodes_PowerDI3333-8" {
+        pad SOURCE 1
+        pad SOURCE 2
+        pad SOURCE 3
+        pad GATE 4
+        pad DRAIN 5
+    }
+
+    port source pin=SOURCE
+    port gate pin=GATE
+    port drain pin=DRAIN
+}
+
+// High-side load switch with soft start. The source connects to the input and the drain to the
+// output. A gate-to-source pull-up keeps it off. An open-drain driver on `gate-drive` pulls the
+// gate low through a series resistor to turn it on. The gate capacitor slows the transitions to
+// about 5 ms on and 50 ms off, limiting inrush.
+//
+// The gate rating is ±25 V. Pulling the gate to ground applies the full input voltage across
+// gate and source. This block includes no gate clamp, so an assertion limits the input voltage.
+block high-side-switch {
+    param pullup resistance default="49.9kΩ"
+    param series resistance default="5.1kΩ"
+    param softstart capacitance default="1µF"
+    param vgs voltage default="25V"
+
+    // Input supply, limited below the FET’s 30 V rating. Output load contributes directly to
+    // input current.
+    port in type=power {
+        require net.voltage min="1V" max="28V"
+        add net.draw "out.draw"
+    }
+    // Switched output, modeled at the input voltage.
+    port out type=power {
+        set net.voltage "in.voltage"
+    }
+    // Control terminal before the series gate resistor. Pull low with an open-drain output to
+    // enable the switch.
+    port gate-drive
+
+    assert "in.voltage.max <= vgs" \
+        message="enabled switch Vgs reaches {in.voltage.max}, exceeding the {vgs} gate limit"
+
+    place dmp3013 as=self
+    circuit in.rail self.source
+    circuit self.drain out.rail
+    circuit in.gnd out.gnd
+
+    place pull-up Rpull node=self.gate rail=in value=pullup \
+        note="gate pull-up — switch off by default"
+    // Use an 0805 X7R capacitor for 1 µF at this voltage. The default filter package is too
+    // small. This is a soft-start filter, so precise timing is unnecessary.
+    place capacitor Css value=softstart intent=filter footprint="C_0805_2012Metric" \
+        note="soft-start — ramps the output to limit inrush"
+    circuit self.gate Css in.rail
+
+    place resistor Rgate value=series intent=series note="gate-drive series resistor"
+    circuit gate-drive Rgate self.gate
+    // Name the gate node for debugging the switch state.
+    circuit self.gate name="GATE"
+}

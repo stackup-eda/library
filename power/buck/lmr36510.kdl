@@ -1,0 +1,88 @@
+// @stackup/power/buck/lmr36510 — TI 4.2–65 V, 1 A synchronous buck.
+// The 22 µH inductor, capacitors, bootstrap capacitor, and divider follow the
+// datasheet's application circuit. Keep the switching loop compact on the PCB.
+
+use "@stackup/passives"
+
+part lmr36510 {
+    symbol "Regulator_Switching:LMR36510ADDA"
+    reference U
+    datasheet "http://www.ti.com/lit/ds/symlink/lmr36510.pdf"
+    description "4.2-65V, 1A adjustable synchronous buck, HSOP-8"
+    manufacturer "Texas Instruments"
+
+    param vout voltage default="5V"
+    param enable-above voltage default="0V"
+    derive rtop "20kΩ * (vout / 1V - 1)"
+    derive rentop "10kΩ * (enable-above / 1.2V - 1)"
+    derive input "out.draw * out.voltage / (0.9 * in.voltage.min)"
+
+    pin PGND power_in
+    pin VIN power_in
+    pin EN input required
+    pin PG open_collector
+    pin FB input required
+    pin VCC power_out
+    pin BOOT input
+    pin SW output
+    pin PAD power_in
+    package hsop8 footprint="Package_SO:Texas_HTSOP-8-1EP_3.9x4.9mm_P1.27mm_EP2.95x4.9mm_Mask2.4x3.1mm_ThermalVias" {
+        pad PGND 1
+        pad VIN 2
+        pad EN 3
+        pad PG 4
+        pad FB 5
+        pad VCC 6
+        pad BOOT 7
+        pad SW 8
+        pad PAD 9
+    }
+    port in type=power {
+        require net.voltage min="4.2V" max="65V"
+        add net.draw input
+        line rail pin=VIN
+        line gnd pin=PGND
+    }
+    port out type=power {
+        set net.voltage vout
+        assert "draw <= 1A" message="LMR36510 output load {draw} exceeds 1A"
+        line rail
+        line gnd
+    }
+    port pg pin=PG
+
+    block power-stage {
+        default
+        place inductor L value="22µH" footprint="L_Bourns-SRN6045TA" intent=filter
+        circuit SW L out.rail
+        circuit PAD PGND
+        place bulk Cin node=VIN rail=in value="2.2µF" footprint="C_1210_3225Metric" \
+            note="100V-rated input ceramic"
+        place bypass Chf node=VIN rail=in value="220nF" footprint="C_0805_2012Metric" \
+            note="100V-rated high-frequency input bypass"
+        place bypass Cout-hf node=out.rail rail=out value="100nF"
+        place bulk Cout1 node=out.rail rail=out value="22µF" footprint="C_1210_3225Metric" \
+            note="25V-rated output reservoir"
+        place bulk Cout2 node=out.rail rail=out value="22µF" footprint="C_1210_3225Metric" \
+            note="25V-rated output reservoir"
+        place bypass Cvcc node=VCC rail=in value="1µF"
+        place capacitor Cboot value="100nF" intent=filter
+        circuit BOOT Cboot SW
+    }
+    block feedback {
+        default
+        place resistor Rtop value=rtop intent=divider
+        place resistor Rbottom value="20kΩ" intent=divider
+        circuit out.rail Rtop FB Rbottom out.gnd
+    }
+    block always-on {
+        when "enable-above == 0V"
+        circuit EN VIN
+    }
+    block uvlo {
+        when "enable-above > 0V"
+        place resistor Ren-top value=rentop intent=divider
+        place resistor Ren-bottom value="10kΩ" intent=divider
+        circuit VIN Ren-top EN Ren-bottom PGND
+    }
+}

@@ -1,0 +1,68 @@
+// @stackup/sensor/temp/tmp102 — TI's TMP102, a digital temperature sensor on I²C.
+
+use "@stackup/passives"
+
+// TMP102 in SOT-563. The address parameter selects the ADD0 strap and determines the I²C
+// address claim. Pinout and ratings were entered from memory of SBOS397 and still need
+// datasheet verification.
+part tmp102 {
+    symbol "Sensor_Temperature:TMP102xxDRL"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/tmp102.pdf"
+
+    param add0 strap default=gnd   // gnd | vplus | sda | scl
+
+    pin V+ power_in
+    pin GND power_in
+    pin SDA bidirectional
+    pin SCL input
+    pin ADD0 input required
+    pin ALERT open_collector
+
+    package sot563 footprint="Package_TO_SOT_SMD:SOT-563" {
+        pad SCL 1
+        pad GND 2
+        pad ALERT 3
+        pad ADD0 4
+        pad V+ 5
+        pad SDA 6
+    }
+
+    port vdd type=power {
+        require net.voltage min="1.4V" max="3.6V"
+        add net.draw "10µA"
+        line rail pin=V+
+        line gnd pin=GND
+    }
+
+    derive address "match(add0, gnd: 0x48, vplus: 0x49, sda: 0x4A, scl: 0x4B)"
+
+    port i2c type=i2c {
+        claim signal.address address
+        line sda pin=SDA
+        line scl pin=SCL
+    }
+
+    block supply {
+        default
+        place decouple Cin node=V+ rail=vdd value="100nF"
+    }
+
+    // Place the strap block matching the selected address.
+    block add0-gnd {
+        when "add0 == gnd"
+        circuit ADD0 vdd.gnd
+    }
+    block add0-vplus {
+        when "add0 == vplus"
+        circuit ADD0 vdd.rail
+    }
+    block add0-sda {
+        when "add0 == sda"
+        circuit ADD0 SDA
+    }
+    block add0-scl {
+        when "add0 == scl"
+        circuit ADD0 SCL
+    }
+}

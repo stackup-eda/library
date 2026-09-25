@@ -1,0 +1,367 @@
+// @stackup/micro/stm32c092 — STM32C092 in LQFP-32 (STM32C092KBT6) and LQFP-48 (STM32C092CBT6).
+// A 48 MHz C0 MCU without a PLL, with one supply and Bosch M_CAN FDCAN. Both packages share
+// digital/analog supply pins and use one bypass capacitor, bulk capacitance, and a reset
+// filter.
+//
+// One pin table covers both packages. Each package maps its bonded pins, and the checker
+// rejects pins unavailable in the selected package. LQFP-48 adds sixteen GPIOs, VREF+, and
+// dedicated HSE pins. Symbol, order number, and package description are package-specific;
+// reference prefix, datasheet, and manufacturer are shared. LQFP-32 is the default; select the
+// other with `package=lqfp48`.
+//
+// - PC14/PC15 support HSE or LSE. Below 48 pins, HSE is permanently remapped there. LQFP-48
+// adds dedicated PF0/PF1 HSE pins. The related C031 has a remapped-HSE erratum; C09x errata
+// ES0625 Rev 1 do not list it. Without a crystal, these pins can be GPIO.
+// - PA14 is SWCLK or BOOT0, controlled by nBOOT_SEL. Factory defaults boot from flash, so no
+// strap is required here.
+// - PF2-NRST defaults to reset and can be configured as GPIO.
+//
+// The ROM CAN bootloader uses PD0/PD1 on LQFP-48 and PB0/PB1 on smaller packages.
+//
+// Peripheral mappings came from the Rust tables based on ST’s STM32C091xx_gpio_v1_0 data,
+// shared by C09x. One table covers both packages. Restored mappings include PB7 as I2C1 SCL and
+// TIM16 ch1, and PB6 as SPI1 MISO and SCK. DMA flags were entered from memory of RM0490 and
+// still need checking against the C092 request table: TIM1/TIM2/TIM3/TIM15/TIM16/TIM17
+// channels, but not TIM14.
+
+use "@stackup/passives"
+
+part stm32c092 {
+    reference U
+    datasheet "https://www.st.com/resource/en/datasheet/stm32c092kb.pdf"
+    description "Arm Cortex-M0+ MCU with CAN FD, 128KB flash, 30KB RAM, 48 MHz, 2.0-3.6V"
+    manufacturer STMicroelectronics
+
+    // Supply
+
+    pin VDD power_in
+    pin VSS power_in
+
+    // VREF+ is exposed in LQFP-48. LQFP-32 connects it internally to VDDA, which is tied to
+    // VDD.
+    pin VREF+ input
+
+    // Current depends on firmware and is not declared here. Supply checks report the calculated
+    // load as a lower bound.
+    port vdd type=power {
+        require net.voltage min="2.0V" max="3.6V"
+        line rail pin=VDD
+        line gnd pin=VSS
+    }
+
+    // GPIO pins
+    //
+    // `once` rejects conflicting pin assignments, including reset. The selected package
+    // determines which pins are available.
+
+    // The internal pull-up releases reset. A net resting low would keep the MCU in reset and
+    // fails the requirement.
+    pin PF2 bidirectional once {
+        role reset active=low pull=internal
+        require net.rest not=low
+    }
+    pin PA0 bidirectional once
+    pin PA1 bidirectional once
+    pin PA2 bidirectional once
+    pin PA3 bidirectional once
+    pin PA4 bidirectional once
+    pin PA5 bidirectional once
+    pin PA6 bidirectional once
+    pin PA7 bidirectional once
+    pin PA8 bidirectional once
+    pin PA9 bidirectional once
+    pin PA10 bidirectional once
+    pin PA11 bidirectional once
+    pin PA12 bidirectional once
+    pin PA13 bidirectional once
+    // BOOT0 is sampled only when nBOOT_SEL is cleared. Factory defaults boot from flash, so
+    // this definition records the function without requiring an external strap.
+    pin PA14 bidirectional once {
+        role strap sampled=reset pull=none \
+            note="BOOT0 when nBOOT_SEL is cleared — high boots the system memory; a fresh part ignores it"
+    }
+    pin PA15 bidirectional once
+    pin PB0 bidirectional once
+    pin PB1 bidirectional once
+    pin PB2 bidirectional once
+    pin PB3 bidirectional once
+    pin PB4 bidirectional once
+    pin PB5 bidirectional once
+    pin PB6 bidirectional once
+    pin PB7 bidirectional once
+    pin PB8 bidirectional once
+    pin PB9 bidirectional once
+    pin PB10 bidirectional once
+    pin PB11 bidirectional once
+    pin PB12 bidirectional once
+    pin PB13 bidirectional once
+    pin PB14 bidirectional once
+    pin PB15 bidirectional once
+    pin PC6 bidirectional once
+    pin PC7 bidirectional once
+    pin PC13 bidirectional once
+    pin PC14 bidirectional once
+    pin PC15 bidirectional once
+    pin PD0 bidirectional once
+    pin PD1 bidirectional once
+    pin PD2 bidirectional once
+    pin PD3 bidirectional once
+    pin PF0 bidirectional once
+    pin PF1 bidirectional once
+    pin PF3 bidirectional once
+
+    // Packages
+
+    // LQFP-32 pin numbering follows ST’s K package: PB9 at pad 1, followed by the oscillator
+    // pins. This definition uses the T6 temperature grade; a 105 °C variant requires the larger
+    // package.
+    package lqfp32 footprint="LQFP-32_7x7mm_P0.8mm" {
+        symbol "MCU_ST_STM32C0:STM32C092KBTx"
+        description "Arm Cortex-M0+ MCU with CAN FD, 128KB flash, 30KB RAM, 48 MHz, 2.0-3.6V, 28 GPIO, LQFP32"
+        order mpn=STM32C092KBT6 mouser="511-STM32C092KBT6"
+        pad PB9 1
+        pad PC14 2
+        pad PC15 3
+        pad VDD 4
+        pad VSS 5
+        pad PF2 6
+        pad PA0 7
+        pad PA1 8
+        pad PA2 9
+        pad PA3 10
+        pad PA4 11
+        pad PA5 12
+        pad PA6 13
+        pad PA7 14
+        pad PB0 15
+        pad PB1 16
+        pad PB2 17
+        pad PA8 18
+        pad PA9 19
+        pad PC6 20
+        pad PA10 21
+        pad PA11 22
+        pad PA12 23
+        pad PA13 24
+        pad PA14 25
+        pad PA15 26
+        pad PB3 27
+        pad PB4 28
+        pad PB5 29
+        pad PB6 30
+        pad PB7 31
+        pad PB8 32
+    }
+
+    // LQFP-48 exposes 44 GPIOs, VREF+, and dedicated PF0-OSC_IN/PF1-OSC_OUT pins.
+    package lqfp48 footprint="LQFP-48_7x7mm_P0.5mm" {
+        symbol "MCU_ST_STM32C0:STM32C092CBTx"
+        description "Arm Cortex-M0+ MCU with CAN FD, 128KB flash, 30KB RAM, 48 MHz, 2.0-3.6V, 44 GPIO, LQFP48"
+        order mpn=STM32C092CBT6 mouser="511-STM32C092CBT6"
+        pad PC13 1
+        pad PC14 2
+        pad PC15 3
+        pad PF3 4
+        pad VREF+ 5
+        pad VDD 6
+        pad VSS 7
+        pad PF0 8
+        pad PF1 9
+        pad PF2 10
+        pad PA0 11
+        pad PA1 12
+        pad PA2 13
+        pad PA3 14
+        pad PA4 15
+        pad PA5 16
+        pad PA6 17
+        pad PA7 18
+        pad PB0 19
+        pad PB1 20
+        pad PB2 21
+        pad PB10 22
+        pad PB11 23
+        pad PB12 24
+        pad PB13 25
+        pad PB14 26
+        pad PB15 27
+        pad PA8 28
+        pad PA9 29
+        pad PC6 30
+        pad PC7 31
+        pad PA10 32
+        pad PA11 33
+        pad PA12 34
+        pad PA13 35
+        pad PA14 36
+        pad PA15 37
+        pad PD0 38
+        pad PD1 39
+        pad PD2 40
+        pad PD3 41
+        pad PB3 42
+        pad PB4 43
+        pad PB5 44
+        pad PB6 45
+        pad PB7 46
+        pad PB8 47
+        pad PB9 48
+    }
+
+    // Application circuit
+    //
+    // Default VDD bypass, bulk capacitor, and reset filter; reset has an internal pull-up. Each
+    // package has one VDD pad, so `VDD` anchors to pad 4 or pad 6 according to the package.
+
+    block supply {
+        default
+
+        place decouple Cvdd node=VDD rail=vdd value="100nF"
+        place bulk Cbulk node=VDD rail=vdd value="4.7µF" note="VDD bulk capacitance"
+        place filter Cnrst node=PF2 rail=vdd value="100nF" \
+            note="NRST glitch filter — the pin's pull-up is internal"
+    }
+
+    // Connect and bypass VREF+ from the supply when the package exposes it. Bulk capacitance
+    // supplies the ADC’s sampling transients. The `when` condition limits this block to
+    // LQFP-48; LQFP-32 has no external reference pin.
+
+    block reference {
+        when "package == lqfp48"
+
+        circuit VREF+ VDD
+        place bulk Cvref node=VREF+ rail=vdd value="1µF" \
+            note="VREF+ bulk capacitance for ADC sampling transients"
+        place bypass Cvref_hf node=VREF+ rail=vdd value="100nF"
+    }
+
+    // Peripherals
+    //
+    // Rows list all supported pins. The selected package filters out unbonded pins.
+
+    peripheral SWD swd {
+        swdio PA13
+        swclk PA14
+        nrst PF2
+    }
+
+    peripheral GPIO gpio {
+        io PA0 PA1 PA2 PA3 PA4 PA5 PA6 PA7 PA8 PA9 PA10 PA11 PA12 PA13 PA14 PA15
+        io PB0 PB1 PB2 PB3 PB4 PB5 PB6 PB7 PB8 PB9 PB10 PB11 PB12 PB13 PB14 PB15
+        io PC6 PC7 PC13 PC14 PC15 PD0 PD1 PD2 PD3 PF0 PF1 PF2 PF3
+    }
+
+    peripheral I2C1 i2c {
+        sda PA10 PB7 PB9 PC14
+        scl PA9 PB6 PB7 PB8
+    }
+
+    peripheral I2C2 i2c {
+        sda PA6 PA10 PA12 PB4 PB11 PB14
+        scl PA7 PA9 PA11 PB3 PB10 PB13
+    }
+
+    peripheral SPI1 spi {
+        sck PA1 PA5 PB3 PB6
+        mosi PA2 PA7 PA12 PB5 PB6
+        miso PA6 PA11 PB4 PB6
+        nss PA4 PA8 PA14 PA15 PB0
+    }
+
+    peripheral SPI2 spi {
+        sck PA0 PB8 PB10 PB13 PD1
+        mosi PA4 PA10 PB7 PB11 PB15
+        miso PA3 PA8 PA9 PB2 PB14 PD3
+        nss PA8 PB9 PB12 PC14 PD0
+    }
+
+    // USART1 supports LIN break detection and auto-baud on the 0x55 sync byte. The other C0
+    // USARTs do not advertise these features. A contract using `require signal.lin` therefore
+    // selects USART1.
+    peripheral USART1 uart {
+        has lin
+        has autobaud
+        tx PA0 PA9 PB6 PC14
+        rx PA1 PA8 PA10 PB2 PB7
+        rts PA12 PA14 PA15 PB3
+        cts PA11 PB4 PB6
+    }
+
+    peripheral USART2 uart {
+        tx PA2 PA4 PA8 PA14
+        rx PA3 PA5 PA13 PA14 PA15
+        rts PA1 PB9 PC14
+        cts PA0 PB7 PB8 PD3
+    }
+
+    peripheral USART3 uart {
+        tx PA5 PB2 PB8 PB10 PC14
+        rx PB0 PB9 PB11
+        rts PA15 PB1 PB14 PD2
+        cts PA6 PB13
+    }
+
+    peripheral USART4 uart {
+        tx PA0
+        rx PA1
+        rts PA15
+        cts PB7
+    }
+
+    peripheral FDCAN1 can {
+        rx PA11 PB0 PB5 PB8 PB12 PD0
+        tx PA12 PB1 PB6 PB9 PB13 PC14 PD1
+    }
+
+    peripheral ADC1 adc {
+        in PA0 PA1 PA2 PA3 PA4 PA5 PA6 PA7 PA8 PA13 PA14 PB0 PB1 PB2 PB10 PB11 PB12
+    }
+
+    peripheral TIM1 timer {
+        has break
+        ch1 PA0 PA5 PA8 PA14 PA15 { has dma }
+        ch2 PA1 PA9 PB3 PB6 { has dma }
+        ch3 PA2 PA10 PB6 { has dma }
+        ch4 PA3 PA11 PB7 PF2 { has dma }
+        ch1n PA3 PA7 PB13 PD2
+        ch2n PA4 PA8 PB0 PB1 PB14 PD3
+        ch3n PA5 PA8 PB1 PB15
+    }
+
+    peripheral TIM2 timer {
+        ch1 PA0 PA5 PA15 { has dma }
+        ch2 PA1 PB3 { has dma }
+        ch3 PA2 PB10 PC6 { has dma }
+        ch4 PA3 PB11 PC7 { has dma }
+    }
+
+    peripheral TIM3 timer {
+        ch1 PA6 PB4 PB6 PB7 PB8 PC6 { has dma }
+        ch2 PA7 PB3 PB5 PB6 PB9 PC7 PC14 { has dma }
+        ch3 PA8 PB0 PB5 PB6 PC15 { has dma }
+        ch4 PA8 PB1 PB7 { has dma }
+    }
+
+    peripheral TIM14 timer {
+        ch1 PA4 PA7 PA8 PB1 PF0
+    }
+
+    peripheral TIM15 timer {
+        has break
+        ch1 PA2 PB14 { has dma }
+        ch2 PA3 PB15 { has dma }
+        ch1n PA1 PB13 PB15 PF1
+    }
+
+    peripheral TIM16 timer {
+        has break
+        ch1 PA0 PA6 PB7 PB8 PD0 { has dma }
+        ch1n PA2 PB6
+    }
+
+    peripheral TIM17 timer {
+        has break
+        ch1 PA1 PA7 PB9 PC14 PD1 { has dma }
+        ch1n PA4 PB7
+    }
+}

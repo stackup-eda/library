@@ -1,0 +1,80 @@
+// STM32C092 example using `package=lqfp48`.
+//
+// This package exposes VREF+, so the conditional `reference` block places capacitors at
+// `mcu/reference/Cvref` and `mcu/reference/Cvref_hf`. Those pins and components are absent in
+// LQFP-32.
+//
+// PD0/PD1 provide the ROM bootloader’s CAN interface on this package. Using PD0 with LQFP-32
+// produces an unbonded-pin error.
+//
+// Dedicated PF0/PF1 HSE pins leave PC14/PC15 available for other uses. This example uses no
+// crystal and declares all four pins `nc`.
+//
+// The power jack defines the supply; placement arguments connect block supplies; `connect`
+// statements assign MCU pins. The SWD header’s `vref` port senses the target rail.
+
+use "@stackup/passives"
+use "@stackup/connector/header"
+use "@stackup/connector/power-jack"
+use "@stackup/connector/swd"
+use "@stackup/micro/stm32c092"
+
+// A header block represents the CAN interface connection in this example.
+block can-port {
+    port vcc type=power
+    port can type=can
+
+    place conn-1x4 J
+    circuit vcc.rail J.1
+    circuit can.tx J.2
+    circuit can.rx J.3
+    circuit vcc.gnd J.4
+}
+
+// Divide a 12 V input for an ADC pin available only on LQFP-48.
+block vin-sense {
+    port vcc type=power
+    port sense type=analog
+
+    place conn-1x2 J
+    place resistor Rtop value="100kΩ" intent=divider
+    place resistor Rbot value="22kΩ" intent=divider
+    circuit J.1 Rtop sense Rbot vcc.gnd
+    circuit sense name="12V sense"
+    circuit J.2 vcc.gnd
+}
+
+design c092-lqfp48 {
+    stock {
+        packages imperial="0603"
+    }
+
+    place power-jack V3V3 voltage="3.3V"
+
+    // CBT6 / LQFP-48 exposes VREF+ and PD0/PD1.
+    place stm32c092 mcu vdd=V3V3.out package=lqfp48
+
+    place can-port can vcc=V3V3.out
+    place vin-sense vin vcc=V3V3.out
+    place swd-header debug vref=V3V3.out
+
+    // FDCAN1 on the ROM bootloader pins, available only in LQFP-48.
+    connect can {
+        from mcu rx=PD0 tx=PD1
+        to can
+    }
+
+    // ADC1_IN on PB10, pad 22; unavailable in LQFP-32.
+    connect analog {
+        from mcu node=PB10
+        to vin
+    }
+
+    connect swd {
+        from mcu swdio=PA13 swclk=PA14 nrst=PF2
+        to debug
+    }
+
+    // No crystals fitted; leave both oscillator pairs unconnected.
+    nc mcu.PF0 mcu.PF1 mcu.PC14 mcu.PC15 note="unused oscillator pins; no crystal fitted"
+}

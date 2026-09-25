@@ -1,0 +1,53 @@
+// @stackup/logic/ahct1g125 — TI SN74AHCT1G125 single tri-state buffer with TTL inputs in
+// SOT-23-5. Its 2.0 V input-high threshold accepts 3.3 V logic and its output drives to the 5 V
+// supply.
+
+use "@stackup/passives"
+
+part ahct1g125 {
+    symbol "74xGxx:74AHCT1G125"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/sn74ahct1g125.pdf"
+    description "Single bus buffer gate with 3-state output, TTL inputs, 4.5-5.5 V"
+    manufacturer "Texas Instruments"
+    order mpn=SN74AHCT1G125DBVR mouser="595-SNAHCT1G125DBVR"
+
+    // KiCad names only the supply pins; signal names come from the datasheet.
+    pin OE input required symbol="~{OE}"
+    pin A input
+    pin GND power_in
+    pin Y output
+    pin VCC power_in
+
+    // DBV / SOT-23-5 pinout: 1 OE, 2 A, 3 GND, 4 Y, 5 VCC.
+    package sot23-5 footprint="SOT-23-5" {
+        pad OE 1
+        pad A 2
+        pad GND 3
+        pad Y 4
+        pad VCC 5
+    }
+
+    // Recommended supply range (§5.3).
+    port vcc type=power {
+        require net.voltage min="4.5V" max="5.5V"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+
+    // Input accepts 3.3 V logic; output uses the supply voltage. Ports are named `in`/`out` to
+    // avoid the `a`/`b` series-element convention.
+    port in pin=A
+    port out type=output pin=Y
+
+    block supply {
+        default
+        place bypass Cvcc node=VCC rail=vcc value="100nF"
+    }
+
+    // Tie output enable low for continuous operation.
+    block always-on {
+        default
+        circuit OE vcc.gnd
+    }
+}

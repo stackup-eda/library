@@ -1,0 +1,56 @@
+// Minimal ESP32-S3 example with a ROM-bootloader UART header and boot button.
+//
+// IO0 must rest high. The module’s default `boot` block supplies its pull-up, and the button
+// temporarily pulls it low. IO45 and IO46 must not rest high; this board declares them `nc` to
+// use their internal pull-downs. A board using these pins as GPIO must still satisfy the
+// boot-level requirements.
+
+use "@stackup/passives"
+use "@stackup/connector/header"
+use "@stackup/connector/power-jack"
+use "@stackup/micro/esp32s3"
+
+// 3.3 V console header, with signals named from the cable’s perspective.
+block console-header {
+    port vcc type=power
+    port uart type=uart
+
+    place conn-1x4 J
+    circuit vcc.rail J.1
+    circuit uart.rx J.2
+    circuit uart.tx J.3
+    circuit vcc.gnd J.4
+}
+
+// Two header pins represent a momentary switch to ground.
+block button {
+    port in
+    port rail type=power
+
+    place conn-1x2 SW
+    circuit in SW.1
+    circuit rail.gnd SW.2
+}
+
+design s3-minimal {
+    stock {
+        packages imperial="0603"
+    }
+
+    place power-jack V3V3 voltage="3.3V"
+    place esp32-s3-wroom-1 mcu v3v3=V3V3.out
+
+    place console-header console vcc=V3V3.out
+    place button boot in=mcu.boot rail=V3V3.out
+
+    // UART0 uses the fixed ROM-bootloader pins. The UART crossover connects the cable’s `tx` to
+    // RXD0.
+    connect uart {
+        from mcu tx=TXD0 rx=RXD0
+        to console
+    }
+
+    // Use internal IO45/IO46 pull-downs: VDD_SPI at 3.3 V, ROM messages enabled, and IO0
+    // selecting boot mode.
+    nc mcu.IO45 mcu.IO46 note="strapping pins left to their internal pull-downs — VDD_SPI at 3.3 V, ROM messages on, and boot mode set by IO0 alone"
+}

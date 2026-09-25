@@ -1,0 +1,43 @@
+// @stackup/switch/push-button — momentary tactile switches using Switch:SW_Push. Ports `a`/`b`
+// support a series connection, such as `circuit mcu.IO40 vol-up rail.gnd`.
+//
+// Select with `package=`: Alps SKRTLAE010 for side actuation at a board edge, a 6 × 6 mm
+// tactile switch for a face button, or Panasonic EVQP2 for a small top-actuated button. The
+// Alps package includes a mounting pad named MP.
+
+part push-button {
+    symbol "Switch:SW_Push"
+    reference SW
+    description "Momentary push button"
+
+    pin 1 passive
+    pin 2 passive
+    // Account for the Alps mounting pad in the netlist.
+    pin MP passive
+
+    port a pin=1
+    port b pin=2
+
+    package alps footprint="SW_Push_1P1T-MP_NO_Horizontal_Alps_SKRTLAE010" {
+        value "Alps_SKRTLAE010"
+        description "Alps SKRTLAE010 side-actuated tactile switch"
+        order mpn=SKRTLAE010 lcsc=C110293
+        pad 1 1
+        pad 2 2
+        pad MP MP
+    }
+    package tact6x6 footprint="SW_Push_1TS009xxxx-xxxx-xxxx_6x6x5mm" {
+        value "6x6x5mm SMD Tactile"
+        description "6x6x5mm SMD tactile switch"
+        order mpn="1TS009A-1800-5000-CT" lcsc=C319409
+        pad 1 1
+        pad 2 2
+    }
+    package evqp2 footprint="SW_SPST_EVQP2_ShortPushTravel_H2.1mm" {
+        value "Panasonic_EVQP2"
+        description "Panasonic EVQP2 short-travel tactile switch"
+        order mpn=EVQP2T02M lcsc=C2915174
+        pad 1 1
+        pad 2 2
+    }
+}

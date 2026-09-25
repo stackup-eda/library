@@ -1,0 +1,97 @@
+// Quad 2-input XOR gate. Each gate has independent A, B, and Y pins.
+
+use "@stackup/passives"
+
+part hc86 {
+    symbol "74xx:74HC86"
+    reference U
+    datasheet "http://www.ti.com/lit/gpn/sn74HC86"
+    description "Quad 2-input XOR gate"
+    pin A_A input symbol=A
+    pin A_B input symbol=B
+    pin A_Y output symbol=Y
+    pin B_A input symbol=A
+    pin B_B input symbol=B
+    pin B_Y output symbol=Y
+    pin C_A input symbol=A
+    pin C_B input symbol=B
+    pin C_Y output symbol=Y
+    pin D_A input symbol=A
+    pin D_B input symbol=B
+    pin D_Y output symbol=Y
+    pin GND power_in
+    pin VCC power_in
+    package soic footprint="SOIC-14_3.9x8.7mm_P1.27mm" {
+        pad A_A 1
+        pad A_B 2
+        pad A_Y 3
+        pad B_A 4
+        pad B_B 5
+        pad B_Y 6
+        pad GND 7
+        pad C_Y 8
+        pad C_A 9
+        pad C_B 10
+        pad D_Y 11
+        pad D_A 12
+        pad D_B 13
+        pad VCC 14
+    }
+    package tssop footprint="TSSOP-14_4.4x5mm_P0.65mm" {
+        pad A_A 1
+        pad A_B 2
+        pad A_Y 3
+        pad B_A 4
+        pad B_B 5
+        pad B_Y 6
+        pad GND 7
+        pad C_Y 8
+        pad C_A 9
+        pad C_B 10
+        pad D_Y 11
+        pad D_A 12
+        pad D_B 13
+        pad VCC 14
+    }
+    package ssop footprint="SSOP-14_5.3x6.2mm_P0.65mm" {
+        pad A_A 1
+        pad A_B 2
+        pad A_Y 3
+        pad B_A 4
+        pad B_B 5
+        pad B_Y 6
+        pad GND 7
+        pad C_Y 8
+        pad C_A 9
+        pad C_B 10
+        pad D_Y 11
+        pad D_A 12
+        pad D_B 13
+        pad VCC 14
+    }
+    package dip footprint="DIP-14_W7.62mm" {
+        pad A_A 1
+        pad A_B 2
+        pad A_Y 3
+        pad B_A 4
+        pad B_B 5
+        pad B_Y 6
+        pad GND 7
+        pad C_Y 8
+        pad C_A 9
+        pad C_B 10
+        pad D_Y 11
+        pad D_A 12
+        pad D_B 13
+        pad VCC 14
+    }
+    port vcc type=power {
+        require net.voltage min="2V" max="6V"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+    block supply {
+        default
+        place bypass Cvcc node=VCC rail=vcc value="100nF"
+    }
+}

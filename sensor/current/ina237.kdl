@@ -1,0 +1,71 @@
+// @stackup/sensor/current/ina237 — TI INA237 current and power monitor with an 85 V common-mode
+// limit, I²C, and an external high-side shunt. Address straps default to A0 low and A1 high.
+
+use "@stackup/passives"
+
+part ina237 {
+    symbol "Sensor_Energy:INA237"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/ina237.pdf"
+    description "Bidirectional current and power monitor, 0–85 V common mode, VSSOP-10"
+    manufacturer "Texas Instruments"
+
+    pin A1 input required
+    pin A0 input required
+    pin ALERT open_collector symbol="~{Alert}"
+    pin SDA bidirectional
+    pin SCL input
+    pin VS power_in
+    pin GND power_in
+    pin VBUS input symbol=Vbus
+    pin VIN- input symbol="Vin-"
+    pin VIN+ input symbol="Vin+"
+
+    package vssop10 footprint="TSSOP-10_3x3mm_P0.5mm" {
+        pad A1 1
+        pad A0 2
+        pad ALERT 3
+        pad SDA 4
+        pad SCL 5
+        pad VS 6
+        pad GND 7
+        pad VBUS 8
+        pad VIN- 9
+        pad VIN+ 10
+    }
+
+    port vs type=power {
+        require net.voltage min="2.7V" max="5.5V"
+        line rail pin=VS
+        line gnd pin=GND
+    }
+    port i2c type=i2c {
+        claim signal.address 0x44
+        line sda pin=SDA
+        line scl pin=SCL
+    }
+    port alert pin=ALERT
+
+    block supply {
+        default
+        place bypass Cvs node=VS rail=vs value="100nF"
+        circuit A0 vs.gnd
+        circuit A1 vs.rail
+    }
+}
+
+block ina237-sense {
+    param shunt resistance
+    port a
+    port b
+    port vs type=power
+    port i2c type=i2c
+    port alert
+
+    place ina237 as=self vs=vs i2c=i2c alert=alert
+    place resistor Rshunt value=shunt intent=shunt footprint="R_2512_6332Metric" note="current-sense shunt"
+    circuit a Rshunt b
+    circuit a self.VIN+
+    circuit b self.VIN- self.VBUS
+    place pull-up Ralert node=self.ALERT rail=vs value="1kΩ"
+}

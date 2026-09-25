@@ -1,0 +1,57 @@
+// @stackup/power/ideal_diode/ltc4359 — LTC4359 ideal-diode controller.
+// Its external N-channel MOSFET conducts from anode to cathode and blocks reverse
+// current. The controller ground is a separate port so isolated legs can use the
+// correct return. The default FET is BSC030N08NS5; replace the FET for other rails.
+
+use "@stackup/passives"
+use "@stackup/discrete/fet/bsc030n08ns5"
+use "@stackup/discrete/diode/zener"
+
+part ltc4359 {
+    symbol "Power_Management:LTC4359-DCB"
+    reference U
+    datasheet "https://www.analog.com/media/en/technical-documentation/data-sheets/ltc4359.pdf"
+    description "Ideal-diode controller with reverse-input protection, DFN-6"
+    manufacturer "Analog Devices"
+    order mpn="LTC4359CDCB#TRPBF" mouser="584-LTC4359CDCBTRPBF" lcsc=C688233
+    pin OUT input
+    pin GATE output
+    pin SRC input
+    pin IN power_in
+    pin SHDN input symbol="~{SHDN}"
+    pin VSS power_in symbol=Vss
+    pin PAD power_in symbol=Pad
+    package dfn6 footprint="Package_DFN_QFN:DFN-6-1EP_3x2mm_P0.5mm_EP1.65x1.35mm" {
+        pad OUT 1
+        pad GATE 2
+        pad SRC 3
+        pad IN 4
+        pad SHDN 5
+        pad VSS 6
+        pad PAD 7
+    }
+    port anode pin=IN
+    port cathode pin=OUT
+    port gnd pin=VSS
+    port gate pin=GATE
+
+    block supply {
+        default
+        circuit IN SRC
+        circuit PAD VSS
+        place capacitor Cshdn value="10nF" intent=filter
+        circuit SHDN Cshdn VSS
+    }
+}
+
+block ltc4359-diode {
+    port anode
+    port cathode
+    port gnd
+    place ltc4359 as=self
+    place bsc030n08ns5 fet
+    circuit anode self.IN self.SRC fet.SOURCE
+    circuit cathode self.OUT fet.DRAIN
+    circuit self.GATE fet.GATE
+    circuit gnd self.VSS self.PAD
+}

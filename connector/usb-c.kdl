@@ -1,0 +1,86 @@
+// @stackup/connector/usb-c — a USB 2.0-only Type-C receptacle.
+
+use "@stackup/types"
+
+// 16-pin USB 2.0 Type-C receptacle. VBUS, GND, D+, and D− are duplicated for reversible
+// insertion: nine logical pins map to seventeen pads. A sink must provide 5.1 kΩ pull-downs on
+// both CC lines to request VBUS. SBU1/SBU2 are unused for USB 2.0; the board chooses the shield
+// connection.
+//
+// The VBUS port declares a 4.75–5.25 V input supply referenced to cable ground.
+
+part usb-c-receptacle {
+    symbol "Connector:USB_C_Receptacle_USB2.0_16P"
+    reference J
+    datasheet "https://gct.co/files/drawings/usb4105.pdf"
+    description "USB 2.0-only 16P Type-C Receptacle connector"
+    manufacturer GCT
+    order mpn="USB4105-GF-A" mouser="640-USB4105-GF-A" lcsc=C3020560
+
+    pin GND passive
+    pin VBUS passive
+    pin CC1 bidirectional
+    pin CC2 bidirectional
+    pin D+ bidirectional
+    pin D- bidirectional
+    pin SBU1 bidirectional
+    pin SBU2 bidirectional
+    pin SHIELD passive
+
+    package usb4105 footprint="USB_C_Receptacle_GCT_USB4105-xx-A_16P_TopMnt_Horizontal" {
+        pad GND A1
+        pad GND A12
+        pad GND B1
+        pad GND B12
+        pad VBUS A4
+        pad VBUS A9
+        pad VBUS B4
+        pad VBUS B9
+        pad CC1 A5
+        pad CC2 B5
+        pad D+ A6
+        pad D+ B6
+        pad D- A7
+        pad D- B7
+        pad SBU1 A8
+        pad SBU2 B8
+        pad SHIELD SH
+    }
+    // HRO TYPE-C-31-M-12, with seventeen pads; specified as a JLCPCB basic part.
+    package hro footprint="USB_C_Receptacle_HRO_TYPE-C-31-M-12" {
+        value "USB-C"
+        order mpn="TYPE-C-31-M-12" lcsc=C165948
+        pad GND A1
+        pad GND A12
+        pad GND B1
+        pad GND B12
+        pad VBUS A4
+        pad VBUS A9
+        pad VBUS B4
+        pad VBUS B9
+        pad CC1 A5
+        pad CC2 B5
+        pad D+ A6
+        pad D+ B6
+        pad D- A7
+        pad D- B7
+        pad SBU1 A8
+        pad SBU2 B8
+        pad SHIELD SH
+    }
+
+    port vbus type=power {
+        set net.voltage min="4.75V" max="5.25V"
+        line rail pin=VBUS
+        line gnd pin=GND
+    }
+
+    port usb type=usb {
+        line dp pin=D+
+        line dm pin=D-
+    }
+
+    port cc1 pin=CC1
+    port cc2 pin=CC2
+    port shield pin=SHIELD
+}

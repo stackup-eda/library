@@ -1,0 +1,24 @@
+// @stackup/connector/power-jack — two-pin power input.
+
+// The board specifies the input voltage through a parameter. The output port uses `set` to
+// declare a supply at that voltage. Ground is an explicit connector pin and connects only where
+// the board wires it.
+part power-jack {
+    symbol "Connector:Conn_01x02_Pin"
+    reference J
+    param voltage voltage
+
+    pin P1 passive
+    pin P2 passive
+
+    package header footprint="PinHeader_1x02_P2.54mm_Vertical" {
+        pad P1 1
+        pad P2 2
+    }
+
+    port out type=power {
+        set net.voltage voltage
+        line rail pin=P1
+        line gnd pin=P2
+    }
+}

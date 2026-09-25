@@ -1,0 +1,67 @@
+// @stackup/power/ldo/ap2112k — AP2112K-3.3, a 600 mA, 3.3 V LDO in SOT-23-5.
+//
+// A simple option for a 5 V-to-3.3 V logic supply. Dissipation is (Vin − 3.3 V) × I: 0.34 W at
+// 200 mA or 0.85 W at 500 mA from 5 V. Check the board’s thermal capacity for the expected
+// load.
+
+use "@stackup/passives"
+
+part ap2112k3v3 {
+    symbol "Regulator_Linear:AP2112K-3.3"
+    reference U
+    datasheet "https://www.diodes.com/assets/Datasheets/AP2112.pdf"
+    description "600mA LDO, 3.3V fixed, SOT-23-5"
+    manufacturer "Diodes Incorporated"
+    order mpn="AP2112K-3.3TRG1" mouser="621-AP2112K-3.3TRG1"
+
+    pin VIN power_in
+    pin GND power_in
+    pin EN input required
+    pin NC no_connect
+    pin VOUT power_out
+
+    package sot23-5 footprint="SOT-23-5" {
+        pad VIN 1
+        pad GND 2
+        pad EN 3
+        pad NC 4
+        pad VOUT 5
+    }
+
+    // Datasheet operating input range. Input current is the output load plus 55 µA quiescent
+    // current.
+    port in type=power {
+        require net.voltage min="2.5V" max="6V"
+        add net.draw "out.draw + 55µA"
+        line rail pin=VIN
+        line gnd pin=GND
+    }
+
+    // 3.3 V output with the same ground as the input.
+    port out type=power {
+        set net.voltage "3.3V" tolerance="1.5%"
+        assert "draw <= 600mA" message="the AP2112K is rated for 600mA; its loads draw {draw}"
+        line rail pin=VOUT
+        line gnd pin=GND
+    }
+
+    // Drive EN externally or retain the default high strap.
+    port en type=output pin=EN
+
+    // Application circuits
+
+    // Datasheet input and output capacitors. Keep the 1 µF stability capacitor close to VOUT.
+    // Add separate bulk capacitance near loads as needed.
+    block supply {
+        default
+        place bypass Cin node=VIN rail=in value="1µF"
+        place bypass Cout node=VOUT rail=out value="1µF"
+    }
+
+    // Tie EN to input for automatic startup. To sequence the rail, place `without always-on`
+    // and drive `en`.
+    block always-on {
+        default
+        circuit EN VIN
+    }
+}

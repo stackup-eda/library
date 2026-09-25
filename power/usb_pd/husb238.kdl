@@ -1,0 +1,68 @@
+// @stackup/power/usb_pd/husb238 — Hynetek HUSB238 USB-PD sink controller.
+// Connect CC1/CC2 to the Type-C receptacle and SDA/SCL to the control I²C bus.
+// GATE is an open-drain output for an external load switch.
+
+use "@stackup/passives"
+
+part husb238 {
+    symbol "Interface_USB:HUSB238_xxxDD"
+    reference U
+    datasheet "https://cdn-learn.adafruit.com/assets/assets/000/125/150/original/husb238_datasheet_full.pdf"
+    description "USB-PD 3.0 sink controller, 3-25V VBUS, WDFN-10"
+    manufacturer "Hynetek"
+
+    pin VIN power_in
+    pin DP bidirectional symbol="D+"
+    pin DN bidirectional symbol="D-"
+    pin CC1 bidirectional
+    pin CC2 bidirectional
+    pin SDA bidirectional
+    pin SCL input
+    pin VSET input
+    pin ISET input
+    pin GATE open_collector
+    pin GND power_in
+    package wdfn10 footprint="Package_DFN_QFN:WDFN-10-1EP_3x3mm_P0.5mm_EP1.8x2.5mm" {
+        pad VIN 1
+        pad DP 2
+        pad DN 3
+        pad CC1 4
+        pad CC2 5
+        pad SDA 6
+        pad SCL 7
+        pad VSET 8
+        pad ISET 9
+        pad GATE 10
+        pad GND 11
+    }
+
+    port vbus type=power {
+        require net.voltage min="4V" max="22V"
+        line rail
+        line gnd pin=GND
+    }
+    port cc1 pin=CC1
+    port cc2 pin=CC2
+    port gate pin=GATE
+    port vset pin=VSET
+    port iset pin=ISET
+    port dp pin=DP
+    port dn pin=DN
+    port i2c type=i2c {
+        line sda pin=SDA
+        line scl pin=SCL
+    }
+
+    // VIN uses a 10 Ω series resistor and a 1 µF capacitor after the resistor.
+    block vin-filter {
+        default
+        place resistor Rvin value="10Ω" intent=series
+        place bypass Cvin node=VIN rail=vbus value="1µF"
+        circuit vbus.rail Rvin VIN
+    }
+    // Ground VSET to use the controller's default PD profile.
+    block default-profile {
+        default
+        circuit VSET GND
+    }
+}

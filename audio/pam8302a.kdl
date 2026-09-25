@@ -1,0 +1,64 @@
+// @stackup/audio/pam8302a — Diodes PAM8302AAD 2.5 W mono class-D amplifier in SOIC-8.
+// Differential inputs are AC-coupled through 100 nF capacitors. Outputs drive a speaker
+// directly; neither speaker terminal is ground. The board drives the active-low shutdown pin.
+
+use "@stackup/passives"
+
+part pam8302a {
+    symbol "Amplifier_Audio:PAM8302AAD"
+    reference U
+    datasheet "https://www.diodes.com/assets/Datasheets/PAM8302A.pdf"
+    description "2.5 W mono class-D audio amplifier, SOIC-8"
+    manufacturer "Diodes Incorporated"
+    order mpn=PAM8302AADCR mouser="621-PAM8302AADCR"
+
+    pin SD input required symbol="~{SD}"
+    pin NC no_connect
+    pin IN+ input
+    pin IN- input
+    pin OUT+ output
+    pin VDD power_in
+    pin GND power_in
+    pin OUT- output
+
+    package soic8 footprint="Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" {
+        pad SD 1
+        pad NC 2
+        pad IN+ 3
+        pad IN- 4
+        pad OUT+ 5
+        pad VDD 6
+        pad GND 7
+        pad OUT- 8
+    }
+
+    port vdd type=power {
+        require net.voltage min="2V" max="5.5V"
+        line rail pin=VDD
+        line gnd pin=GND
+    }
+    port shutdown pin=SD
+    port speaker-plus pin=OUT+
+    port speaker-minus pin=OUT-
+
+    block supply {
+        default
+        place bypass Cvdd node=VDD rail=vdd value="1µF" note="place close to VDD"
+        place bulk Cbulk node=VDD rail=vdd value="10µF"
+    }
+}
+
+block pam8302a-amplifier {
+    port vdd type=power
+    port input
+    port input-return
+    port speaker-plus
+    port speaker-minus
+    port shutdown
+
+    place pam8302a as=self vdd=vdd speaker-plus=speaker-plus speaker-minus=speaker-minus shutdown=shutdown
+    place capacitor Cin-plus value="100nF" intent=filter
+    place capacitor Cin-minus value="100nF" intent=filter
+    circuit input Cin-plus self.IN+
+    circuit input-return Cin-minus self.IN-
+}

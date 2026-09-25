@@ -1,0 +1,15 @@
+// @stackup/passive/ferrite — ferrite bead, commonly used between noisy digital and quiet
+// analog supplies. The two terminals have no preferred orientation.
+part ferrite-bead {
+    symbol "Device:FerriteBead"
+    reference FB
+    description "Ferrite bead"
+    pin A passive
+    pin B passive
+    port a pin=A
+    port b pin=B
+    package chip0603 footprint="Inductor_SMD:L_0603_1608Metric" {
+        pad A 1
+        pad B 2
+    }
+}

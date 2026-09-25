@@ -1,0 +1,100 @@
+// @stackup/mechanical — mounting holes, fiducials, test points, and net ties.
+//
+// Mounting holes and fiducials have no electrical pins. Declare them as parts so PCB sync
+// retains them in the layout.
+
+// Unplated M3 screw clearance hole, with no electrical connection to the board.
+part mounting-hole {
+    symbol "Mechanical:MountingHole"
+    reference H
+    description "Mounting hole, M3, unplated"
+    package m3 footprint="MountingHole_3.2mm_M3"
+    // Ø2 mm hole for a case locating pin.
+    package m2 footprint="MountingHole_2mm"
+}
+
+// 1 mm copper fiducial with a 2 mm solder-mask opening for pick-and-place alignment.
+part fiducial {
+    symbol "Mechanical:Fiducial"
+    reference FID
+    description "Fiducial mark"
+    package p1mm footprint="Fiducial_1mm_Mask2mm"
+}
+
+// Test point with one pad and one net. Choose a flat pad for a handheld probe, a drilled pad
+// for access from either side or a soldered lead, or a wire loop for a clip. The note describes
+// the signal being measured. The bare pad options require no purchased component.
+
+part test-point {
+    symbol "Connector:TestPoint"
+    reference TP
+    description "Test point"
+
+    pin 1 passive
+    port at pin=1
+
+    package pad footprint="TestPoint_Pad_D1.5mm" {
+        pad 1 1
+    }
+    package hole footprint="TestPoint_THTPad_D1.5mm_Drill0.7mm" {
+        pad 1 1
+    }
+    package loop footprint="TestPoint_Loop_D2.50mm_Drill1.0mm" {
+        pad 1 1
+    }
+}
+
+// A net tie joins separate nets at a specific spot on the PCB. Keep its pins on separate nets
+// in the design; KiCad's NetTie footprint joins their copper and permits that contact in DRC.
+// These are fabricated copper, with no component to fit. Choose a footprint with larger pads
+// if the connection must carry more current.
+part net-tie-2 {
+    symbol "Device:NetTie_2"
+    reference NT
+    description "2-net copper tie"
+    pin A passive
+    pin B passive
+    package smd footprint="NetTie:NetTie-2_SMD_Pad0.5mm" {
+        pad A 1
+        pad B 2
+    }
+    port a pin=A
+    port b pin=B
+}
+
+part net-tie-3 {
+    symbol "Device:NetTie_3"
+    reference NT
+    description "3-net copper tie"
+    pin A passive
+    pin B passive
+    pin C passive
+    package smd footprint="NetTie:NetTie-3_SMD_Pad0.5mm" {
+        pad A 1
+        pad B 2
+        pad C 3
+    }
+    port a pin=A
+    port b pin=B
+    port c pin=C
+}
+
+part net-tie-4 {
+    symbol "Device:NetTie_4"
+    reference NT
+    description "4-net copper tie"
+    pin A passive
+    pin B passive
+    pin C passive
+    pin D passive
+    package smd footprint="NetTie:NetTie-4_SMD_Pad0.5mm" {
+        pad A 1
+        pad B 2
+        pad C 3
+        pad D 4
+    }
+    port a pin=A
+    port b pin=B
+    port c pin=C
+    port d pin=D
+}

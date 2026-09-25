@@ -1,0 +1,104 @@
+// @stackup/sensor/accel/qma6100p — QST QMA6100P three-axis accelerometer in a 2 × 2 mm LGA-12.
+// Supports I²C/SPI, motion/no-motion interrupts, and 500 nA standby.
+//
+// The custom symbol and footprint use the SnipsControllers_Custom library; footprint data came
+// from LCSC EasyEDA C2887190. Supply limits were taken from preliminary datasheet 13-52-20 Rev
+// A1 and have not been rechecked.
+//
+// The AD0 parameter selects a strap block and the corresponding I²C address claim, 0x12 or
+// 0x13. A default block ties SENB high for I²C; it must not float.
+
+use "@stackup/passives"
+
+part qma6100p {
+    symbol "SnipsControllers_Custom:QMA6100P"
+    reference U
+    datasheet "https://www.lcsc.com/datasheet/C2887190.pdf"
+    description "3-axis accelerometer, I2C/SPI, motion interrupts, LGA-12 2x2mm"
+    manufacturer "QST"
+    order mpn=QMA6100P lcsc=C2887190
+
+    // AD0 low is 0x12, high is 0x13.
+    param ad0 strap default=gnd
+
+    pin AD0 input required
+    pin SDX bidirectional
+    pin VDD power_in
+    pin RESV1 passive
+    pin INT1 output
+    pin INT2 output
+    pin NC no_connect
+    pin GNDIO power_in
+    pin GND power_in
+    pin SENB input required
+    pin RESV2 passive
+    pin SCX input
+
+    package lga12 footprint="QMA6100P" {
+        pad AD0 1
+        pad SDX 2
+        pad VDD 3
+        pad RESV1 4
+        pad INT1 5
+        pad INT2 6
+        pad NC 7
+        pad GNDIO 8
+        pad GND 9
+        pad SENB 10
+        pad RESV2 11
+        pad SCX 12
+    }
+
+    derive address "match(ad0, gnd: 18, vdd: 19)"
+
+    port vdd type=power {
+        require net.voltage min="1.8V" max="3.6V"
+        add net.draw "1mA"
+        line rail pin=VDD
+        line gnd pin=GND
+    }
+
+    port i2c type=i2c {
+        claim signal.address address
+        line sda pin=SDX
+        line scl pin=SCX
+    }
+
+    // Push-pull interrupt outputs, initially inactive low until configured by firmware.
+    port int1 pin=INT1
+    port int2 pin=INT2
+
+    // Application circuits
+
+    // Three VDD capacitors from Figure 4’s single-supply I²C circuit. The two smallest values
+    // are uncertain readings of the preliminary diagram.
+    block supply {
+        default
+        place decouple Cvdd node=VDD rail=vdd value="10nF" note="VDD decoupling, Figure 4"
+        place decouple "Cvdd/hf" node=VDD rail=vdd value="100pF" \
+            note="VDD decoupling, Figure 4 — value needs verification; preliminary figure is difficult to read"
+        place decouple "Cvdd/mid" node=VDD rail=vdd value="2.2nF" \
+            note="VDD decoupling, Figure 4 — value needs verification; preliminary figure is difficult to read"
+    }
+
+    // Tie SENB high to select I²C.
+    block i2c-mode {
+        default
+        circuit SENB vdd.rail
+    }
+
+    // Connect the I/O ground and reserved pins to ground, as shown in Figure 4.
+    block returns {
+        default
+        circuit GNDIO RESV1 RESV2 vdd.gnd
+    }
+
+    block ad0-low {
+        when "ad0 == gnd"
+        circuit AD0 vdd.gnd
+    }
+    block ad0-high {
+        when "ad0 == vdd"
+        circuit AD0 vdd.rail
+    }
+}

@@ -1,0 +1,126 @@
+// @stackup/power/efuse/tps26631 — TI TPS26631 60 V, 6 A eFuse.
+// Resistors set overvoltage cutoff and current limit. The optional external FET
+// blocks reverse current. OUT is the protected path's output terminal.
+
+use "@stackup/passives"
+use "@stackup/discrete/fet/bsc030n08ns5"
+use "@stackup/discrete/fet/bss138"
+
+part tps26631 {
+    symbol "Power_Management:TPS26631PWP"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/tps2663.pdf"
+    description "60V, 6A eFuse with adjustable overvoltage cutoff, HTSSOP-20"
+    manufacturer "Texas Instruments"
+
+    param current-limit current default="2A"
+    param overvoltage voltage default="30V"
+    param undervoltage voltage default="0V"
+    param power-good-above voltage default="0V"
+    derive rilim "18kΩ * 1A / current-limit"
+    derive rovp "10kΩ * (overvoltage / 1.2V - 1)"
+    derive ruvlo "10kΩ * (undervoltage / 1.2V - 1)"
+    derive rpg "10kΩ * (power-good-above / 1.2V - 1)"
+
+    pin IN power_in
+    pin IN_SYS power_in
+    pin OUT power_out
+    pin B_GATE output
+    pin DRV output
+    pin UVLO input
+    pin OVP input
+    pin GND power_in
+    pin DVDT passive symbol=dVdT
+    pin ILIM passive
+    pin MODE input
+    pin SHDN input symbol="~{SHDN}"
+    pin IMON output
+    pin FLT open_collector symbol="~{FLT}"
+    pin PGTH input
+    pin PGOOD open_collector
+    package htssop20 footprint="Package_SO:HTSSOP-20-1EP_4.4x6.5mm_P0.65mm_EP3.4x6.5mm" {
+        pad IN 1
+        pad IN 2
+        pad IN 3
+        pad B_GATE 4
+        pad DRV 5
+        pad IN_SYS 6
+        pad UVLO 7
+        pad OVP 8
+        pad GND 9
+        pad GND 21
+        pad DVDT 10
+        pad ILIM 11
+        pad MODE 12
+        pad SHDN 13
+        pad IMON 14
+        pad FLT 15
+        pad PGTH 16
+        pad PGOOD 17
+        pad OUT 18
+        pad OUT 19
+        pad OUT 20
+    }
+
+    port in type=power {
+        require net.voltage min="4.5V" max="60V"
+        line rail
+        line gnd pin=GND
+    }
+    port out pin=OUT
+    port fault pin=FLT
+    port power-good pin=PGOOD
+    port monitor pin=IMON
+    port shutdown pin=SHDN
+
+    block no-reverse-blocking {
+        when "!reverse-blocking"
+        circuit in.rail IN IN_SYS
+        nc B_GATE DRV note="Reverse current is possible without the external blocking FET"
+    }
+    block reverse-blocking {
+        place bsc030n08ns5 Qblock
+        place bss138 Qpull
+        circuit in.rail IN_SYS Qblock.SOURCE Qpull.SOURCE
+        circuit Qblock.DRAIN IN
+        circuit B_GATE Qblock.GATE Qpull.DRAIN
+        circuit DRV Qpull.GATE
+    }
+    block programming {
+        default
+        assert "current-limit >= 600mA && current-limit <= 6A" message="TPS26631 current limit must be 0.6-6A"
+        place resistor Rilim value=rilim intent=divider
+        circuit ILIM Rilim GND
+        place resistor Rovp-top value=rovp intent=divider
+        place resistor Rovp-bottom value="10kΩ" intent=divider
+        circuit in.rail Rovp-top OVP Rovp-bottom GND
+        place bypass Cin node=IN rail=in value="100nF"
+        place bypass Cout node=OUT rail=in value="100nF"
+        place capacitor Cdvdt value="10nF" intent=filter
+        circuit DVDT Cdvdt GND
+    }
+    block internal-uvlo {
+        when "undervoltage == 0V"
+        circuit UVLO GND
+    }
+    block programmed-uvlo {
+        when "undervoltage > 0V"
+        place resistor Ruvlo-top value=ruvlo intent=divider
+        place resistor Ruvlo-bottom value="10kΩ" intent=divider
+        circuit in.rail Ruvlo-top UVLO Ruvlo-bottom GND
+    }
+    block no-power-good {
+        when "power-good-above == 0V"
+        circuit PGTH GND
+    }
+    block programmed-power-good {
+        when "power-good-above > 0V"
+        place resistor Rpg-top value=rpg intent=divider
+        place resistor Rpg-bottom value="10kΩ" intent=divider
+        circuit OUT Rpg-top PGTH Rpg-bottom GND
+    }
+    block auto-retry {
+        default
+        circuit MODE GND
+    }
+}

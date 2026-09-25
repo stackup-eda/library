@@ -1,0 +1,87 @@
+// @stackup/discrete/led/led — indicator LED and power-indicator block.
+
+use "@stackup/passives"
+
+// 0805 indicator LED using Device:LED. Pins A and K are the anode and cathode; the footprint
+// marks K. Series ports `a` and `b` follow forward current from anode to cathode.
+part led {
+    symbol "Device:LED"
+    reference D
+    description "Light emitting diode"
+
+    pin A passive
+    pin K passive
+
+    port a pin=A
+    port b pin=K
+
+    package p0805 footprint="LED_0805_2012Metric" {
+        pad K 1
+        pad A 2
+    }
+}
+
+// Power indicator: LED anode to the supply, cathode through a resistor to ground.
+//
+// The placement selects the resistor value. Assertions check minimum LED current at the lowest
+// supply voltage and maximum current at the highest voltage. An incompatible rail produces an
+// error without changing the selected components.
+//
+// Forward voltage defaults to 2.0 V for red or standard green LEDs. Blue, white, and true green
+// LEDs are closer to 3.0 V and need a corresponding `vf` setting. The colour is included in the
+// LED value so the BOM separates different colours.
+block indicator {
+    // 680 Ω is the E24 value near (3.3 V − 2.0 V) / 2 mA.
+    param r resistance default="680Ω"
+    param forward voltage default="2.0V"
+    // Maximum allowed current and minimum visible-light current.
+    param limit current default="3mA"
+    param floor current default="500µA"
+    param colour colour default=green   // green | red
+
+    // Check both ends of the supply-voltage range.
+    derive current "(rail.voltage.max - forward) / r"
+    derive dim "(rail.voltage.min - forward) / r"
+
+    assert "rail.voltage.min > forward" \
+        message="LED forward voltage {forward} leaves no headroom at minimum supply voltage {rail.voltage.min}"
+    assert "current <= limit" \
+        message="LED current {current} at {rail.voltage.max} with {r} exceeds the {limit} limit"
+    assert "dim >= floor" \
+        message="LED current {dim} at {rail.voltage.min} is below the visibility threshold"
+
+    // Indicator current drawn from the rail.
+    port rail type=power {
+        add net.draw current
+    }
+
+    // Use an 0805 resistor for continuous dissipation. At 10 mA from a 5 V rail with a 2 V LED,
+    // it dissipates 30 mW: 24% of a 125 mW rating, compared with 48% of a 62.5 mW 0402 rating.
+    // A 2 mA indicator on 3.3 V dissipates about 2.6 mW.
+    place led as=self value=colour
+    place resistor R value=r intent=series footprint="R_0805_2012Metric" \
+        note="LED current limit — {current} at {rail.voltage.max}, {(rail.voltage.max - forward) * current} in the resistor"
+    circuit rail.rail self R rail.gnd
+}
+
+// A host output sinks current when it pulls `sink` low. State the lowest rail voltage used
+// to size the resistor; the assertions check the connected rail afterward.
+block driven-led {
+    param current current default="2mA"
+    param forward voltage default="2.0V"
+    param design-rail-min voltage
+    param limit current default="10mA"
+    param colour colour default=green
+    port rail type=power
+    port sink
+
+    assert "design-rail-min > forward" message="LED forward voltage leaves no resistor headroom"
+    assert "rail.voltage.min >= design-rail-min" message="LED rail is below the voltage used to size its resistor"
+    derive r "e24((design-rail-min - forward) / current)"
+    derive peak "(rail.voltage.max - forward) / r"
+    assert "peak <= limit" message="LED current at the highest rail voltage exceeds its limit"
+    place led as=self value=colour
+    place resistor R value=r intent=series
+    circuit rail.rail self.A
+    circuit self.K R sink
+}

@@ -1,0 +1,109 @@
+// @stackup/interface/expander/pca9555 — 16-channel I²C GPIO expander. Address pins A0–A2
+// select one of eight addresses (0x20–0x27); INT is open-drain with a default pull-up.
+
+use "@stackup/passives"
+
+part pca9555 {
+    symbol "Interface_Expansion:PCA9555DB"
+    reference U
+    datasheet "https://www.nxp.com/docs/en/data-sheet/PCA9555.pdf"
+    manufacturer NXP
+    description "16-channel I²C GPIO expander"
+
+    param offset number default=0
+    assert "offset >= 0 && offset <= 7" message="I²C address offset must be 0–7"
+    derive address "0x20 + offset"
+
+    pin INT open_collector symbol="~{INT}"
+    pin A1 input required
+    pin A2 input required
+    pin IO0_0 bidirectional
+    pin IO0_1 bidirectional
+    pin IO0_2 bidirectional
+    pin IO0_3 bidirectional
+    pin IO0_4 bidirectional
+    pin IO0_5 bidirectional
+    pin IO0_6 bidirectional
+    pin IO0_7 bidirectional
+    pin VSS power_in
+    pin IO1_0 bidirectional
+    pin IO1_1 bidirectional
+    pin IO1_2 bidirectional
+    pin IO1_3 bidirectional
+    pin IO1_4 bidirectional
+    pin IO1_5 bidirectional
+    pin IO1_6 bidirectional
+    pin IO1_7 bidirectional
+    pin A0 input required
+    pin SCL input
+    pin SDA bidirectional
+    pin VDD power_in
+
+    package ssop24 footprint="Package_SO:SSOP-24_5.3x8.2mm_P0.65mm" {
+        pad INT 1
+        pad A1 2
+        pad A2 3
+        pad IO0_0 4
+        pad IO0_1 5
+        pad IO0_2 6
+        pad IO0_3 7
+        pad IO0_4 8
+        pad IO0_5 9
+        pad IO0_6 10
+        pad IO0_7 11
+        pad VSS 12
+        pad IO1_0 13
+        pad IO1_1 14
+        pad IO1_2 15
+        pad IO1_3 16
+        pad IO1_4 17
+        pad IO1_5 18
+        pad IO1_6 19
+        pad IO1_7 20
+        pad A0 21
+        pad SCL 22
+        pad SDA 23
+        pad VDD 24
+    }
+
+    port vdd type=power {
+        require net.voltage min="2.3V" max="5.5V"
+        add net.draw "1mA"
+        line rail pin=VDD
+        line gnd pin=VSS
+    }
+    port i2c type=i2c {
+        claim signal.address address
+        line sda pin=SDA
+        line scl pin=SCL
+    }
+    port int pin=INT
+    port io0_0 pin=IO0_0
+    port io0_1 pin=IO0_1
+    port io0_2 pin=IO0_2
+    port io0_3 pin=IO0_3
+    port io0_4 pin=IO0_4
+    port io0_5 pin=IO0_5
+    port io0_6 pin=IO0_6
+    port io0_7 pin=IO0_7
+    port io1_0 pin=IO1_0
+    port io1_1 pin=IO1_1
+    port io1_2 pin=IO1_2
+    port io1_3 pin=IO1_3
+    port io1_4 pin=IO1_4
+    port io1_5 pin=IO1_5
+    port io1_6 pin=IO1_6
+    port io1_7 pin=IO1_7
+
+    block supply {
+        default
+        place decouple Cvdd node=VDD rail=vdd value="100nF"
+        place pull-up Rint node=INT rail=vdd value="4.7kΩ"
+    }
+    block a0-low { when "offset == 0 || offset == 2 || offset == 4 || offset == 6"; circuit A0 vdd.gnd }
+    block a0-high { when "offset == 1 || offset == 3 || offset == 5 || offset == 7"; circuit A0 vdd.rail }
+    block a1-low { when "offset == 0 || offset == 1 || offset == 4 || offset == 5"; circuit A1 vdd.gnd }
+    block a1-high { when "offset == 2 || offset == 3 || offset == 6 || offset == 7"; circuit A1 vdd.rail }
+    block a2-low { when "offset == 0 || offset == 1 || offset == 2 || offset == 3"; circuit A2 vdd.gnd }
+    block a2-high { when "offset == 4 || offset == 5 || offset == 6 || offset == 7"; circuit A2 vdd.rail }
+}

@@ -1,0 +1,26 @@
+// @stackup/discrete/fet/2n7002 — 2N7002, a 60 V / 115 mA N-channel MOSFET in SOT-23 for
+// low-side switching. Vgs(th) is 1.0–2.5 V at 250 µA; account for this threshold when driving
+// the gate through a diode-OR.
+
+part nfet-2n7002 {
+    symbol "Transistor_FET:Q_NMOS_GSD"
+    reference Q
+    value "2N7002"
+    datasheet "https://www.onsemi.com/pdf/datasheet/2n7002-d.pdf"
+    description "60V Vds, 115mA Id, N-Channel MOSFET, SOT-23"
+    order mpn="2N7002" lcsc=C8545
+
+    pin GATE input symbol=G
+    pin SOURCE passive symbol=S
+    pin DRAIN passive symbol=D
+
+    package sot23 footprint="SOT-23" {
+        pad GATE 1
+        pad SOURCE 2
+        pad DRAIN 3
+    }
+
+    port gate pin=GATE
+    port source pin=SOURCE
+    port drain pin=DRAIN
+}

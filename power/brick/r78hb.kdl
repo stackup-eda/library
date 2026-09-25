@@ -1,0 +1,44 @@
+// @stackup/power/brick/r78hb — Recom R-78HB5.0-0.5, a 5 V/500 mA switching module.
+// Its 9–72 V input range suits 24 V and 48 V supplies. Above 50 V, fit the input
+// protection capacitor specified by Recom. The datasheet recommends at least 10 mA load.
+
+use "@stackup/passives"
+
+part r78hb5v0 {
+    symbol "Converter_DCDC:R-78HB5.0-0.5"
+    reference U
+    datasheet "https://www.recom-power.com/pdf/Innoline/R-78HBxx-0.5_L.pdf"
+    description "500mA DC/DC regulator, 9-72V input, fixed 5V output, SIP-3"
+    manufacturer "RECOM Power"
+    order mpn="R-78HB5.0-0.5"
+
+    pin IN power_in
+    pin GND power_in
+    pin OUT power_out
+    package sip3 footprint="Converter_DCDC_RECOM_R-78HB-0.5_THT" {
+        pad IN 1
+        pad GND 2
+        pad OUT 3
+    }
+
+    derive input "out.draw * out.voltage / (0.8 * in.voltage.min)"
+    port in type=power {
+        require net.voltage min="9V" max="72V"
+        add net.draw input
+        line rail pin=IN
+        line gnd pin=GND
+    }
+    port out type=power {
+        set net.voltage "5V"
+        assert "draw <= 500mA" message="R-78HB output load {draw} exceeds 500mA"
+        assert "draw >= 10mA" message="R-78HB datasheet recommends at least 10mA output load; declared load is {draw}"
+        line rail pin=OUT
+        line gnd pin=GND
+    }
+
+    // Select this block when the input can exceed 50 V. Use a 100 V rated 3.3 µF capacitor.
+    block input-protection {
+        place bulk Cin node=IN rail=in value="3.3µF" footprint="C_1210_3225Metric" \
+            note="100V rated input protection capacitor required above 50V input"
+    }
+}

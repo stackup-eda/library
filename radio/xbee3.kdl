@@ -1,0 +1,133 @@
+// @stackup/radio/xbee3 — Digi XBee 3 Zigbee XB3-24Z8UT-J through-hole module. A 2.4 GHz
+// 802.15.4 radio with UART and SPI interfaces on the twenty-pin XBee footprint.
+//
+// The custom symbol and footprint come from the Amidala board.
+//
+// SPI_ATTN also selects boot mode. Digi’s hardware reference (90001543) requires it to stay
+// high during reset; a net-level requirement and default pull-up enforce this.
+//
+// The default supply block places the manual’s 1 µF, 47 pF, and 10 µF capacitors near VCC, with
+// the smallest closest.
+//
+// An optional `with reset-filter` block adds the Amidala shield’s 10 kΩ pull-up and 100 Ω / 100
+// nF reset filter. Use the pull-up alone when driving RESET from a GPIO.
+
+use "@stackup/passives"
+
+part xbee3-zigbee {
+    symbol "Xbee3:XB3-24Z8UT-J"
+    reference U
+    value "XBee3"
+    datasheet "https://www.digi.com/resources/documentation/digidocs/pdfs/90001543.pdf"
+    description "XBee 3 Zigbee 3.0 module, 2.4 GHz, U.FL antenna, through-hole"
+    manufacturer "Digi International"
+    order mpn="XB3-24Z8UT-J" mouser="888-XB3-24Z8UT-J"
+
+    pin VCC power_in
+    pin DOUT output symbol="DOUT/DIO13"
+    pin DIN input symbol="DIN/~{CONFIG}/DIO14"
+    pin SPI_MISO output
+    pin RESET input
+    pin RSSI_PWM output symbol="RSSI_PWM/DIO10"
+    pin PWM1 output symbol="PWM1/DIO11"
+    pin RESERVED1 passive symbol="[RESERVED]_1"
+    pin DTR input
+    pin GND power_in
+    pin SPI_MOSI input
+    pin CTS output symbol="~{CTS}/DIO7"
+    pin ON_SLEEP output
+    pin RESERVED2 passive symbol="[RESERVED]_2"
+    pin ASSOCIATE output symbol="ASSOCIATE/DIO5"
+    pin RTS input symbol="~{RTS}/DIO6"
+    pin SPI_SSEL input
+    pin SPI_CLK input
+    pin SPI_ATTN output {
+        role strap sampled=reset pull=none \
+            note="BOOTMODE — must not be low at reset (90001543); the module's data-ready line afterwards"
+        require net.rest high
+    }
+    pin AD0 bidirectional symbol="AD0_/DIO0"
+
+    package tht footprint="XB324Z8UTJ" {
+        pad VCC 1
+        pad DOUT 2
+        pad DIN 3
+        pad SPI_MISO 4
+        pad RESET 5
+        pad RSSI_PWM 6
+        pad PWM1 7
+        pad RESERVED1 8
+        pad DTR 9
+        pad GND 10
+        pad SPI_MOSI 11
+        pad CTS 12
+        pad ON_SLEEP 13
+        pad RESERVED2 14
+        pad ASSOCIATE 15
+        pad RTS 16
+        pad SPI_SSEL 17
+        pad SPI_CLK 18
+        pad SPI_ATTN 19
+        pad AD0 20
+    }
+
+    // 2.1–3.6 V supply; 40 mA budget for transmission at +8 dBm.
+    port vcc type=power {
+        require net.voltage min="2.1V" max="3.6V"
+        add net.draw "40mA"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+
+    port spi type=spi {
+        line sck pin=SPI_CLK
+        line mosi pin=SPI_MOSI
+        line miso pin=SPI_MISO
+    }
+    // Host-driven chip select, connected separately from the SPI bus.
+    port cs type=output pin=SPI_SSEL
+    // UART interface: the module transmits on DOUT and drives CTS.
+    port uart type=uart {
+        line tx pin=DOUT
+        line rx pin=DIN
+        line rts pin=RTS
+        line cts pin=CTS
+    }
+    // Host-driven DTR: high requests pin sleep.
+    port sleep-rq type=output pin=DTR
+    // Module status outputs: SPI data ready and sleep state.
+    port attn pin=SPI_ATTN
+    port on-sleep pin=ON_SLEEP
+    // Active-low reset with an internal pull-up.
+    port reset pin=RESET
+
+    // Application circuits
+
+    // Manual’s supply capacitors: 1 µF and 47 pF closest to VCC, with 10 µF nearby.
+    block supply {
+        default
+        place decouple Cvcc node=VCC rail=vcc value="1µF" footprint="C_0603_1608Metric" \
+            note="VCC decoupling — place the specified 1 µF close to VCC, beside the 47 pF"
+        place decouple Chf node=VCC rail=vcc value="47pF" \
+            note="VCC decoupling — the manual's 47 pF, nearest the module"
+        place bulk Cbulk node=VCC rail=vcc value="10µF" footprint="C_0603_1608Metric" \
+            note="VCC bulk capacitance — 10 µF per the manual"
+    }
+
+    // Pull SPI_ATTN high during reset; the module drives it afterward.
+    block bootmode {
+        default
+        place pull-up Rattn node=SPI_ATTN rail=vcc value="10kΩ" \
+            note="BOOTMODE strap — SPI_ATTN must not be low at reset"
+    }
+
+    // Optional reset filter: 10 kΩ pull-up, 100 Ω series resistor, and 100 nF capacitor,
+    // approximately 160 Hz. Use when RESET has no external driver.
+    block reset-filter {
+        place resistor Rrc value="100Ω" intent=series note="reset RC — the series element"
+        place pull-up Rrst node=Rrc.a rail=vcc value="10kΩ" note="reset pull-up"
+        place filter Crc node=Rrc.a rail=vcc value="100nF" note="reset RC — ~160 Hz with 100 Ω"
+        circuit Rrst Rrc RESET
+        set Rrst net.name "RST_PU"
+    }
+}

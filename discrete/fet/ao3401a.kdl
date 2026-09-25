@@ -1,0 +1,28 @@
+// @stackup/discrete/fet/ao3401a — Alpha & Omega AO3401A, a −30 V / −4 A P-channel MOSFET in
+// SOT-23 for high-side switching on a single-cell supply. Rds(on) is 60 mΩ at Vgs = −4.5 V and
+// 85 mΩ at −2.5 V (datasheet rev 3.1). It shares the DMG2305UX pinout. Vgs(th) is −0.5 to −1.3
+// V; the gate rating is ±12 V.
+
+part ao3401a {
+    symbol "Transistor_FET:Q_PMOS_GSD"
+    reference Q
+    value "AO3401A"
+    datasheet "https://www.aosmd.com/res/datasheets/AO3401A.pdf"
+    description "-4A Id, -30V Vds, P-Channel MOSFET, 60mOhm at -4.5V, SOT-23"
+    manufacturer "Alpha & Omega Semiconductor"
+    order mpn="AO3401A" lcsc=C15127
+
+    pin GATE input symbol=G
+    pin SOURCE passive symbol=S
+    pin DRAIN passive symbol=D
+
+    package sot23 footprint="SOT-23" {
+        pad GATE 1
+        pad SOURCE 2
+        pad DRAIN 3
+    }
+
+    port gate pin=GATE
+    port source pin=SOURCE
+    port drain pin=DRAIN
+}

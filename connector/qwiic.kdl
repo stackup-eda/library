@@ -1,0 +1,54 @@
+// @stackup/connector/qwiic — the Qwiic / STEMMA QT I²C port.
+
+// Qwiic / STEMMA QT uses a keyed 1.00 mm JST SH connector with GND, 3.3 V, SDA, and SCL on pins
+// 1–4. Ports expose this pinout without requiring board code to use pin numbers. KiCad labels
+// the mounting pads MP; the default block connects them to ground.
+
+part qwiic {
+    symbol "Connector_Generic_MountingPin:Conn_01x04_MountingPin"
+    reference J
+    description "Qwiic / STEMMA QT I2C port (JST SH 1.00mm, 4-position)"
+    datasheet "https://www.jst-mfg.com/product/pdf/eng/eSH.pdf"
+    manufacturer JST
+
+    pin 1 passive
+    pin 2 passive
+    pin 3 passive
+    pin 4 passive
+    pin MP passive
+
+    // Side-entry and top-entry packages share the same pad map and have separate order numbers.
+    // Side-entry is the default.
+    package side footprint="JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal" {
+        pad 1 1
+        pad 2 2
+        pad 3 3
+        pad 4 4
+        pad MP MP
+    }
+    package vertical footprint="JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical" {
+        pad 1 1
+        pad 2 2
+        pad 3 3
+        pad 4 4
+        pad MP MP
+    }
+
+    // 3.3 V output on pin 2. External device current is not specified here, so the calculated
+    // rail load is a lower bound.
+    port vcc type=power {
+        line rail pin=2
+        line gnd pin=1
+    }
+
+    port i2c type=i2c {
+        line sda pin=3
+        line scl pin=4
+    }
+
+    // Connect the mounting pads to ground.
+    block tab {
+        default
+        circuit MP vcc.gnd
+    }
+}

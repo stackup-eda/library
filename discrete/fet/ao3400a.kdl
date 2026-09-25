@@ -1,0 +1,28 @@
+// @stackup/discrete/fet/ao3400a — Alpha & Omega AO3400A, a 30 V / 5.7 A N-channel MOSFET in
+// SOT-23. Rds(on) is 32 mΩ at Vgs = 4.5 V and 48 mΩ at 2.5 V (datasheet rev 3.1). It shares the
+// 2N7002 pinout and supports lower gate drive. Vgs(th) is 0.65–1.45 V at 250 µA; the gate
+// rating is ±12 V.
+
+part nfet-ao3400a {
+    symbol "Transistor_FET:Q_NMOS_GSD"
+    reference Q
+    value "AO3400A"
+    datasheet "https://www.aosmd.com/res/datasheets/AO3400A.pdf"
+    description "30V Vds, 5.7A Id, N-Channel MOSFET, 32mOhm at 4.5V, SOT-23"
+    manufacturer "Alpha & Omega Semiconductor"
+    order mpn="AO3400A" lcsc=C20917
+
+    pin GATE input symbol=G
+    pin SOURCE passive symbol=S
+    pin DRAIN passive symbol=D
+
+    package sot23 footprint="SOT-23" {
+        pad GATE 1
+        pad SOURCE 2
+        pad DRAIN 3
+    }
+
+    port gate pin=GATE
+    port source pin=SOURCE
+    port drain pin=DRAIN
+}

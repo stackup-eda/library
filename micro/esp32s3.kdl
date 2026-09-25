@@ -1,0 +1,319 @@
+// @stackup/micro/esp32s3 — Espressif ESP32-S3-WROOM-1 module with supply, reset-delay, and
+// boot-strap blocks.
+//
+// Strapping requirements check the net’s resting level at reset. The `rest` fact comes from
+// connected rails and pull resistors; `role strap` records the pin’s boot function.
+//
+// - IO0 must rest high for SPI boot. The default `boot` block adds a pull-up; a button or
+// programming interface can pull it low for download mode.
+// - IO46 must not rest high. High with IO0 low is an invalid boot combination; it also controls
+// ROM messages. Use its internal pull-down unless the board supplies another compatible
+// connection.
+// - IO45 must not rest high: high selects 1.8 V VDD_SPI, incompatible with this module’s 3.3 V
+// flash. It has an internal pull-down.
+// - IO3 selects the JTAG source. No resting-level requirement is imposed.
+//
+// EN is reset, not a boot strap. Its pull-up and delay capacitor release reset after power
+// settles; its net must not rest low.
+//
+// The board may use IO45/IO46 as GPIO while respecting the reset requirements, or declare them
+// `nc` to use their internal pulls.
+//
+// The N8R2 has 8 MB flash and 2 MB quad PSRAM. IO35–IO37 remain GPIO on this version; R8
+// variants use them for octal PSRAM. Reserve those pins at board level if compatibility with R8
+// is needed.
+
+use "@stackup/passives"
+use "@stackup/types"
+
+part esp32-s3-wroom-1 {
+    symbol "RF_Module:ESP32-S3-WROOM-1"
+    reference U
+    datasheet "https://documentation.espressif.com/esp32-s3-wroom-1_wroom-1u_datasheet_en.pdf"
+    description "ESP32-S3 Wi-Fi + Bluetooth LE module, 8 MB flash, 2 MB quad PSRAM, PCB antenna"
+    manufacturer "Espressif Systems"
+    order mpn=ESP32-S3-WROOM-1-N8R2 mouser="356-ESP32-S3WRM1N8R2"
+
+    // Supply
+
+    pin "3V3" power_in
+    pin GND power_in
+
+    // Use the datasheet’s 500 mA supply budget to accommodate radio transmit bursts.
+    port v3v3 type=power {
+        require net.voltage min="3.0V" max="3.6V"
+        add net.draw "500mA"
+        line rail pin="3V3"
+        line gnd pin=GND
+    }
+
+    // Reset and straps
+
+    pin EN input required {
+        role reset active=low pull=none
+        require net.rest not=low
+    }
+    port en pin=EN
+
+    pin IO0 bidirectional once {
+        role strap sampled=reset pull=internal-up \
+            note="boot mode — high is SPI boot, low is download; a GPIO afterwards"
+        require net.rest high
+    }
+    port boot pin=IO0
+
+    pin IO3 bidirectional once {
+        role strap sampled=reset pull=none \
+            note="JTAG source — low selects external pins, high selects USB Serial/JTAG; no external bias required"
+    }
+
+    pin IO45 bidirectional once {
+        role strap sampled=reset pull=internal-down \
+            note="VDD_SPI — low selects 3.3 V; high selects 1.8 V, incompatible with this module's flash"
+        require net.rest not=high
+    }
+
+    pin IO46 bidirectional once {
+        role strap sampled=reset pull=internal-down \
+            note="ROM message control — high with IO0 low is an invalid boot combination; use the internal pull-down"
+        require net.rest not=high
+    }
+
+    // GPIO pins
+
+    pin IO1 bidirectional once
+    pin IO2 bidirectional once
+    pin IO4 bidirectional once
+    pin IO5 bidirectional once
+    pin IO6 bidirectional once
+    pin IO7 bidirectional once
+    pin IO8 bidirectional once
+    pin IO9 bidirectional once
+    pin IO10 bidirectional once
+    pin IO11 bidirectional once
+    pin IO12 bidirectional once
+    pin IO13 bidirectional once
+    pin IO14 bidirectional once
+    pin IO15 bidirectional once
+    pin IO16 bidirectional once
+    pin IO17 bidirectional once
+    pin IO18 bidirectional once
+    pin USB_D- bidirectional once
+    pin USB_D+ bidirectional once
+    pin IO21 bidirectional once
+    pin IO35 bidirectional once
+    pin IO36 bidirectional once
+    pin IO37 bidirectional once
+    pin IO38 bidirectional once
+    pin IO39 bidirectional once
+    pin IO40 bidirectional once
+    pin IO41 bidirectional once
+    pin IO42 bidirectional once
+    pin RXD0 bidirectional once
+    pin TXD0 bidirectional once
+    pin IO47 bidirectional once
+    pin IO48 bidirectional once
+
+    // Fixed USB full-speed pair, shared by ROM USB Serial/JTAG and the OTG PHY.
+    port usb type=usb {
+        line dp pin=USB_D+
+        line dm pin=USB_D-
+    }
+
+    // Grounded thermal pad 41. KiCad’s footprint includes a large pad and nine plated holes,
+    // all numbered 41.
+    package module footprint="ESP32-S3-WROOM-1" {
+        pad GND 1
+        pad "3V3" 2
+        pad EN 3
+        pad IO4 4
+        pad IO5 5
+        pad IO6 6
+        pad IO7 7
+        pad IO15 8
+        pad IO16 9
+        pad IO17 10
+        pad IO18 11
+        pad IO8 12
+        pad USB_D- 13
+        pad USB_D+ 14
+        pad IO3 15
+        pad IO46 16
+        pad IO9 17
+        pad IO10 18
+        pad IO11 19
+        pad IO12 20
+        pad IO13 21
+        pad IO14 22
+        pad IO21 23
+        pad IO47 24
+        pad IO48 25
+        pad IO45 26
+        pad IO0 27
+        pad IO35 28
+        pad IO36 29
+        pad IO37 30
+        pad IO38 31
+        pad IO39 32
+        pad IO40 33
+        pad IO41 34
+        pad IO42 35
+        pad RXD0 36
+        pad TXD0 37
+        pad IO2 38
+        pad IO1 39
+        pad GND 40
+        pad GND 41
+    }
+
+    // N8 variant: 8 MB flash without PSRAM. It shares the N8R2 footprint and pinout, including
+    // GPIO use of IO35–IO37.
+    package n8 footprint="ESP32-S3-WROOM-1" {
+        value "ESP32-S3-WROOM-1-N8"
+        description "ESP32-S3 Wi-Fi + Bluetooth LE module, 8 MB flash, no PSRAM, PCB antenna"
+        order mpn=ESP32-S3-WROOM-1-N8 mouser="356-ESP32S3WROOM1N8" lcsc=C2913198
+        pad GND 1
+        pad "3V3" 2
+        pad EN 3
+        pad IO4 4
+        pad IO5 5
+        pad IO6 6
+        pad IO7 7
+        pad IO15 8
+        pad IO16 9
+        pad IO17 10
+        pad IO18 11
+        pad IO8 12
+        pad USB_D- 13
+        pad USB_D+ 14
+        pad IO3 15
+        pad IO46 16
+        pad IO9 17
+        pad IO10 18
+        pad IO11 19
+        pad IO12 20
+        pad IO13 21
+        pad IO14 22
+        pad IO21 23
+        pad IO47 24
+        pad IO48 25
+        pad IO45 26
+        pad IO0 27
+        pad IO35 28
+        pad IO36 29
+        pad IO37 30
+        pad IO38 31
+        pad IO39 32
+        pad IO40 33
+        pad IO41 34
+        pad IO42 35
+        pad RXD0 36
+        pad TXD0 37
+        pad IO2 38
+        pad IO1 39
+        pad GND 40
+        pad GND 41
+    }
+
+    // Application circuit
+
+    // Bulk capacitance for radio transmit bursts, with local bypassing.
+    block supply {
+        default
+        place bulk Cbulk node="3V3" rail=v3v3 value="10µF" footprint="C_0603_1608Metric" \
+            note="bulk capacitance for radio transmit bursts of hundreds of milliamps over milliseconds"
+        place decouple Cbypass node="3V3" rail=v3v3 value="100nF"
+    }
+
+    // EN reset delay: the pull-up and capacitor give a 10 ms time constant. A programming
+    // interface can pulse `en` low.
+    block enable {
+        default
+        place pull-up Ren node=EN rail=v3v3 value="10kΩ" note="enable pull-up to release reset"
+        place filter Cen node=EN rail=v3v3 value="1µF" note="reset-release delay"
+    }
+
+    // Pull IO0 high for SPI boot unless an external connection pulls it low.
+    block boot {
+        default
+        place pull-up Rboot node=IO0 rail=v3v3 value="10kΩ" \
+            note="boot strap pull-up — SPI boot unless something pulls it low"
+    }
+
+    // Peripherals
+    //
+    // The GPIO matrix allows most functions on most pins, represented by the `io` rows. UART0
+    // uses the fixed ROM-bootloader and default-console pair in this definition.
+
+    peripheral GPIO gpio {
+        io IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18
+        io IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+    }
+
+    peripheral UART0 uart {
+        tx TXD0
+        rx RXD0
+    }
+
+    // UART1/2 and TWAI use the GPIO matrix. The selected pin pair is recorded by the
+    // placement's peripheral binding; either function can use any exposed GPIO.
+    peripheral UART1 uart {
+        tx IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+        rx IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+    }
+    peripheral UART2 uart {
+        tx IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+        rx IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+    }
+    peripheral TWAI can {
+        tx IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+        rx IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+    }
+
+    // I²C and general-purpose SPI signals use the GPIO matrix.
+    peripheral I2C0 i2c {
+        sda IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+        scl IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+    }
+    peripheral I2C1 i2c {
+        sda IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+        scl IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+    }
+    peripheral SPI2 spi {
+        sck IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+        mosi IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+        miso IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+    }
+    peripheral SPI3 spi {
+        sck IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+        mosi IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+        miso IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10 IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18 \
+            IO21 IO35 IO36 IO37 IO38 IO39 IO40 IO41 IO42 IO45 IO46 IO47 IO48 RXD0 TXD0
+    }
+
+    // ADC inputs are fixed: ADC1 uses IO1–IO10 and ADC2 uses IO11–IO20. ADC2 is shared with
+    // Wi-Fi and unavailable while the radio is active. Only ADC1 advertises the capability for
+    // concurrent sampling and radio use.
+    peripheral ADC1 adc {
+        has wifi-safe
+        in IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO10
+    }
+    peripheral ADC2 adc {
+        in IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18
+    }
+}

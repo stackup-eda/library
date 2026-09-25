@@ -1,0 +1,40 @@
+// @stackup/discrete/diode/tvs — generic bidirectional TVS diode using Device:D_TVS. Its pins
+// are symmetric. Set the specific device through the placement’s `value` and choose a package
+// rated for the expected surge energy. SMB is the default package.
+//
+// Ports `a` and `b` allow a clamp connection across a rail: `circuit vpwr.rail clamp vpwr.gnd`.
+
+part tvs {
+    symbol "Device:D_TVS"
+    reference D
+    description "Bidirectional transient-voltage-suppression diode"
+
+    pin A1 passive
+    pin A2 passive
+
+    port a pin=A1
+    port b pin=A2
+
+    package smb footprint="D_SMB" {
+        pad A1 1
+        pad A2 2
+    }
+    package smc footprint="D_SMC" {
+        pad A1 1
+        pad A2 2
+    }
+    package sma footprint="D_SMA" {
+        pad A1 1
+        pad A2 2
+    }
+    package sod123 footprint="D_SOD-123" {
+        pad A1 1
+        pad A2 2
+    }
+    // SOD-123 option for ESD protection, such as PESD5V0S1BA on a USB rail. Check its energy
+    // rating before using it for supply surges.
+    package sod323 footprint="D_SOD-323" {
+        pad A1 1
+        pad A2 2
+    }
+}
