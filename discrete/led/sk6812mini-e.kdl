@@ -5,10 +5,9 @@
 // after the stock PLCC4 footprint was rejected. Pad order follows LED:SK6812: VSS, DIN, VDD,
 // DOUT.
 //
-// The szledcolor SK6812 datasheet used for this definition characterises the part at 4.5–5.5 V
-// and specifies a 3.4 V input-high threshold at 5 V. It gives no minimum operating supply
-// voltage. The model therefore requires 4.5–5.5 V; operation at 3.3 V is not established by
-// that datasheet.
+// OPSCO's SK6812MINI-E Rev. 02 datasheet gives a 3.7–5.5 V supply range. Its detailed IC
+// electrical characteristics are specified at 4.5–5.5 V; the input-high threshold is at least
+// 0.7 × VDD when VDD is 5 V. Operation at 3.3 V is outside the stated supply range.
 
 use "@stackup/passives"
 
@@ -36,7 +35,7 @@ part sk6812mini-e {
     // Estimated full-brightness current. The datasheet gives 1 mA static current but no RGB
     // total; related parts use 12–20 mA per colour.
     port vdd type=power {
-        require net.voltage min="4.5V" max="5.5V"
+        require net.voltage min="3.7V" max="5.5V"
         add net.draw "40mA"
         line rail pin=VDD
         line gnd pin=VSS
