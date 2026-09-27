@@ -93,8 +93,8 @@ Generic components and shared types live at the root. Part families are grouped 
 | `bus/can`, `bus/lin`, `bus/rs485`, `bus/usb` | Transceivers and bridges |
 | `clock/` | Oscillators |
 | `audio/` | Audio amplifiers |
-| `connector/` | Headers, power jacks, Qwiic, SWD, and USB-C |
-| `discrete/fet`, `discrete/bjt`, `discrete/diode`, `discrete/led` | Transistors, diodes, TVS protection, and LEDs |
+| `connector/` | Headers, JST PH, power jacks, Qwiic, SWD, and USB-C |
+| `discrete/fet`, `discrete/bjt`, `discrete/diode`, `discrete/led` | Transistors, diodes including BAT54W, TVS protection, and LEDs |
 | `driver/led`, `driver/motor` | LED and motor drivers |
 | `interface/expander` | GPIO expanders |
 | `isolator/` | Digital isolators and optocouplers |
