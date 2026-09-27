@@ -1,0 +1,29 @@
+// @stackup/discrete/diode/bat54w — Diodes Incorporated BAT54W single Schottky diode.
+//
+// This is the single-diode W version in SOT-323, not the AW/CW/SW dual-diode variants.
+// The third physical pad (2) is unconnected. The 30 V reverse and 200 mA continuous forward
+// ratings come from the manufacturer's datasheet; circuit suitability remains the board's job.
+// Source: https://www.diodes.com/datasheet/download/BAT54CW.pdf
+
+part bat54w {
+    symbol "Diode:BAT54W"
+    reference D
+    value BAT54W
+    description "Single 30 V, 200 mA Schottky diode in SOT-323; pad 2 unconnected"
+    datasheet "https://www.diodes.com/datasheet/download/BAT54CW.pdf"
+    manufacturer "Diodes Incorporated"
+    order mpn="BAT54W-7-F" lcsc=C134417
+
+    pin A passive
+    pin NC no_connect
+    pin K passive
+
+    port a pin=A
+    port b pin=K
+
+    package sot323 footprint="Package_TO_SOT_SMD:SOT-323_SC-70" {
+        pad A 1
+        pad NC 2
+        pad K 3
+    }
+}

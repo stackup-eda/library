@@ -1,0 +1,24 @@
+// @stackup/connector/jst-ph — JST PH 2.00 mm polarized wire-to-board connector.
+//
+// The two-position S2B-PH-K is a side-entry through-hole header: the cable exits parallel to
+// the PCB. The top-entry B2B-PH-K is mechanically different and is not a substitute for this
+// package. Pin numbers follow the connector face and KiCad's JST PH footprint.
+// Source: https://www.jst-mfg.com/product/pdf/eng/ePH.pdf
+
+part jst-ph-2 {
+    symbol "Connector_Generic:Conn_01x02"
+    reference J
+    value "JST PH 2-pin side entry"
+    description "JST PH 2.00 mm two-position polarized, side-entry through-hole header"
+    datasheet "https://www.jst-mfg.com/product/pdf/eng/ePH.pdf"
+    manufacturer JST
+
+    pin 1 passive
+    pin 2 passive
+
+    package side footprint="Connector_JST:JST_PH_S2B-PH-K_1x02_P2.00mm_Horizontal" {
+        order mpn="S2B-PH-K(LF)(SN)" lcsc=C265016
+        pad 1 1
+        pad 2 2
+    }
+}
