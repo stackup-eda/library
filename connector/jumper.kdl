@@ -6,7 +6,7 @@ part jumper {
     description "2-pin 2.54 mm jumper header"
     pin A passive
     pin B passive
-    package header footprint="PinHeader_1x02_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" {
         pad A 1
         pad B 2
     }

@@ -10,7 +10,7 @@ part conn-1x2 {
     pin 2 passive
     port 1 pin=1
     port 2 pin=2
-    package header footprint="PinHeader_1x02_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
     }
@@ -25,7 +25,7 @@ part conn-1x3 {
     port 1 pin=1
     port 2 pin=2
     port 3 pin=3
-    package header footprint="PinHeader_1x03_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -43,19 +43,19 @@ part conn-1x4 {
     port 2 pin=2
     port 3 pin=3
     port 4 pin=4
-    package header footprint="PinHeader_1x04_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
         pad 4 4
     }
-    package two-row-header footprint="PinHeader_2x02_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x02_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
         pad 4 4
     }
-    package two-row-socket footprint="PinSocket_2x02_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x02_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -68,7 +68,7 @@ part conn-1x1 {
     reference J
     pin 1 passive
     port 1 pin=1
-    package header footprint="PinHeader_1x01_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical" {
         pad 1 1
     }
 }
@@ -86,7 +86,7 @@ part conn-1x5 {
     port 3 pin=3
     port 4 pin=4
     port 5 pin=5
-    package header footprint="PinHeader_1x05_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -110,7 +110,7 @@ part conn-1x6 {
     port 4 pin=4
     port 5 pin=5
     port 6 pin=6
-    package header footprint="PinHeader_1x06_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -118,7 +118,7 @@ part conn-1x6 {
         pad 5 5
         pad 6 6
     }
-    package two-row-header footprint="PinHeader_2x03_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -126,7 +126,7 @@ part conn-1x6 {
         pad 5 5
         pad 6 6
     }
-    package two-row-socket footprint="PinSocket_2x03_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x03_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -153,7 +153,7 @@ part conn-1x7 {
     port 5 pin=5
     port 6 pin=6
     port 7 pin=7
-    package header footprint="PinHeader_1x07_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x07_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -183,7 +183,7 @@ part conn-1x8 {
     port 6 pin=6
     port 7 pin=7
     port 8 pin=8
-    package header footprint="PinHeader_1x08_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -193,7 +193,7 @@ part conn-1x8 {
         pad 7 7
         pad 8 8
     }
-    package two-row-header footprint="PinHeader_2x04_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x04_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -203,7 +203,7 @@ part conn-1x8 {
         pad 7 7
         pad 8 8
     }
-    package two-row-socket footprint="PinSocket_2x04_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x04_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -236,7 +236,7 @@ part conn-1x9 {
     port 7 pin=7
     port 8 pin=8
     port 9 pin=9
-    package header footprint="PinHeader_1x09_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x09_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -272,7 +272,7 @@ part conn-1x10 {
     port 8 pin=8
     port 9 pin=9
     port 10 pin=10
-    package header footprint="PinHeader_1x10_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x10_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -284,7 +284,7 @@ part conn-1x10 {
         pad 9 9
         pad 10 10
     }
-    package two-row-header footprint="PinHeader_2x05_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -296,7 +296,7 @@ part conn-1x10 {
         pad 9 9
         pad 10 10
     }
-    package two-row-socket footprint="PinSocket_2x05_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x05_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -335,7 +335,7 @@ part conn-1x11 {
     port 9 pin=9
     port 10 pin=10
     port 11 pin=11
-    package header footprint="PinHeader_1x11_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x11_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -377,7 +377,7 @@ part conn-1x12 {
     port 10 pin=10
     port 11 pin=11
     port 12 pin=12
-    package header footprint="PinHeader_1x12_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x12_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -391,7 +391,7 @@ part conn-1x12 {
         pad 11 11
         pad 12 12
     }
-    package two-row-header footprint="PinHeader_2x06_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x06_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -405,7 +405,7 @@ part conn-1x12 {
         pad 11 11
         pad 12 12
     }
-    package two-row-socket footprint="PinSocket_2x06_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x06_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -450,7 +450,7 @@ part conn-1x13 {
     port 11 pin=11
     port 12 pin=12
     port 13 pin=13
-    package header footprint="PinHeader_1x13_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x13_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -498,7 +498,7 @@ part conn-1x14 {
     port 12 pin=12
     port 13 pin=13
     port 14 pin=14
-    package header footprint="PinHeader_1x14_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x14_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -514,7 +514,7 @@ part conn-1x14 {
         pad 13 13
         pad 14 14
     }
-    package two-row-header footprint="PinHeader_2x07_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x07_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -530,7 +530,7 @@ part conn-1x14 {
         pad 13 13
         pad 14 14
     }
-    package two-row-socket footprint="PinSocket_2x07_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x07_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -581,7 +581,7 @@ part conn-1x15 {
     port 13 pin=13
     port 14 pin=14
     port 15 pin=15
-    package header footprint="PinHeader_1x15_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x15_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -635,7 +635,7 @@ part conn-1x16 {
     port 14 pin=14
     port 15 pin=15
     port 16 pin=16
-    package header footprint="PinHeader_1x16_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x16_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -653,7 +653,7 @@ part conn-1x16 {
         pad 15 15
         pad 16 16
     }
-    package two-row-header footprint="PinHeader_2x08_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x08_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -671,7 +671,7 @@ part conn-1x16 {
         pad 15 15
         pad 16 16
     }
-    package two-row-socket footprint="PinSocket_2x08_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x08_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -728,7 +728,7 @@ part conn-1x17 {
     port 15 pin=15
     port 16 pin=16
     port 17 pin=17
-    package header footprint="PinHeader_1x17_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x17_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -788,7 +788,7 @@ part conn-1x18 {
     port 16 pin=16
     port 17 pin=17
     port 18 pin=18
-    package header footprint="PinHeader_1x18_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x18_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -808,7 +808,7 @@ part conn-1x18 {
         pad 17 17
         pad 18 18
     }
-    package two-row-header footprint="PinHeader_2x09_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x09_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -828,7 +828,7 @@ part conn-1x18 {
         pad 17 17
         pad 18 18
     }
-    package two-row-socket footprint="PinSocket_2x09_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x09_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -891,7 +891,7 @@ part conn-1x19 {
     port 17 pin=17
     port 18 pin=18
     port 19 pin=19
-    package header footprint="PinHeader_1x19_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x19_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -957,7 +957,7 @@ part conn-1x20 {
     port 18 pin=18
     port 19 pin=19
     port 20 pin=20
-    package header footprint="PinHeader_1x20_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x20_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -979,7 +979,7 @@ part conn-1x20 {
         pad 19 19
         pad 20 20
     }
-    package two-row-header footprint="PinHeader_2x10_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x10_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1001,7 +1001,7 @@ part conn-1x20 {
         pad 19 19
         pad 20 20
     }
-    package two-row-socket footprint="PinSocket_2x10_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x10_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1070,7 +1070,7 @@ part conn-1x21 {
     port 19 pin=19
     port 20 pin=20
     port 21 pin=21
-    package header footprint="PinHeader_1x21_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x21_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1142,7 +1142,7 @@ part conn-1x22 {
     port 20 pin=20
     port 21 pin=21
     port 22 pin=22
-    package header footprint="PinHeader_1x22_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x22_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1166,7 +1166,7 @@ part conn-1x22 {
         pad 21 21
         pad 22 22
     }
-    package two-row-header footprint="PinHeader_2x11_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x11_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1190,7 +1190,7 @@ part conn-1x22 {
         pad 21 21
         pad 22 22
     }
-    package two-row-socket footprint="PinSocket_2x11_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x11_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1265,7 +1265,7 @@ part conn-1x23 {
     port 21 pin=21
     port 22 pin=22
     port 23 pin=23
-    package header footprint="PinHeader_1x23_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x23_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1343,7 +1343,7 @@ part conn-1x24 {
     port 22 pin=22
     port 23 pin=23
     port 24 pin=24
-    package header footprint="PinHeader_1x24_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x24_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1369,7 +1369,7 @@ part conn-1x24 {
         pad 23 23
         pad 24 24
     }
-    package two-row-header footprint="PinHeader_2x12_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x12_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1395,7 +1395,7 @@ part conn-1x24 {
         pad 23 23
         pad 24 24
     }
-    package two-row-socket footprint="PinSocket_2x12_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x12_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1476,7 +1476,7 @@ part conn-1x25 {
     port 23 pin=23
     port 24 pin=24
     port 25 pin=25
-    package header footprint="PinHeader_1x25_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x25_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1560,7 +1560,7 @@ part conn-1x26 {
     port 24 pin=24
     port 25 pin=25
     port 26 pin=26
-    package header footprint="PinHeader_1x26_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x26_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1588,7 +1588,7 @@ part conn-1x26 {
         pad 25 25
         pad 26 26
     }
-    package two-row-header footprint="PinHeader_2x13_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1616,7 +1616,7 @@ part conn-1x26 {
         pad 25 25
         pad 26 26
     }
-    package two-row-socket footprint="PinSocket_2x13_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x13_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1703,7 +1703,7 @@ part conn-1x27 {
     port 25 pin=25
     port 26 pin=26
     port 27 pin=27
-    package header footprint="PinHeader_1x27_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x27_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1793,7 +1793,7 @@ part conn-1x28 {
     port 26 pin=26
     port 27 pin=27
     port 28 pin=28
-    package header footprint="PinHeader_1x28_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x28_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1823,7 +1823,7 @@ part conn-1x28 {
         pad 27 27
         pad 28 28
     }
-    package two-row-header footprint="PinHeader_2x14_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x14_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1853,7 +1853,7 @@ part conn-1x28 {
         pad 27 27
         pad 28 28
     }
-    package two-row-socket footprint="PinSocket_2x14_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x14_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -1946,7 +1946,7 @@ part conn-1x29 {
     port 27 pin=27
     port 28 pin=28
     port 29 pin=29
-    package header footprint="PinHeader_1x29_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x29_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -2042,7 +2042,7 @@ part conn-1x30 {
     port 28 pin=28
     port 29 pin=29
     port 30 pin=30
-    package header footprint="PinHeader_1x30_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x30_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -2074,7 +2074,7 @@ part conn-1x30 {
         pad 29 29
         pad 30 30
     }
-    package two-row-header footprint="PinHeader_2x15_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x15_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -2106,7 +2106,7 @@ part conn-1x30 {
         pad 29 29
         pad 30 30
     }
-    package two-row-socket footprint="PinSocket_2x15_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x15_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -2205,7 +2205,7 @@ part conn-1x31 {
     port 29 pin=29
     port 30 pin=30
     port 31 pin=31
-    package header footprint="PinHeader_1x31_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x31_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -2307,7 +2307,7 @@ part conn-1x32 {
     port 30 pin=30
     port 31 pin=31
     port 32 pin=32
-    package header footprint="PinHeader_1x32_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x32_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -2341,7 +2341,7 @@ part conn-1x32 {
         pad 31 31
         pad 32 32
     }
-    package two-row-header footprint="PinHeader_2x16_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x16_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -2375,7 +2375,7 @@ part conn-1x32 {
         pad 31 31
         pad 32 32
     }
-    package two-row-socket footprint="PinSocket_2x16_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x16_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -2480,7 +2480,7 @@ part conn-1x33 {
     port 31 pin=31
     port 32 pin=32
     port 33 pin=33
-    package header footprint="PinHeader_1x33_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x33_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -2588,7 +2588,7 @@ part conn-1x34 {
     port 32 pin=32
     port 33 pin=33
     port 34 pin=34
-    package header footprint="PinHeader_1x34_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x34_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -2624,7 +2624,7 @@ part conn-1x34 {
         pad 33 33
         pad 34 34
     }
-    package two-row-header footprint="PinHeader_2x17_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x17_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -2660,7 +2660,7 @@ part conn-1x34 {
         pad 33 33
         pad 34 34
     }
-    package two-row-socket footprint="PinSocket_2x17_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x17_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -2771,7 +2771,7 @@ part conn-1x35 {
     port 33 pin=33
     port 34 pin=34
     port 35 pin=35
-    package header footprint="PinHeader_1x35_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x35_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -2885,7 +2885,7 @@ part conn-1x36 {
     port 34 pin=34
     port 35 pin=35
     port 36 pin=36
-    package header footprint="PinHeader_1x36_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x36_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -2923,7 +2923,7 @@ part conn-1x36 {
         pad 35 35
         pad 36 36
     }
-    package two-row-header footprint="PinHeader_2x18_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x18_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -2961,7 +2961,7 @@ part conn-1x36 {
         pad 35 35
         pad 36 36
     }
-    package two-row-socket footprint="PinSocket_2x18_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x18_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -3078,7 +3078,7 @@ part conn-1x37 {
     port 35 pin=35
     port 36 pin=36
     port 37 pin=37
-    package header footprint="PinHeader_1x37_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x37_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -3198,7 +3198,7 @@ part conn-1x38 {
     port 36 pin=36
     port 37 pin=37
     port 38 pin=38
-    package header footprint="PinHeader_1x38_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x38_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -3238,7 +3238,7 @@ part conn-1x38 {
         pad 37 37
         pad 38 38
     }
-    package two-row-header footprint="PinHeader_2x19_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x19_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -3278,7 +3278,7 @@ part conn-1x38 {
         pad 37 37
         pad 38 38
     }
-    package two-row-socket footprint="PinSocket_2x19_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x19_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -3401,7 +3401,7 @@ part conn-1x39 {
     port 37 pin=37
     port 38 pin=38
     port 39 pin=39
-    package header footprint="PinHeader_1x39_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x39_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -3527,7 +3527,7 @@ part conn-1x40 {
     port 38 pin=38
     port 39 pin=39
     port 40 pin=40
-    package header footprint="PinHeader_1x40_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x40_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -3569,7 +3569,7 @@ part conn-1x40 {
         pad 39 39
         pad 40 40
     }
-    package two-row-header footprint="PinHeader_2x20_P2.54mm_Vertical" {
+    package two-row-header footprint="Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3
@@ -3611,7 +3611,7 @@ part conn-1x40 {
         pad 39 39
         pad 40 40
     }
-    package two-row-socket footprint="PinSocket_2x20_P2.54mm_Vertical" {
+    package two-row-socket footprint="Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3

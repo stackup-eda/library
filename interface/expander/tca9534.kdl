@@ -4,6 +4,10 @@
 use "@stackup/passives"
 
 part tca9534 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvdd text default=#null
+    param ref-supply-Rint text default=#null
+
     symbol "Interface_Expansion:TCA9534"
     reference U
     datasheet "https://www.ti.com/lit/gpn/tca9534"
@@ -73,8 +77,8 @@ part tca9534 {
 
     block supply {
         default
-        place decouple Cvdd node=VDD rail=vdd value="1µF"
-        place pull-up Rint node=INT rail=vdd value="4.7kΩ"
+        place decouple Cvdd anchor=VDD node=VDD rail=vdd value="1µF" designator=ref-supply-Cvdd
+        place pull-up Rint anchor=INT node=INT rail=vdd value="4.7kΩ" designator=ref-supply-Rint
     }
     block a0-low { when "offset == 0 || offset == 2 || offset == 4 || offset == 6"; circuit A0 vdd.gnd }
     block a0-high { when "offset == 1 || offset == 3 || offset == 5 || offset == 7"; circuit A0 vdd.rail }

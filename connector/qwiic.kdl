@@ -19,14 +19,14 @@ part qwiic {
 
     // Side-entry and top-entry packages share the same pad map and have separate order numbers.
     // Side-entry is the default.
-    package side footprint="JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal" {
+    package side footprint="Connector_JST:JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal" {
         pad 1 1
         pad 2 2
         pad 3 3
         pad 4 4
         pad MP MP
     }
-    package vertical footprint="JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical" {
+    package vertical footprint="Connector_JST:JST_SH_BM04B-SRSS-TB_1x04-1MP_P1.00mm_Vertical" {
         pad 1 1
         pad 2 2
         pad 3 3

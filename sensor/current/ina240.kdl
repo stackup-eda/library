@@ -42,7 +42,7 @@ part ina240a2 {
 
     block supply {
         default
-        place bypass Cvdd node=V+ rail=vdd value="100nF"
+        place bypass Cvdd anchor=V+ node=V+ rail=vdd value="100nF"
         circuit REF2 vdd.gnd
     }
     block midpoint {
@@ -63,7 +63,7 @@ block ina240-sense {
     port signal
 
     place ina240a2 as=self vdd=vdd output=signal
-    place resistor Rshunt value=shunt intent=shunt footprint="R_2512_6332Metric" note="current-sense shunt; specify tolerance in purchasing data"
+    place resistor Rshunt value=shunt intent=shunt footprint="Resistor_SMD:R_2512_6332Metric" note="current-sense shunt; specify tolerance in purchasing data"
     circuit a Rshunt b
     circuit a self.P
     circuit b self.N

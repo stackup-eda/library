@@ -14,7 +14,7 @@ part dmn3404l {
     pin S passive
     pin D passive
 
-    package sot23 footprint="SOT-23" {
+    package sot23 footprint="Package_TO_SOT_SMD:SOT-23" {
         pad G 1
         pad S 2
         pad D 3

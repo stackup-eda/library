@@ -89,14 +89,14 @@ part tps26631 {
     block programming {
         default
         assert "current-limit >= 600mA && current-limit <= 6A" message="TPS26631 current limit must be 0.6-6A"
-        place resistor Rilim value=rilim intent=divider
+        place resistor Rilim anchor=ILIM value=rilim intent=divider
         circuit ILIM Rilim GND
-        place resistor Rovp-top value=rovp intent=divider
-        place resistor Rovp-bottom value="10kΩ" intent=divider
+        place resistor Rovp-top anchor=OVP value=rovp intent=divider
+        place resistor Rovp-bottom anchor=OVP value="10kΩ" intent=divider
         circuit in.rail Rovp-top OVP Rovp-bottom GND
-        place bypass Cin node=IN rail=in value="100nF"
-        place bypass Cout node=OUT rail=in value="100nF"
-        place capacitor Cdvdt value="10nF" intent=filter
+        place bypass Cin anchor=IN@1 node=IN rail=in value="100nF"
+        place bypass Cout anchor=OUT@18 node=OUT rail=in value="100nF"
+        place capacitor Cdvdt anchor=DVDT value="10nF" intent=filter
         circuit DVDT Cdvdt GND
     }
     block internal-uvlo {
@@ -105,8 +105,8 @@ part tps26631 {
     }
     block programmed-uvlo {
         when "undervoltage > 0V"
-        place resistor Ruvlo-top value=ruvlo intent=divider
-        place resistor Ruvlo-bottom value="10kΩ" intent=divider
+        place resistor Ruvlo-top anchor=UVLO value=ruvlo intent=divider
+        place resistor Ruvlo-bottom anchor=UVLO value="10kΩ" intent=divider
         circuit in.rail Ruvlo-top UVLO Ruvlo-bottom GND
     }
     block no-power-good {
@@ -115,8 +115,8 @@ part tps26631 {
     }
     block programmed-power-good {
         when "power-good-above > 0V"
-        place resistor Rpg-top value=rpg intent=divider
-        place resistor Rpg-bottom value="10kΩ" intent=divider
+        place resistor Rpg-top anchor=PGTH value=rpg intent=divider
+        place resistor Rpg-bottom anchor=PGTH value="10kΩ" intent=divider
         circuit OUT Rpg-top PGTH Rpg-bottom GND
     }
     block auto-retry {

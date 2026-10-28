@@ -15,7 +15,7 @@ part r78hb5v0 {
     pin IN power_in
     pin GND power_in
     pin OUT power_out
-    package sip3 footprint="Converter_DCDC_RECOM_R-78HB-0.5_THT" {
+    package sip3 footprint="Converter_DCDC:Converter_DCDC_RECOM_R-78HB-0.5_THT" {
         pad IN 1
         pad GND 2
         pad OUT 3
@@ -38,7 +38,7 @@ part r78hb5v0 {
 
     // Select this block when the input can exceed 50 V. Use a 100 V rated 3.3 µF capacitor.
     block input-protection {
-        place bulk Cin node=IN rail=in value="3.3µF" footprint="C_1210_3225Metric" \
+        place bulk Cin anchor=IN node=IN rail=in value="3.3µF" footprint="Capacitor_SMD:C_1210_3225Metric" \
             note="100V rated input protection capacitor required above 50V input"
     }
 }

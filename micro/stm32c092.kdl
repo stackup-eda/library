@@ -27,6 +27,13 @@
 use "@stackup/passives"
 
 part stm32c092 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvdd text default=#null
+    param ref-supply-Cbulk text default=#null
+    param ref-supply-Cnrst text default=#null
+    param ref-reference-Cvref text default=#null
+    param ref-reference-Cvref_hf text default=#null
+
     reference U
     datasheet "https://www.st.com/resource/en/datasheet/stm32c092kb.pdf"
     description "Arm Cortex-M0+ MCU with CAN FD, 128KB flash, 30KB RAM, 48 MHz, 2.0-3.6V"
@@ -115,7 +122,7 @@ part stm32c092 {
     // LQFP-32 pin numbering follows ST’s K package: PB9 at pad 1, followed by the oscillator
     // pins. This definition uses the T6 temperature grade; a 105 °C variant requires the larger
     // package.
-    package lqfp32 footprint="LQFP-32_7x7mm_P0.8mm" {
+    package lqfp32 footprint="Package_QFP:LQFP-32_7x7mm_P0.8mm" {
         symbol "MCU_ST_STM32C0:STM32C092KBTx"
         description "Arm Cortex-M0+ MCU with CAN FD, 128KB flash, 30KB RAM, 48 MHz, 2.0-3.6V, 28 GPIO, LQFP32"
         order mpn=STM32C092KBT6 mouser="511-STM32C092KBT6"
@@ -154,7 +161,7 @@ part stm32c092 {
     }
 
     // LQFP-48 exposes 44 GPIOs, VREF+, and dedicated PF0-OSC_IN/PF1-OSC_OUT pins.
-    package lqfp48 footprint="LQFP-48_7x7mm_P0.5mm" {
+    package lqfp48 footprint="Package_QFP:LQFP-48_7x7mm_P0.5mm" {
         symbol "MCU_ST_STM32C0:STM32C092CBTx"
         description "Arm Cortex-M0+ MCU with CAN FD, 128KB flash, 30KB RAM, 48 MHz, 2.0-3.6V, 44 GPIO, LQFP48"
         order mpn=STM32C092CBT6 mouser="511-STM32C092CBT6"
@@ -216,10 +223,10 @@ part stm32c092 {
     block supply {
         default
 
-        place decouple Cvdd node=VDD rail=vdd value="100nF"
-        place bulk Cbulk node=VDD rail=vdd value="4.7µF" note="VDD bulk capacitance"
-        place filter Cnrst node=PF2 rail=vdd value="100nF" \
-            note="NRST glitch filter — the pin's pull-up is internal"
+        place decouple Cvdd node=VDD anchor=VDD rail=vdd value="100nF" designator=ref-supply-Cvdd
+        place bulk Cbulk anchor=VDD node=VDD rail=vdd value="4.7µF" note="VDD bulk capacitance" designator=ref-supply-Cbulk
+        place filter Cnrst anchor=PF2 node=PF2 rail=vdd value="100nF" \
+            note="NRST glitch filter — the pin's pull-up is internal" designator=ref-supply-Cnrst
     }
 
     // Connect and bypass VREF+ from the supply when the package exposes it. Bulk capacitance
@@ -230,9 +237,9 @@ part stm32c092 {
         when "package == lqfp48"
 
         circuit VREF+ VDD
-        place bulk Cvref node=VREF+ rail=vdd value="1µF" \
-            note="VREF+ bulk capacitance for ADC sampling transients"
-        place bypass Cvref_hf node=VREF+ rail=vdd value="100nF"
+        place bulk Cvref anchor=VREF+ node=VREF+ rail=vdd value="1µF" \
+            note="VREF+ bulk capacitance for ADC sampling transients" designator=ref-reference-Cvref
+        place bypass Cvref_hf anchor=VREF+ node=VREF+ rail=vdd value="100nF" designator=ref-reference-Cvref_hf
     }
 
     // Peripherals
@@ -251,12 +258,16 @@ part stm32c092 {
         io PC6 PC7 PC13 PC14 PC15 PD0 PD1 PD2 PD3 PF0 PF1 PF2 PF3
     }
 
+    // ROM bindings: ST AN2606, C091/C092 Table 18; G0B1 Table 111 (Rev 70).
+    // This capability checks interface pins, not boot entry or external circuit state.
     peripheral I2C1 i2c {
+        has bootloader when="scl == PB6 && sda == PB7"
         sda PA10 PB7 PB9 PC14
         scl PA9 PB6 PB7 PB8
     }
 
     peripheral I2C2 i2c {
+        has bootloader when="scl == PB10 && sda == PB11"
         sda PA6 PA10 PA12 PB4 PB11 PB14
         scl PA7 PA9 PA11 PB3 PB10 PB13
     }
@@ -309,6 +320,7 @@ part stm32c092 {
     }
 
     peripheral FDCAN1 can {
+        has bootloader when="(package == lqfp48 && rx == PD0 && tx == PD1) || (package == lqfp32 && rx == PB0 && tx == PB1)"
         rx PA11 PB0 PB5 PB8 PB12 PD0
         tx PA12 PB1 PB6 PB9 PB13 PC14 PD1
     }

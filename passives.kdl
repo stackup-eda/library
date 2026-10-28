@@ -70,38 +70,42 @@ part inductor {
 // The rail supplies the voltage used to select capacitor ratings and check pull-up levels. Its
 // `gnd` line provides the return, including in isolated sections; there is no global ground.
 //
-// The terminal also sets the placement anchor: `node=VDD@4` puts the capacitor beside pad 4.
+// `node=` wires the capacitor; `anchor=VDD@4` places it beside that physical pad.
 
 // High-frequency decoupling at a supply pin.
 block decouple {
+    param anchor reference default=#null
     port node
     port rail type=power
-    place capacitor as=self intent=decouple
+    place capacitor as=self intent=decouple anchor=anchor
     circuit node self rail.gnd
 }
 
 // Bypass on a signal or reference pin, to its return.
 block bypass {
+    param anchor reference default=#null
     port node
     port rail type=power
-    place capacitor as=self intent=bypass
+    place capacitor as=self anchor=anchor intent=bypass
     circuit node self rail.gnd
 }
 
 // Bulk capacitance for a power rail. Ceramic by default; the board’s stock rules select the
 // type and package.
 block bulk {
+    param anchor reference default=#null
     port node
     port rail type=power
-    place capacitor as=self intent=bulk
+    place capacitor as=self anchor=anchor intent=bulk footprint="Capacitor_SMD:C_1210_3225Metric"
     circuit node self rail.gnd
 }
 
 // Capacitor for an RC filter or glitch filter.
 block filter {
+    param anchor reference default=#null
     port node
     port rail type=power
-    place capacitor as=self intent=filter
+    place capacitor as=self anchor=anchor intent=filter
     circuit node self rail.gnd
 }
 
@@ -109,20 +113,22 @@ block filter {
 // pull-up on a pin that is not 5 V tolerant. Multiple pull-ups contribute their parallel
 // conductance, which I²C checks use to calculate the effective resistance.
 block pull-up {
+    param anchor reference default=#null
     port node {
         add net.pull "1 / value"
     }
     port rail type=power
-    place resistor as=self intent=pull-up
+    place resistor as=self anchor=anchor intent=pull-up
     circuit node self rail.rail
 }
 
 // Pull-down to the rail’s ground.
 block pull-down {
+    param anchor reference default=#null
     port node {
         add net.pull-down "1 / value"
     }
     port rail type=power
-    place resistor as=self intent=pull-down
+    place resistor as=self anchor=anchor intent=pull-down
     circuit node self rail.gnd
 }

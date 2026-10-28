@@ -122,7 +122,7 @@ part esp32-s3-wroom-1 {
 
     // Grounded thermal pad 41. KiCad’s footprint includes a large pad and nine plated holes,
     // all numbered 41.
-    package module footprint="ESP32-S3-WROOM-1" {
+    package module footprint="RF_Module:ESP32-S3-WROOM-1" {
         pad GND 1
         pad "3V3" 2
         pad EN 3
@@ -168,7 +168,7 @@ part esp32-s3-wroom-1 {
 
     // N8 variant: 8 MB flash without PSRAM. It shares the N8R2 footprint and pinout, including
     // GPIO use of IO35–IO37.
-    package n8 footprint="ESP32-S3-WROOM-1" {
+    package n8 footprint="RF_Module:ESP32-S3-WROOM-1" {
         value "ESP32-S3-WROOM-1-N8"
         description "ESP32-S3 Wi-Fi + Bluetooth LE module, 8 MB flash, no PSRAM, PCB antenna"
         order mpn=ESP32-S3-WROOM-1-N8 mouser="356-ESP32S3WROOM1N8" lcsc=C2913198
@@ -220,23 +220,23 @@ part esp32-s3-wroom-1 {
     // Bulk capacitance for radio transmit bursts, with local bypassing.
     block supply {
         default
-        place bulk Cbulk node="3V3" rail=v3v3 value="10µF" footprint="C_0603_1608Metric" \
+        place bulk Cbulk anchor="3V3" node="3V3" rail=v3v3 value="10µF" footprint="Capacitor_SMD:C_0603_1608Metric" \
             note="bulk capacitance for radio transmit bursts of hundreds of milliamps over milliseconds"
-        place decouple Cbypass node="3V3" rail=v3v3 value="100nF"
+        place decouple Cbypass node="3V3" anchor="3V3" rail=v3v3 value="100nF"
     }
 
     // EN reset delay: the pull-up and capacitor give a 10 ms time constant. A programming
     // interface can pulse `en` low.
     block enable {
         default
-        place pull-up Ren node=EN rail=v3v3 value="10kΩ" note="enable pull-up to release reset"
-        place filter Cen node=EN rail=v3v3 value="1µF" note="reset-release delay"
+        place pull-up Ren anchor=EN node=EN rail=v3v3 value="10kΩ" note="enable pull-up to release reset"
+        place filter Cen anchor=EN node=EN rail=v3v3 value="1µF" note="reset-release delay"
     }
 
     // Pull IO0 high for SPI boot unless an external connection pulls it low.
     block boot {
         default
-        place pull-up Rboot node=IO0 rail=v3v3 value="10kΩ" \
+        place pull-up Rboot anchor=IO0 node=IO0 rail=v3v3 value="10kΩ" \
             note="boot strap pull-up — SPI boot unless something pulls it low"
     }
 

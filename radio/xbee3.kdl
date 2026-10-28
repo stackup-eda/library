@@ -106,27 +106,27 @@ part xbee3-zigbee {
     // Manual’s supply capacitors: 1 µF and 47 pF closest to VCC, with 10 µF nearby.
     block supply {
         default
-        place decouple Cvcc node=VCC rail=vcc value="1µF" footprint="C_0603_1608Metric" \
+        place decouple Cvcc anchor=VCC node=VCC rail=vcc value="1µF" footprint="Capacitor_SMD:C_0603_1608Metric" \
             note="VCC decoupling — place the specified 1 µF close to VCC, beside the 47 pF"
-        place decouple Chf node=VCC rail=vcc value="47pF" \
+        place decouple Chf anchor=VCC node=VCC rail=vcc value="47pF" \
             note="VCC decoupling — the manual's 47 pF, nearest the module"
-        place bulk Cbulk node=VCC rail=vcc value="10µF" footprint="C_0603_1608Metric" \
+        place bulk Cbulk anchor=VCC node=VCC rail=vcc value="10µF" footprint="Capacitor_SMD:C_0603_1608Metric" \
             note="VCC bulk capacitance — 10 µF per the manual"
     }
 
     // Pull SPI_ATTN high during reset; the module drives it afterward.
     block bootmode {
         default
-        place pull-up Rattn node=SPI_ATTN rail=vcc value="10kΩ" \
+        place pull-up Rattn anchor=SPI_ATTN node=SPI_ATTN rail=vcc value="10kΩ" \
             note="BOOTMODE strap — SPI_ATTN must not be low at reset"
     }
 
     // Optional reset filter: 10 kΩ pull-up, 100 Ω series resistor, and 100 nF capacitor,
     // approximately 160 Hz. Use when RESET has no external driver.
     block reset-filter {
-        place resistor Rrc value="100Ω" intent=series note="reset RC — the series element"
-        place pull-up Rrst node=Rrc.a rail=vcc value="10kΩ" note="reset pull-up"
-        place filter Crc node=Rrc.a rail=vcc value="100nF" note="reset RC — ~160 Hz with 100 Ω"
+        place resistor Rrc anchor=RESET value="100Ω" intent=series note="reset RC — the series element"
+        place pull-up Rrst anchor=Rrc.A node=Rrc.a rail=vcc value="10kΩ" note="reset pull-up"
+        place filter Crc anchor=Rrc.A node=Rrc.a rail=vcc value="100nF" note="reset RC — ~160 Hz with 100 Ω"
         circuit Rrst Rrc RESET
         set Rrst net.name "RST_PU"
     }

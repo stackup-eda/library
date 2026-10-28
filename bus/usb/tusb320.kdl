@@ -1,0 +1,52 @@
+// @stackup/bus/usb/tusb320 — TI TUSB320LAI USB Type-C CC logic and port controller, X2QFN-12.
+//
+// The LAI variant has an active-low enable. In GPIO mode, PORT pulled high makes it a DFP
+// (source): its internal Rp advertises the current that ADDR/OUT straps select, and ID pulls low
+// open-drain when a sink attaches. A source still switches VBUS itself; the board gates its VBUS
+// switch on ID so an empty receptacle stays unpowered. The I²C mode, DRP and UFP roles are not
+// modelled here beyond their pins.
+
+use "@stackup/passives"
+
+part tusb320lai {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvdd text default=#null
+
+    symbol "Interface_USB:TUSB320"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/tusb320lai.pdf"
+    description "USB-C CC controller, active-low enable, GPIO or I2C mode, X2QFN-12"
+    manufacturer "Texas Instruments"
+    order mpn="TUSB320LAIRWBR" mouser="595-TUSB320LAIRWBR"
+    pin CC1 bidirectional
+    pin CC2 bidirectional
+    pin PORT input required
+    pin VBUS_DET input
+    pin ADDR input
+    pin OUT3 open_collector symbol="~{INT}/OUT3"
+    pin OUT1 open_collector symbol="SDA/OUT1"
+    pin OUT2 open_collector symbol="SCL/OUT2"
+    pin ID open_collector
+    pin GND power_in
+    pin EN_N input required symbol="~{EN}"
+    pin VDD power_in
+    package x2qfn12 footprint="Package_DFN_QFN:Texas_X2QFN-12_1.6x1.6mm_P0.4mm" {
+        pad CC1 1; pad CC2 2; pad PORT 3; pad VBUS_DET 4
+        pad ADDR 5; pad OUT3 6; pad OUT1 7; pad OUT2 8
+        pad ID 9; pad GND 10; pad EN_N 11; pad VDD 12
+    }
+    port vdd type=power {
+        require net.voltage min="2.7V" max="5V"
+        // Conservative allowance, including the CC current sources.
+        add net.draw "1mA"
+        line rail pin=VDD
+        line gnd pin=GND
+    }
+    port cc1 pin=CC1
+    port cc2 pin=CC2
+    port id pin=ID
+    block supply {
+        default
+        place bypass Cvdd anchor=VDD node=VDD rail=vdd value="100nF" designator=ref-supply-Cvdd
+    }
+}

@@ -5,8 +5,8 @@
 // Connect the array in parallel with the USB pair, for example `connect usb from=connector
 // to=esd`, and connect VBUS separately.
 //
-// The 2P6 uses a 1.6 × 1.6 mm SOT-666 package; the 2SC6 uses SOT-23-6 with the same pinout. The
-// smaller package was selected for distributor availability.
+// The default 2P6 uses a 1.6 × 1.6 mm SOT-666 package; `package=sot23-6` selects the 2SC6, the
+// same die and pinout in SOT-23-6, which is easier to place by hand and more widely stocked.
 
 use "@stackup/types"
 
@@ -24,7 +24,21 @@ part usblc6 {
     pin IO2 passive symbol="I/O2"
     pin VBUS passive
 
-    package sot666 footprint="SOT-666" {
+    package sot666 footprint="Package_TO_SOT_SMD:SOT-666" {
+        pad IO1 1
+        pad IO1 6
+        pad GND 2
+        pad IO2 3
+        pad IO2 4
+        pad VBUS 5
+    }
+
+    // USBLC6-2SC6: the same pinout in SOT-23-6.
+    package sot23-6 footprint="Package_TO_SOT_SMD:SOT-23-6" {
+        symbol "Power_Protection:USBLC6-2SC6"
+        value "USBLC6-2SC6"
+        description "Very low capacitance ESD protection diode, 2 data-line, SOT-23-6"
+        order mpn="USBLC6-2SC6" mouser="511-USBLC6-2SC6"
         pad IO1 1
         pad IO1 6
         pad GND 2

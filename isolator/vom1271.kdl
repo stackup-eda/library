@@ -16,7 +16,7 @@ part vom1271 {
     pin K passive
     pin VO- passive
     pin VO+ passive
-    package sop4 footprint="SOP-4_4.4x2.6mm_P1.27mm" {
+    package sop4 footprint="Package_SO:SOP-4_4.4x2.6mm_P1.27mm" {
         pad A 1
         pad K 2
         pad VO- 3
@@ -44,7 +44,7 @@ block vom1271-ac-switch {
     circuit fet-a.gate fet-b.gate self.VO+
     circuit a fet-a.drain
     circuit b fet-b.drain
-    place resistor R_led value=r intent=series
+    place resistor R_led anchor=self.A value=r intent=series
     circuit lamp.rail R_led self.A
     circuit self.K control
 }

@@ -1,0 +1,87 @@
+// @stackup/sensor/tof/vl53l4cd — ST's VL53L4CD, a single-zone time-of-flight proximity sensor on
+// I²C: 1 mm to 1.3 m over an 18° field of view, a 940 nm Class 1 VCSEL, in a 4.4 × 2.4 × 1 mm
+// optical LGA12. Entered from DS13812 Rev 8.
+//
+// One supply, AVDD 2.6–3.5 V (2.8 V typical); the I/Os are fail-safe, with no diode to AVDD, so
+// there is no sequencing to respect, but XSHUT should only go high once AVDD is up. I²C up to
+// 1 MHz at 0x29 (0x52 with the R/W bit); the address can be moved in software but not strapped,
+// so a board with several drives each XSHUT and readdresses them one by one. The pull-ups belong to
+// the host's bus and are not placed here.
+//
+// XSHUT must always be driven or pulled (DS13812 §1.4: a floating XSHUT leaks); low is hardware
+// standby. GPIO1 is an open-drain interrupt, left unconnected if unused. DNC must float.
+//
+// The symbol is the VL53L1X's: the two parts share the pin names and numbering, not the package.
+// The footprint is `stackup:ST_VL53L4CD` (see stackup.pretty/README.md); a cover window over it
+// follows AN5231 and the exclusion cones in DS13812 Figure 21.
+
+use "@stackup/passives"
+
+part vl53l4cd {
+    symbol "Sensor_Distance:VL53L1CXV0FY1"
+    value "VL53L4CD"
+    reference U
+    datasheet "https://www.st.com/resource/en/datasheet/vl53l4cd.pdf"
+    description "Time-of-flight proximity sensor, 1 mm to 1.3 m, I2C, 940 nm VCSEL, optical LGA12 4.4x2.4mm"
+    manufacturer STMicroelectronics
+    order mpn="VL53L4CDV0DH/1" mouser="511-VL53L4CDV0DH/1"
+
+    pin AVDDVCSEL power_in
+    pin AVSSVCSEL power_in
+    pin GND power_in
+    pin GND2 passive symbol="GND"
+    pin XSHUT input required
+    pin GND3 passive symbol="GND"
+    pin GPIO1 open_collector
+    pin DNC no_connect
+    pin SDA bidirectional
+    pin SCL input
+    pin AVDD power_in
+    pin GND4 passive symbol="GND"
+
+    package lga12 footprint="stackup:ST_VL53L4CD" {
+        pad AVDDVCSEL 1
+        pad AVSSVCSEL 2
+        pad GND 3
+        pad GND2 4
+        pad XSHUT 5
+        pad GND3 6
+        pad GPIO1 7
+        pad DNC 8
+        pad SDA 9
+        pad SCL 10
+        pad AVDD 11
+        pad GND4 12
+    }
+
+    // Ranging averages 22 mA typical, 24 mA at most, VCSEL included (Table 14); peaks reach 40 mA.
+    // Standby is 5 µA.
+    port vdd type=power {
+        require net.voltage min="2.6V" max="3.5V"
+        add net.draw "24mA"
+        line rail pin=AVDD
+        line gnd pin=GND
+    }
+
+    port i2c type=i2c {
+        claim signal.address 0x29
+        line sda pin=SDA
+        line scl pin=SCL
+    }
+
+    port xshut pin=XSHUT
+    port int pin=GPIO1
+
+    // Figure 3: the VCSEL supply joins AVDD, every ground pin joins ground (GND2–4 are forced to the
+    // ground domain to keep the die stable, §1.3), and 100 nF and 4.7 µF sit as close as possible to
+    // AVDDVCSEL and AVSSVCSEL.
+    block supply {
+        default
+        circuit AVDDVCSEL vdd.rail
+        circuit AVSSVCSEL GND2 GND3 GND4 vdd.gnd
+        place decouple Cvcsel anchor=AVDDVCSEL node=AVDDVCSEL rail=vdd value="100nF" \
+            note="VCSEL decoupling, Figure 3"
+        place bulk Cbulk anchor=AVDDVCSEL node=AVDDVCSEL rail=vdd value="4.7µF" \
+            note="VCSEL bulk, Figure 3"
+    }
+}

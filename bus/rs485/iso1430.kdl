@@ -4,6 +4,10 @@
 use "@stackup/passives"
 
 part iso1430 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Chost text default=#null
+    param ref-supply-Clink text default=#null
+
     symbol "ISO1430:ISO1430DW"
     reference U
     datasheet "https://www.ti.com/lit/ds/symlink/iso1430.pdf"
@@ -23,7 +27,7 @@ part iso1430 {
     pin B bidirectional
     pin VCC2 power_in
 
-    package soic16w footprint="SOIC-16W_7.5x10.3mm_P1.27mm" {
+    package soic16w footprint="Package_SO:SOIC-16W_7.5x10.3mm_P1.27mm" {
         pad VCC1 1
         pad GND1 2
         pad R 3
@@ -61,7 +65,7 @@ part iso1430 {
 
     block supply {
         default
-        place bypass Chost node=VCC1 rail=host value="100nF"
-        place bypass Clink node=VCC2 rail=link value="100nF"
+        place bypass Chost anchor=VCC1 node=VCC1 rail=host value="100nF" designator=ref-supply-Chost
+        place bypass Clink anchor=VCC2 node=VCC2 rail=link value="100nF" designator=ref-supply-Clink
     }
 }

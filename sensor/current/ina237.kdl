@@ -21,7 +21,7 @@ part ina237 {
     pin VIN- input symbol="Vin-"
     pin VIN+ input symbol="Vin+"
 
-    package vssop10 footprint="TSSOP-10_3x3mm_P0.5mm" {
+    package vssop10 footprint="Package_SO:TSSOP-10_3x3mm_P0.5mm" {
         pad A1 1
         pad A0 2
         pad ALERT 3
@@ -48,7 +48,7 @@ part ina237 {
 
     block supply {
         default
-        place bypass Cvs node=VS rail=vs value="100nF"
+        place bypass Cvs anchor=VS node=VS rail=vs value="100nF"
         circuit A0 vs.gnd
         circuit A1 vs.rail
     }
@@ -63,9 +63,9 @@ block ina237-sense {
     port alert
 
     place ina237 as=self vs=vs i2c=i2c alert=alert
-    place resistor Rshunt value=shunt intent=shunt footprint="R_2512_6332Metric" note="current-sense shunt"
+    place resistor Rshunt value=shunt intent=shunt footprint="Resistor_SMD:R_2512_6332Metric" note="current-sense shunt"
     circuit a Rshunt b
     circuit a self.VIN+
     circuit b self.VIN- self.VBUS
-    place pull-up Ralert node=self.ALERT rail=vs value="1kΩ"
+    place pull-up Ralert anchor=self.ALERT node=self.ALERT rail=vs value="1kΩ"
 }

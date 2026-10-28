@@ -12,6 +12,15 @@ use "@stackup/passives"
 use "@stackup/types"
 
 part cp2102n {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-bus-powered-Cregin text default=#null
+    param ref-bus-powered-Cregin_bulk text default=#null
+    param ref-bus-powered-Cvdd text default=#null
+    param ref-bus-powered-Cvdd_bulk text default=#null
+    param ref-bus-powered-Rrst text default=#null
+    param ref-bus-powered-Rsense_top text default=#null
+    param ref-bus-powered-Rsense_bot text default=#null
+
     symbol "Interface_USB:CP2102N-Axx-xQFN24"
     reference U
     datasheet "https://www.silabs.com/documents/public/data-sheets/cp2102n-datasheet.pdf"
@@ -44,7 +53,7 @@ part cp2102n {
     pin DCD input
 
     // Exposed pad 25 must connect to ground.
-    package qfn24 footprint="VQFN-24-1EP_4x4mm_P0.5mm_EP2.45x2.45mm" {
+    package qfn24 footprint="Package_DFN_QFN:VQFN-24-1EP_4x4mm_P0.5mm_EP2.45x2.45mm" {
         pad RI 1
         pad GND 2
         pad GND 25
@@ -113,20 +122,20 @@ part cp2102n {
     block bus-powered {
         default
 
-        place bypass Cregin node=VREGIN rail=vbus value="100nF"
-        place bulk Cregin_bulk node=VREGIN rail=vbus value="4.7µF"
+        place bypass Cregin anchor=VREGIN node=VREGIN rail=vbus value="100nF" designator=ref-bus-powered-Cregin
+        place bulk Cregin_bulk anchor=VREGIN node=VREGIN rail=vbus value="4.7µF" designator=ref-bus-powered-Cregin_bulk
 
         circuit VIO VDD
-        place bypass Cvdd node=VDD rail=vdd value="100nF"
-        place bulk Cvdd_bulk node=VDD rail=vdd value="4.7µF"
+        place bypass Cvdd anchor=VDD node=VDD rail=vdd value="100nF" designator=ref-bus-powered-Cvdd
+        place bulk Cvdd_bulk anchor=VDD node=VDD rail=vdd value="4.7µF" designator=ref-bus-powered-Cvdd_bulk
 
-        place pull-up Rrst node=RSTB rail=vdd value="1kΩ" \
-            note="RSTB pull-up — 1 kΩ to VIO, per §2.1"
+        place pull-up Rrst anchor=RSTB node=RSTB rail=vdd value="1kΩ" \
+            note="RSTB pull-up — 1 kΩ to VIO, per §2.1" designator=ref-bus-powered-Rrst
         circuit RSTB name="rstb"
 
-        place resistor Rsense_top value="22.1kΩ" intent=divider \
-            note="VBUS sense divider — 5 V onto a VIO-referenced input, per §2.3"
-        place resistor Rsense_bot value="47.5kΩ" intent=divider
+        place resistor Rsense_top anchor=VBUS value="22.1kΩ" intent=divider \
+            note="VBUS sense divider — 5 V onto a VIO-referenced input, per §2.3" designator=ref-bus-powered-Rsense_top
+        place resistor Rsense_bot anchor=VBUS value="47.5kΩ" intent=divider designator=ref-bus-powered-Rsense_bot
         circuit vbus.rail Rsense_top VBUS Rsense_bot vbus.gnd
         circuit VBUS name="vbus_sense"
     }

@@ -1,0 +1,67 @@
+// @stackup/switch/rkjxv — ALPS RKJXV thumbstick: two potentiometers and a centre push.
+
+use "@stackup/types"
+
+// ALPS RKJXV122400R: the game-controller analog stick, a lever on two 10 kΩ linear (B taper)
+// potentiometers at right angles, 23° each way, with a return spring and a centre push switch.
+// RKJXV catalog, Update 2510 (~/dev/datasheets/potentiometer/alps-rkjxv.pdf), Drawing No. 1.
+// It replaces the RKJXV1224005, on the same land.
+//
+// - Potentiometers: 10 kΩ, 5 V DC at most, 12.5 mW. Each is a divider: drive its 1 and 3 from the
+//   ADC's reference and ground and read the wiper, 2. Which end is which only sets the sign.
+//   VR1 is the column of three down one side, VR2 the row of three across the top.
+// - Hall-effect and TMR drop-in sticks (GuliKit and others) are built to this land and pin out the
+//   same way, but run a sensor from the ends and drive the wiper from it: they need the ends
+//   powered, at the voltage the ADC reads against, and the wiper is an output, not a divider.
+// - Switch: 50 mA at 12 V DC, 0.4 mm travel. Four legs, a and c nearer the lever, b and d below
+//   them. The catalog does not say which legs are joined inside; a and d, diagonally across, are on
+//   opposite sides of the contact whether the legs pair side by side or one above the other.
+// - Two locating bosses stand 0.75 mm under the body, in unplated holes the land provides.
+// - Through-hole, for hand or selective soldering. No symbol fits, so it borrows the generic
+//   ten-way connector with a mounting pin; pads 1-3 are VR1, 4-6 VR2, 7-10 the switch's a, b, c, d.
+part rkjxv122400r {
+    symbol "Connector_Generic_MountingPin:Conn_01x10_MountingPin"
+    reference J
+    datasheet "https://tech.alpsalpine.com/e/products/detail/RKJXV122400R/"
+    description "Thumbstick, two 10 kΩ potentiometers, 23° each way, centre push switch"
+    manufacturer ALPS
+    order mpn="RKJXV122400R"
+
+    pin VR1_1 passive
+    pin VR1_2 passive
+    pin VR1_3 passive
+    pin VR2_1 passive
+    pin VR2_2 passive
+    pin VR2_3 passive
+    pin SW_A passive
+    pin SW_B passive
+    pin SW_C passive
+    pin SW_D passive
+    pin MP passive
+
+    package tht footprint="stackup:Thumbstick_Alps_RKJXV" {
+        pad VR1_1 1
+        pad VR1_2 2
+        pad VR1_3 3
+        pad VR2_1 4
+        pad VR2_2 5
+        pad VR2_3 6
+        pad SW_A 7
+        pad SW_B 8
+        pad SW_C 9
+        pad SW_D 10
+        pad MP MP
+    }
+
+    port vr1-1 pin=VR1_1
+    port vr1-wiper pin=VR1_2
+    port vr1-3 pin=VR1_3
+    port vr2-1 pin=VR2_1
+    port vr2-wiper pin=VR2_2
+    port vr2-3 pin=VR2_3
+    port sw-a pin=SW_A
+    port sw-b pin=SW_B
+    port sw-c pin=SW_C
+    port sw-d pin=SW_D
+    port mp pin=MP
+}

@@ -5,6 +5,9 @@
 use "@stackup/passives"
 
 part ahct1g125 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvcc text default=#null
+
     symbol "74xGxx:74AHCT1G125"
     reference U
     datasheet "https://www.ti.com/lit/ds/symlink/sn74ahct1g125.pdf"
@@ -20,7 +23,7 @@ part ahct1g125 {
     pin VCC power_in
 
     // DBV / SOT-23-5 pinout: 1 OE, 2 A, 3 GND, 4 Y, 5 VCC.
-    package sot23-5 footprint="SOT-23-5" {
+    package sot23-5 footprint="Package_TO_SOT_SMD:SOT-23-5" {
         pad OE 1
         pad A 2
         pad GND 3
@@ -42,7 +45,7 @@ part ahct1g125 {
 
     block supply {
         default
-        place bypass Cvcc node=VCC rail=vcc value="100nF"
+        place bypass Cvcc anchor=VCC node=VCC rail=vcc value="100nF" designator=ref-supply-Cvcc
     }
 
     // Tie output enable low for continuous operation.

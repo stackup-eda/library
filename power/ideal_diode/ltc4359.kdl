@@ -8,6 +8,9 @@ use "@stackup/discrete/fet/bsc030n08ns5"
 use "@stackup/discrete/diode/zener"
 
 part ltc4359 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cshdn text default=#null
+
     symbol "Power_Management:LTC4359-DCB"
     reference U
     datasheet "https://www.analog.com/media/en/technical-documentation/data-sheets/ltc4359.pdf"
@@ -39,17 +42,21 @@ part ltc4359 {
         default
         circuit IN SRC
         circuit PAD VSS
-        place capacitor Cshdn value="10nF" intent=filter
+        place capacitor Cshdn anchor=SHDN value="10nF" intent=filter designator=ref-supply-Cshdn
         circuit SHDN Cshdn VSS
     }
 }
 
 block ltc4359-diode {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cshdn text default=#null
+    param ref-fet text default=#null
+
     port anode
     port cathode
     port gnd
-    place ltc4359 as=self
-    place bsc030n08ns5 fet
+    place ltc4359 as=self ref-supply-Cshdn=ref-supply-Cshdn
+    place bsc030n08ns5 fet designator=ref-fet
     circuit anode self.IN self.SRC fet.SOURCE
     circuit cathode self.OUT fet.DRAIN
     circuit self.GATE fet.GATE

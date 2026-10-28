@@ -3,6 +3,9 @@
 use "@stackup/passives"
 
 part lvc86 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvcc text default=#null
+
     symbol "74xx:74HC86"
     reference U
     datasheet "https://www.ti.com/lit/ds/symlink/sn74lvc86a.pdf"
@@ -23,7 +26,7 @@ part lvc86 {
     pin D_Y output symbol=Y
     pin GND power_in
     pin VCC power_in
-    package tssop footprint="TSSOP-14_4.4x5mm_P0.65mm" {
+    package tssop footprint="Package_SO:TSSOP-14_4.4x5mm_P0.65mm" {
         pad A_A 1
         pad A_B 2
         pad A_Y 3
@@ -46,6 +49,6 @@ part lvc86 {
     }
     block supply {
         default
-        place bypass Cvcc node=VCC rail=vcc value="100nF"
+        place bypass Cvcc anchor=VCC node=VCC rail=vcc value="100nF" designator=ref-supply-Cvcc
     }
 }

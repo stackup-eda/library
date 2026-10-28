@@ -10,6 +10,11 @@
 use "@stackup/passives"
 
 part iso1044 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Chost text default=#null
+    param ref-supply-Clink text default=#null
+    param ref-supply-Clink_bulk text default=#null
+
     symbol "Interface_CAN_LIN:ISO1044BD"
     reference U
     datasheet "https://www.ti.com/lit/ds/symlink/iso1044.pdf"
@@ -26,7 +31,7 @@ part iso1044 {
     pin GND2 power_in
     pin VCC2 power_in
 
-    package soic8 footprint="SOIC-8_3.9x4.9mm_P1.27mm" {
+    package soic8 footprint="Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" {
         pad VCC1 1
         pad TXD 2
         pad RXD 3
@@ -66,9 +71,9 @@ part iso1044 {
     // 0.1 µF at each VCC, plus the datasheet’s suggested bus-side bulk capacitance.
     block supply {
         default
-        place bypass Chost node=VCC1 rail=host value="100nF"
-        place bypass Clink node=VCC2 rail=link value="100nF"
-        place bulk Clink_bulk node=VCC2 rail=link value="4.7µF" \
-            note="datasheet-recommended bulk capacitance near VCC2, returning to bus-side ground"
+        place bypass Chost anchor=VCC1 node=VCC1 rail=host value="100nF" designator=ref-supply-Chost
+        place bypass Clink anchor=VCC2 node=VCC2 rail=link value="100nF" designator=ref-supply-Clink
+        place bulk Clink_bulk anchor=VCC2 node=VCC2 rail=link value="4.7µF" \
+            note="datasheet-recommended bulk capacitance near VCC2, returning to bus-side ground" designator=ref-supply-Clink_bulk
     }
 }

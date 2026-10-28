@@ -1,0 +1,53 @@
+// @stackup/power/switch/mic2007 — Microchip MIC2007 adjustable current-limited power switch,
+// SOT-23-6.
+
+// Microchip MIC2007, a current-limited high-side power switch in SOT-23-6: 2.5–5.5 V, 70 mΩ,
+// active-high enable, automatic load discharge when off, no Kickstart (the MIC2017 lets 4 A through
+// for 128 ms, which a short on the output turns into a brownout of the shared rail).
+// The limit is CLF / R_ILIMIT, where the current-limit factor depends on the current: 144–299 V,
+// 225 V typical at 0.2 A; 168–298 V, 235 V typical at 0.5 A; 190–293 V, 243 V typical at 1.0 A
+// (datasheet DS20006486B, Electrical Characteristics). Over current it limits; over temperature it
+// shuts down and retries. CSLEW slows turn-on with a capacitor to VIN and may be left open.
+part mic2007 {
+    symbol "Power_Management:MIC2007YM6"
+    reference U
+    datasheet "https://ww1.microchip.com/downloads/aemDocuments/documents/APID/ProductDocuments/DataSheets/MIC20XX-Fixed-and-Adjustable-Current-Limiting-Power-Distribution-Switches-DS20006486B.pdf"
+    description "Adjustable current-limiting power switch, 0.2–2 A, active-high enable, SOT-23-6"
+    manufacturer "Microchip Technology"
+    order mpn="MIC2007YM6-TR" mouser="998-MIC2007YM6TR"
+
+    pin VIN power_in
+    pin GND power_in
+    pin EN input required {
+        role enable active=high pull=none
+        require net.rest not=float
+    }
+    pin ILIM passive required
+    pin CSLEW passive
+    pin VOUT power_out
+
+    package sot23-6 footprint="Package_TO_SOT_SMD:SOT-23-6" {
+        pad VIN 1
+        pad GND 2
+        pad EN 3
+        pad ILIM 4
+        pad CSLEW 5
+        pad VOUT 6
+    }
+
+    port in type=power {
+        require net.voltage min="2.5V" max="5.5V"
+        add net.draw "out.draw + 80µA"
+        line rail pin=VIN
+        line gnd pin=GND
+    }
+    // The switched rail is the input less the switch's drop; the slot rail is stated where it is
+    // placed.
+    port out type=power {
+        line rail pin=VOUT
+        line gnd pin=GND
+    }
+    port en pin=EN
+    port ilim pin=ILIM
+    port cslew pin=CSLEW
+}

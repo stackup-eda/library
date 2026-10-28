@@ -97,8 +97,8 @@ part pca9555 {
 
     block supply {
         default
-        place decouple Cvdd node=VDD rail=vdd value="100nF"
-        place pull-up Rint node=INT rail=vdd value="4.7kΩ"
+        place decouple Cvdd anchor=VDD node=VDD rail=vdd value="100nF"
+        place pull-up Rint anchor=INT node=INT rail=vdd value="4.7kΩ"
     }
     block a0-low { when "offset == 0 || offset == 2 || offset == 4 || offset == 6"; circuit A0 vdd.gnd }
     block a0-high { when "offset == 1 || offset == 3 || offset == 5 || offset == 7"; circuit A0 vdd.rail }

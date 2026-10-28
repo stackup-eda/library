@@ -5,6 +5,16 @@
 use "@stackup/passives"
 
 part tpsm53603 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cin1 text default=#null
+    param ref-supply-Cin2 text default=#null
+    param ref-supply-Cout1 text default=#null
+    param ref-supply-Cout2 text default=#null
+    param ref-feedback-Rtop text default=#null
+    param ref-feedback-Rbottom text default=#null
+    param ref-uvlo-Ren-top text default=#null
+    param ref-uvlo-Ren-bottom text default=#null
+
     symbol "Converter_DCDC:TPSM53603RDA"
     reference U
     datasheet "https://www.ti.com/lit/ds/symlink/tpsm53603.pdf"
@@ -14,8 +24,11 @@ part tpsm53603 {
 
     param vout voltage default="5V"
     param enable-above voltage default="0V"
-    derive rbottom "10kΩ / (vout / 1V - 1)"
-    derive renbottom "100kΩ / (enable-above / 1.23V - 1)"
+    // Divider values round to E96; `actual` is what the rounded divider makes, and is what the
+    // output port declares.
+    derive rbottom "e96(10kΩ / (vout / 1V - 1))"
+    derive actual "1V * (1 + 10kΩ / rbottom)"
+    derive renbottom "e96(100kΩ / (enable-above / 1.23V - 1))"
     derive input "out.draw * out.voltage / (0.9 * in.voltage.min)"
 
     pin VIN power_in
@@ -52,7 +65,7 @@ part tpsm53603 {
         line gnd pin=PGND
     }
     port out type=power {
-        set net.voltage vout
+        set net.voltage actual
         assert "vout >= 1V && vout <= 7V" message="TPSM53603 output setting must be 1-7V"
         assert "draw <= 3A" message="TPSM53603 output load {draw} exceeds 3A"
         line rail pin=VOUT
@@ -62,16 +75,16 @@ part tpsm53603 {
 
     block supply {
         default
-        place bulk Cin1 node=VIN rail=in value="10µF" footprint="C_1210_3225Metric"
-        place bulk Cin2 node=VIN rail=in value="10µF" footprint="C_1210_3225Metric"
-        place bulk Cout1 node=VOUT rail=out value="47µF" footprint="C_1210_3225Metric"
-        place bulk Cout2 node=VOUT rail=out value="47µF" footprint="C_1210_3225Metric"
+        place bulk Cin1 anchor=VIN@1 node=VIN rail=in value="10µF" footprint="Capacitor_SMD:C_1210_3225Metric" designator=ref-supply-Cin1
+        place bulk Cin2 anchor=VIN@1 node=VIN rail=in value="10µF" footprint="Capacitor_SMD:C_1210_3225Metric" designator=ref-supply-Cin2
+        place bulk Cout1 anchor=VOUT@7 node=VOUT rail=out value="47µF" footprint="Capacitor_SMD:C_1210_3225Metric" designator=ref-supply-Cout1
+        place bulk Cout2 anchor=VOUT@7 node=VOUT rail=out value="47µF" footprint="Capacitor_SMD:C_1210_3225Metric" designator=ref-supply-Cout2
         circuit AGND PGND
     }
     block feedback {
         default
-        place resistor Rtop value="10kΩ" intent=divider
-        place resistor Rbottom value=rbottom intent=divider
+        place resistor Rtop anchor=FB value="10kΩ" intent=divider designator=ref-feedback-Rtop
+        place resistor Rbottom anchor=FB value=rbottom intent=divider designator=ref-feedback-Rbottom
         circuit VOUT Rtop FB Rbottom AGND
     }
     block always-on {
@@ -80,8 +93,8 @@ part tpsm53603 {
     }
     block uvlo {
         when "enable-above > 0V"
-        place resistor Ren-top value="100kΩ" intent=divider
-        place resistor Ren-bottom value=renbottom intent=divider
+        place resistor Ren-top anchor=EN value="100kΩ" intent=divider designator=ref-uvlo-Ren-top
+        place resistor Ren-bottom anchor=EN value=renbottom intent=divider designator=ref-uvlo-Ren-bottom
         circuit VIN Ren-top EN Ren-bottom PGND
     }
     block unused {

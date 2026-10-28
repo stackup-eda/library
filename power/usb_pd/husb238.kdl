@@ -56,8 +56,8 @@ part husb238 {
     // VIN uses a 10 Ω series resistor and a 1 µF capacitor after the resistor.
     block vin-filter {
         default
-        place resistor Rvin value="10Ω" intent=series
-        place bypass Cvin node=VIN rail=vbus value="1µF"
+        place resistor Rvin anchor=VIN value="10Ω" intent=series
+        place bypass Cvin anchor=VIN node=VIN rail=vbus value="1µF"
         circuit vbus.rail Rvin VIN
     }
     // Ground VSET to use the controller's default PD profile.

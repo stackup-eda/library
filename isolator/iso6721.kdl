@@ -11,6 +11,10 @@
 use "@stackup/passives"
 
 part iso6721b {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Chost text default=#null
+    param ref-supply-Cfar text default=#null
+
     symbol "Isolator:ISO6721BD"
     reference U
     datasheet "https://www.ti.com/lit/ds/symlink/iso6721.pdf"
@@ -27,7 +31,7 @@ part iso6721b {
     pin INA input
     pin VCC2 power_in
 
-    package soic8 footprint="SOIC-8_3.9x4.9mm_P1.27mm" {
+    package soic8 footprint="Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" {
         pad VCC1 1
         pad OUTA 2
         pad INB 3
@@ -68,7 +72,7 @@ part iso6721b {
     // 0.1 µF at each VCC, returning to that side’s ground (§9.2.1).
     block supply {
         default
-        place bypass Chost node=VCC1 rail=host value="100nF"
-        place bypass Cfar node=VCC2 rail=far value="100nF"
+        place bypass Chost anchor=VCC1 node=VCC1 rail=host value="100nF" designator=ref-supply-Chost
+        place bypass Cfar anchor=VCC2 node=VCC2 rail=far value="100nF" designator=ref-supply-Cfar
     }
 }

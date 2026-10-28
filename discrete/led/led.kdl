@@ -15,7 +15,7 @@ part led {
     port a pin=A
     port b pin=K
 
-    package p0805 footprint="LED_0805_2012Metric" {
+    package p0805 footprint="LED_SMD:LED_0805_2012Metric" {
         pad K 1
         pad A 2
     }
@@ -31,6 +31,9 @@ part led {
 // LEDs are closer to 3.0 V and need a corresponding `vf` setting. The colour is included in the
 // LED value so the BOM separates different colours.
 block indicator {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-R text default=#null
+
     // 680 Ω is the E24 value near (3.3 V − 2.0 V) / 2 mA.
     param r resistance default="680Ω"
     param forward voltage default="2.0V"
@@ -38,6 +41,7 @@ block indicator {
     param limit current default="3mA"
     param floor current default="500µA"
     param colour colour default=green   // green | red
+    param resistor-body text default="Resistor_SMD:R_0402_1005Metric"
 
     // Check both ends of the supply-voltage range.
     derive current "(rail.voltage.max - forward) / r"
@@ -55,18 +59,19 @@ block indicator {
         add net.draw current
     }
 
-    // Use an 0805 resistor for continuous dissipation. At 10 mA from a 5 V rail with a 2 V LED,
-    // it dissipates 30 mW: 24% of a 125 mW rating, compared with 48% of a 62.5 mW 0402 rating.
-    // A 2 mA indicator on 3.3 V dissipates about 2.6 mW.
+    // Select the resistor land per layout; 0402 is the default for low-current pilots.
     place led as=self value=colour
-    place resistor R value=r intent=series footprint="R_0805_2012Metric" \
-        note="LED current limit — {current} at {rail.voltage.max}, {(rail.voltage.max - forward) * current} in the resistor"
+    place resistor R anchor=self.K value=r intent=series footprint=resistor-body \
+        note="LED current limit — {current} at {rail.voltage.max}, {(rail.voltage.max - forward) * current} in the resistor" designator=ref-R
     circuit rail.rail self R rail.gnd
 }
 
 // A host output sinks current when it pulls `sink` low. State the lowest rail voltage used
 // to size the resistor; the assertions check the connected rail afterward.
 block driven-led {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-R text default=#null
+
     param current current default="2mA"
     param forward voltage default="2.0V"
     param design-rail-min voltage
@@ -81,7 +86,7 @@ block driven-led {
     derive peak "(rail.voltage.max - forward) / r"
     assert "peak <= limit" message="LED current at the highest rail voltage exceeds its limit"
     place led as=self value=colour
-    place resistor R value=r intent=series
+    place resistor R anchor=self.K value=r intent=series designator=ref-R
     circuit rail.rail self.A
     circuit self.K R sink
 }

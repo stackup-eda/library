@@ -1,0 +1,51 @@
+// @stackup/power/switch/tps2552 — TI TPS2552 adjustable current-limited power-distribution
+// switch, SOT-23-6, active-low enable (the TPS2553 is the active-high sibling).
+//
+// R_ILIM from ILIM to GND sets the overcurrent threshold, 75 mA to 1.3 A. TPS2553 datasheet
+// equation 1 gives the nominal: I_OS (mA) = 23950 / R_ILIM (kΩ)^0.977; the minimum and maximum
+// curves are about −10 % and +11 % around it. The board places R_ILIM, at 1 %, and its own
+// FAULT pull-up. The engine cannot evaluate a non-integer power, so the threshold is recorded
+// beside the board's resistor rather than derived here.
+
+use "@stackup/passives"
+
+part tps2552 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cin text default=#null
+
+    symbol "TPS2552:TPS2552DBVR"
+    reference U
+    manufacturer "Texas Instruments"
+    order mpn="TPS2552DBVR" mouser="595-TPS2552DBVR"
+    datasheet "https://www.ti.com/lit/ds/symlink/tps2553.pdf"
+    description "Adjustable current-limited power switch, 75mA-1.3A, active-low enable, SOT-23-6"
+    pin IN power_in
+    pin GND power_in
+    pin EN input required
+    pin FAULT open_collector
+    pin ILIM passive
+    pin OUT power_out
+    package sot23-6 footprint="Package_TO_SOT_SMD:SOT-23-6" {
+        pad IN 1; pad GND 2; pad EN 3; pad FAULT 4; pad ILIM 5; pad OUT 6
+    }
+    port in type=power {
+        require net.voltage min="2.5V" max="6.5V"
+        add net.draw "140µA"
+        line rail pin=IN
+        line gnd pin=GND
+    }
+    // The switched output follows the input. Its load is not carried to the input's draw: size
+    // the upstream budget from R_ILIM, as the limit is what the switch can pass.
+    port out type=power {
+        set net.voltage "in.voltage"
+        line rail pin=OUT
+        line gnd pin=GND
+    }
+    port en pin=EN
+    port fault pin=FAULT
+    // The datasheet's 0.1 µF IN-to-GND ceramic, as close to the device as possible.
+    block supply {
+        default
+        place bypass Cin anchor=IN node=IN rail=in value="100nF" designator=ref-supply-Cin
+    }
+}

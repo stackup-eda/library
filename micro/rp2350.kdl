@@ -71,7 +71,7 @@ part rp2350a {
     pin VREG_PGND power_in
     pin GND power_in
 
-    package qfn60 footprint="QFN-60-1EP_7x7mm_P0.4mm_EP3.4x3.4mm" {
+    package qfn60 footprint="Package_DFN_QFN:QFN-60-1EP_7x7mm_P0.4mm_EP3.4x3.4mm" {
         pad IOVDD 1
         pad GPIO0 2
         pad GPIO1 3
@@ -198,44 +198,44 @@ part rp2350a {
 
     block supply {
         default
-        place decouple Ciovdd1 node=IOVDD@1 rail=vdd value="100nF"
-        place decouple Ciovdd11 node=IOVDD@11 rail=vdd value="100nF"
-        place decouple Ciovdd20 node=IOVDD@20 rail=vdd value="100nF"
-        place decouple Ciovdd30 node=IOVDD@30 rail=vdd value="100nF"
-        place decouple Ciovdd38 node=IOVDD@38 rail=vdd value="100nF"
-        place decouple Ciovdd45 node=IOVDD@45 rail=vdd value="100nF"
-        place bulk Cbulk node=IOVDD rail=vdd value="10µF"
+        place decouple Ciovdd1 node=IOVDD@1 anchor=IOVDD@1 rail=vdd value="100nF"
+        place decouple Ciovdd11 node=IOVDD@11 anchor=IOVDD@11 rail=vdd value="100nF"
+        place decouple Ciovdd20 node=IOVDD@20 anchor=IOVDD@20 rail=vdd value="100nF"
+        place decouple Ciovdd30 node=IOVDD@30 anchor=IOVDD@30 rail=vdd value="100nF"
+        place decouple Ciovdd38 node=IOVDD@38 anchor=IOVDD@38 rail=vdd value="100nF"
+        place decouple Ciovdd45 node=IOVDD@45 anchor=IOVDD@45 rail=vdd value="100nF"
+        place bulk Cbulk anchor=IOVDD@1 node=IOVDD rail=vdd value="10µF"
         circuit QSPI_IOVDD IOVDD
-        place decouple Cqspi node=QSPI_IOVDD rail=vdd value="100nF"
+        place decouple Cqspi node=QSPI_IOVDD anchor=QSPI_IOVDD rail=vdd value="100nF"
         circuit USB_OTP_VDD IOVDD
-        place decouple Cusb node=USB_OTP_VDD rail=vdd value="100nF"
+        place decouple Cusb node=USB_OTP_VDD anchor=USB_OTP_VDD rail=vdd value="100nF"
     }
     block regulator {
         default
         circuit VREG_VIN IOVDD
-        place bulk Cvin node=VREG_VIN rail=vdd value="4.7µF"
+        place bulk Cvin anchor=VREG_VIN node=VREG_VIN rail=vdd value="4.7µF"
         circuit VREG_PGND GND
-        place inductor L value="3.3µH"
+        place inductor L anchor=VREG_LX value="3.3µH"
         circuit VREG_LX L.b
         circuit L.a DVDD
         circuit VREG_FB DVDD
-        place bulk Cout node=DVDD rail=core value="4.7µF" note="place beside regulator feedback pin; ESR <=250 mΩ, ESL <=6 nH"
-        place bulk Cout_far node=DVDD@23 rail=core value="4.7µF"
-        place decouple Cdvdd6 node=DVDD@6 rail=core value="100nF"
-        place decouple Cdvdd23 node=DVDD@23 rail=core value="100nF"
-        place decouple Cdvdd39 node=DVDD@39 rail=core value="100nF"
-        place resistor Ravdd value="33Ω"
+        place bulk Cout anchor=DVDD@6 node=DVDD rail=core value="4.7µF" note="place beside regulator feedback pin; ESR <=250 mΩ, ESL <=6 nH"
+        place bulk Cout_far anchor=DVDD@23 node=DVDD@23 rail=core value="4.7µF"
+        place decouple Cdvdd6 node=DVDD@6 anchor=DVDD@6 rail=core value="100nF"
+        place decouple Cdvdd23 node=DVDD@23 anchor=DVDD@23 rail=core value="100nF"
+        place decouple Cdvdd39 node=DVDD@39 anchor=DVDD@39 rail=core value="100nF"
+        place resistor Ravdd anchor=VREG_AVDD value="33Ω"
         circuit IOVDD Ravdd.a
         circuit Ravdd.b VREG_AVDD
-        place bypass Cavdd node=VREG_AVDD rail=vdd value="4.7µF"
+        place bypass Cavdd anchor=VREG_AVDD node=VREG_AVDD rail=vdd value="4.7µF"
     }
     block analog {
         default
-        place ferrite-bead FB value="600Ω@100MHz"
+        place ferrite-bead FB anchor=ADC_AVDD value="600Ω@100MHz"
         circuit IOVDD FB.a
         circuit FB.b ADC_AVDD
-        place bulk Cadc node=ADC_AVDD rail=vdd value="1µF"
-        place bypass Cadc_hf node=ADC_AVDD rail=vdd value="100nF"
+        place bulk Cadc anchor=ADC_AVDD node=ADC_AVDD rail=vdd value="1µF"
+        place bypass Cadc_hf anchor=ADC_AVDD node=ADC_AVDD rail=vdd value="100nF"
     }
     block flash {
         default

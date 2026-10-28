@@ -1,0 +1,93 @@
+// @stackup/power/efuse/tps2595 — TI TPS2595x 2.7–18 V, 4 A eFuses, WSON-8, 34 mΩ, active-high
+// enable: the TPS259530 (thermal latch-off, FAULT output) and the TPS259531 (5.7 V output clamp,
+// auto-retry).
+//
+// R_ILM from ILIM to GND sets the current limit: R_ILM = 2000 / (I_limit − 0.04), with current in
+// amperes (TPS2595 datasheet equation 4). DVDT to GND sets the output slew. A latched thermal
+// fault needs an enable cycle to clear.
+
+part tps259530 {
+    param current-limit current default="750mA"
+
+    symbol "TPS2595:TPS259530DSGR"
+    reference U
+    manufacturer "Texas Instruments"
+    order mpn="TPS259530DSGR" mouser="595-TPS259530DSGR"
+    datasheet "https://www.ti.com/lit/ds/symlink/tps2595.pdf"
+    description "34mΩ eFuse, current limiting, active-high enable, thermal latch-off, WSON-8"
+    pin DVDT passive
+    pin EN input required
+    pin IN power_in
+    pin OUT power_out
+    pin FAULT open_collector
+    pin ILIM passive
+    pin GND power_in
+    package wson8 footprint="Package_SON:Texas_DSG0008A_WSON-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm" {
+        pad DVDT 1; pad EN 2; pad IN 3; pad IN 4; pad OUT 5
+        pad FAULT 6; pad ILIM 7; pad GND 8; pad GND 9
+    }
+    // The input carries the limit the board's R_ILM sets, stated as `current-limit` (its
+    // upper tolerance), plus the part's own quiescent draw.
+    port in type=power {
+        require net.voltage min="2.7V" max="18V"
+        add net.draw "current-limit + 250µA"
+        line rail pin=IN
+        line gnd pin=GND
+    }
+    port out type=power {
+        set net.voltage "in.voltage"
+        line rail pin=OUT
+        line gnd pin=GND
+    }
+    port en pin=EN
+    port fault pin=FAULT
+}
+
+// TI TPS259531, a 2.7–18 V eFuse in WSON-8: 34 mΩ, active current limiting, an output clamp at
+// 5.7 V (typ) so a bad charger or a hot-plug spike never reaches the 5.5 V parts behind it, and
+// auto-retry after thermal shutdown (93 ms), so a board that overheated in current limit comes back
+// on its own instead of waiting to be unplugged. The TPS259530 above is the latch-off sibling with
+// the same pins.
+//
+// R_ILM sets the limit: I_LIMIT = 2000 / R_ILM + 0.04 A (datasheet SLVSE57C, equation 4; 1780 Ω
+// measures 1.09–1.24 A). C_dVdt sets the turn-on slew: C_dVdt (pF) = 42000 / SR (V/ms), equation 3.
+// EN/UVLO is rated to 7 V and may be tied to IN.
+part tps259531 {
+    param current-limit current default="1.5A"
+
+    symbol "TPS2595:TPS259530DSGR"
+    reference U
+    value "TPS259531"
+    manufacturer "Texas Instruments"
+    order mpn="TPS259531DSGR" mouser="595-TPS259531DSGR"
+    datasheet "https://www.ti.com/lit/ds/symlink/tps2595.pdf"
+    description "34mΩ eFuse, current limiting, 5.7V output clamp, auto-retry, WSON-8"
+    pin DVDT passive
+    pin EN input required
+    pin IN power_in
+    pin OUT power_out
+    pin FAULT open_collector
+    pin ILIM passive
+    pin GND power_in
+    package wson8 footprint="Package_SON:Texas_DSG0008A_WSON-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm" {
+        pad DVDT 1; pad EN 2; pad IN 3; pad IN 4; pad OUT 5
+        pad FAULT 6; pad ILIM 7; pad GND 8; pad GND 9
+    }
+    // The input carries the limit the board's R_ILM sets, stated as `current-limit` (its upper
+    // tolerance), plus the part's own quiescent draw.
+    port in type=power {
+        require net.voltage min="2.7V" max="18V"
+        add net.draw "current-limit + 250µA"
+        line rail pin=IN
+        line gnd pin=GND
+    }
+    port out type=power {
+        set net.voltage "in.voltage"
+        line rail pin=OUT
+        line gnd pin=GND
+    }
+    port en pin=EN
+    port fault pin=FAULT
+    port dvdt pin=DVDT
+    port ilim pin=ILIM
+}

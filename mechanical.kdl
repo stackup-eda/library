@@ -8,9 +8,11 @@ part mounting-hole {
     symbol "Mechanical:MountingHole"
     reference H
     description "Mounting hole, M3, unplated"
-    package m3 footprint="MountingHole_3.2mm_M3"
+    package m3 footprint="MountingHole:MountingHole_3.5mm"
     // Ø2 mm hole for a case locating pin.
-    package m2 footprint="MountingHole_2mm"
+    package m2 footprint="MountingHole:MountingHole_2mm"
+    // Ø2.2 mm clearance for an M2 screw.
+    package m2-screw footprint="MountingHole:MountingHole_2.2mm_M2"
 }
 
 // 1 mm copper fiducial with a 2 mm solder-mask opening for pick-and-place alignment.
@@ -18,7 +20,7 @@ part fiducial {
     symbol "Mechanical:Fiducial"
     reference FID
     description "Fiducial mark"
-    package p1mm footprint="Fiducial_1mm_Mask2mm"
+    package p1mm footprint="Fiducial:Fiducial_1mm_Mask2mm"
 }
 
 // Test point with one pad and one net. Choose a flat pad for a handheld probe, a drilled pad
@@ -33,13 +35,13 @@ part test-point {
     pin 1 passive
     port at pin=1
 
-    package pad footprint="TestPoint_Pad_D1.5mm" {
+    package pad footprint="TestPoint:TestPoint_Pad_D1.5mm" {
         pad 1 1
     }
-    package hole footprint="TestPoint_THTPad_D1.5mm_Drill0.7mm" {
+    package hole footprint="TestPoint:TestPoint_THTPad_D1.5mm_Drill0.7mm" {
         pad 1 1
     }
-    package loop footprint="TestPoint_Loop_D2.50mm_Drill1.0mm" {
+    package loop footprint="TestPoint:TestPoint_Loop_D2.50mm_Drill1.0mm" {
         pad 1 1
     }
 }

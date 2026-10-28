@@ -1,0 +1,34 @@
+// @stackup/discrete/diode/nup2105l — onsemi NUP2105L dual-line CAN bus protector in SOT-23. Two
+// bidirectional 24 V working-voltage TVS diodes share a common pin, so one part clamps CANH and
+// CANL to the transceiver's bus-side ground. It is rated to IEC 61000-4-2 level 4 (30 kV) and
+// suits 12 V and 24 V CAN systems.
+//
+// Line capacitance is about 30 pF maximum. That is acceptable for classical CAN and CAN FD at
+// moderate data-phase rates; check the bus budget before using it at several Mbit/s.
+//
+// Place it between the connector and the transceiver, close to the connector, with its common
+// pin on a short path to the bus-side ground. The two line channels are symmetric.
+
+part nup2105l {
+    symbol "Power_Protection:NUP2105L"
+    reference D
+    datasheet "https://www.onsemi.com/pub/Collateral/NUP2105L-D.PDF"
+    description "Dual-line CAN bus TVS protector, 24 V working voltage, SOT-23"
+    manufacturer onsemi
+    order mpn=NUP2105LT1G mouser="863-NUP2105LT1G"
+
+    // The symbol names both line pins `K` and the common pin `A`.
+    pin IO1 passive symbol="K"
+    pin IO2 passive symbol="K"
+    pin COM passive symbol="A"
+
+    package sot23 footprint="Package_TO_SOT_SMD:SOT-23" {
+        pad IO1 1
+        pad IO2 2
+        pad COM 3
+    }
+
+    port IO1 pin=IO1
+    port IO2 pin=IO2
+    port COM pin=COM
+}

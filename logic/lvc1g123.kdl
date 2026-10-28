@@ -21,7 +21,7 @@ part lvc1g123 {
     pin CEXT input symbol=Cext
     pin RCEXT input symbol=RCext
     pin VCC power_in
-    package ssop8 footprint="SSOP-8_2.95x2.8mm_P0.65mm" {
+    package ssop8 footprint="Package_SO:SSOP-8_2.95x2.8mm_P0.65mm" {
         pad A 1
         pad B 2
         pad CLR 3
@@ -41,11 +41,11 @@ part lvc1g123 {
     port out type=output pin=Q
     block supply {
         default
-        place bypass Cvcc node=VCC rail=vcc value="100nF"
+        place bypass Cvcc anchor=VCC node=VCC rail=vcc value="100nF"
     }
     block stretcher {
-        place resistor R value=resistance intent=timing
-        place capacitor C value=capacitance intent=timing
+        place resistor R anchor=RCEXT value=resistance intent=timing
+        place capacitor C anchor=CEXT value=capacitance intent=timing
         circuit vcc.rail R RCEXT C CEXT
         circuit B vcc.rail
         circuit CLR vcc.rail

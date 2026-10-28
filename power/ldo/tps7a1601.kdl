@@ -54,14 +54,14 @@ part tps7a1601 {
 
     block supply {
         default
-        place bypass Cin node=IN rail=in value="1µF"
-        place bypass Cout node=OUT rail=out value="2.2µF"
+        place bypass Cin anchor=IN node=IN rail=in value="1µF"
+        place bypass Cout anchor=OUT node=OUT rail=out value="2.2µF"
         circuit GND in.gnd
     }
     block feedback {
         default
-        place resistor Rtop value=rtop intent=divider
-        place resistor Rbottom value="1.13MΩ" intent=divider
+        place resistor Rtop anchor=FB value=rtop intent=divider
+        place resistor Rbottom anchor=FB value="1.13MΩ" intent=divider
         circuit OUT Rtop FB Rbottom GND
     }
     block always-on {

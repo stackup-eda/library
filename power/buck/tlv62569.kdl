@@ -30,7 +30,7 @@ part tlv62569 {
     pin VIN power_in
     pin FB input required
 
-    package sot23-5 footprint="SOT-23-5" {
+    package sot23-5 footprint="Package_TO_SOT_SMD:SOT-23-5" {
         pad EN 1
         pad GND 2
         pad SW 3
@@ -81,18 +81,18 @@ block tlv62569-buck {
 
     // Inductor recommended with 22 µF for outputs of at least 1.8 V (Table 4). Default package
     // is Bourns SRN4018, 4 × 4 mm, with 3 A saturation current.
-    place inductor L value=inductance intent=filter footprint="L_Bourns-SRN4018" \
+    place inductor L anchor=self.SW value=inductance intent=filter footprint="Inductor_SMD:L_Bourns-SRN4018" \
         note="buck inductor — datasheet value for VOUT >= 1.8 V with a 22 µF output"
     circuit self.sw L out.rail
 
     // 10 µF input and 22 µF output capacitors, with packages selected for those values.
-    place bulk Cin node=self.vin.rail rail=in value=cin footprint="C_0805_2012Metric" \
+    place bulk Cin anchor=self.VIN node=self.vin.rail rail=in value=cin footprint="Capacitor_SMD:C_0805_2012Metric" \
         note="input capacitor, at VIN"
-    place bulk Cout node=out.rail rail=out value=cout footprint="C_0805_2012Metric" \
+    place bulk Cout anchor=L.B node=out.rail rail=out value=cout footprint="Capacitor_SMD:C_0805_2012Metric" \
         note="output capacitor — datasheet specifies 22 µF with this inductor"
 
     // Feedback divider from output through FB to ground.
-    place resistor Rtop value=rtop intent=divider note="feedback divider, top — sets {vout}"
-    place resistor Rbottom value=rbottom intent=divider note="feedback divider, bottom"
+    place resistor Rtop anchor=self.FB value=rtop intent=divider note="feedback divider, top — sets {vout}"
+    place resistor Rbottom anchor=self.FB value=rbottom intent=divider note="feedback divider, bottom"
     circuit out.rail Rtop self.fb Rbottom out.gnd
 }

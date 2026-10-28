@@ -15,25 +15,25 @@ part tvs {
     port a pin=A1
     port b pin=A2
 
-    package smb footprint="D_SMB" {
+    package smb footprint="Diode_SMD:D_SMB" {
         pad A1 1
         pad A2 2
     }
-    package smc footprint="D_SMC" {
+    package smc footprint="Diode_SMD:D_SMC" {
         pad A1 1
         pad A2 2
     }
-    package sma footprint="D_SMA" {
+    package sma footprint="Diode_SMD:D_SMA" {
         pad A1 1
         pad A2 2
     }
-    package sod123 footprint="D_SOD-123" {
+    package sod123 footprint="Diode_SMD:D_SOD-123" {
         pad A1 1
         pad A2 2
     }
     // SOD-123 option for ESD protection, such as PESD5V0S1BA on a USB rail. Check its energy
     // rating before using it for supply surges.
-    package sod323 footprint="D_SOD-323" {
+    package sod323 footprint="Diode_SMD:D_SOD-323" {
         pad A1 1
         pad A2 2
     }

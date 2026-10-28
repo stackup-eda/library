@@ -125,7 +125,7 @@ block lm5146-buck {
     place lm5146 as=self
     place power-fet Qhs
     place power-fet Qls
-    place inductor L value=inductance footprint="L_Coilcraft-XAL1060" intent=filter
+    place inductor L anchor=self.SW value=inductance footprint="L_Coilcraft-XAL1060" intent=filter
     circuit in.rail Qhs.drain
     circuit Qhs.source self.SW Qls.drain L
     circuit Qhs.gate self.HO
@@ -138,44 +138,44 @@ block lm5146-buck {
     circuit pgood self.PGOOD
     nc self.SYNCOUT self.NC
 
-    place bulk Cin1 node=in.rail rail=in value=cin footprint="C_1210_3225Metric"
-    place bulk Cin2 node=in.rail rail=in value=cin footprint="C_1210_3225Metric"
-    place bypass Cin-hf1 node=in.rail rail=in value="100nF" footprint="C_0603_1608Metric"
-    place bypass Cin-hf2 node=in.rail rail=in value="100nF" footprint="C_0603_1608Metric"
-    place bulk Cout1 node=out.rail rail=out value=cout footprint="C_1210_3225Metric"
-    place bulk Cout2 node=out.rail rail=out value=cout footprint="C_1210_3225Metric"
+    place bulk Cin1 node=in.rail rail=in value=cin footprint="Capacitor_SMD:C_1210_3225Metric"
+    place bulk Cin2 node=in.rail rail=in value=cin footprint="Capacitor_SMD:C_1210_3225Metric"
+    place bypass Cin-hf1 node=in.rail rail=in value="100nF" footprint="Capacitor_SMD:C_0603_1608Metric"
+    place bypass Cin-hf2 node=in.rail rail=in value="100nF" footprint="Capacitor_SMD:C_0603_1608Metric"
+    place bulk Cout1 anchor=L.B node=out.rail rail=out value=cout footprint="Capacitor_SMD:C_1210_3225Metric"
+    place bulk Cout2 anchor=L.B node=out.rail rail=out value=cout footprint="Capacitor_SMD:C_1210_3225Metric"
 
     block third-output-capacitor {
         when "output-bank == three"
-        place bulk Cout3 node=out.rail rail=out value=cout footprint="C_1210_3225Metric"
+        place bulk Cout3 anchor=L.B node=out.rail rail=out value=cout footprint="Capacitor_SMD:C_1210_3225Metric"
     }
 
-    place resistor Rboot value="2.2Ω" intent=series
-    place capacitor Cboot value="100nF" intent=filter
+    place resistor Rboot anchor=self.BST value="2.2Ω" intent=series
+    place capacitor Cboot anchor=self.BST value="100nF" intent=filter
     circuit self.BST Rboot Cboot self.SW
-    place resistor Rilim value=rilim intent=series
-    place capacitor Cilim value=cilim intent=filter
+    place resistor Rilim anchor=self.ILIM value=rilim intent=series
+    place capacitor Cilim anchor=self.ILIM value=cilim intent=filter
     circuit self.ILIM Rilim self.SW
     circuit self.ILIM Cilim in.gnd
-    place bypass Cvcc node=self.VCC rail=in value="2.2µF" footprint="C_0805_2012Metric"
-    place bypass Css node=self.SS_TRK rail=in value=css
-    place resistor Rrt value="33.2kΩ" intent=series
+    place bypass Cvcc anchor=self.VCC node=self.VCC rail=in value="2.2µF" footprint="Capacitor_SMD:C_0805_2012Metric"
+    place bypass Css anchor=self.SS_TRK node=self.SS_TRK rail=in value=css
+    place resistor Rrt anchor=self.RT value="33.2kΩ" intent=series
     circuit self.RT Rrt in.gnd
-    place resistor Rvin value="4.7Ω" intent=series
-    place bypass Cvin node=self.VIN rail=in value="100nF"
+    place resistor Rvin anchor=self.VIN value="4.7Ω" intent=series
+    place bypass Cvin anchor=self.VIN node=self.VIN rail=in value="100nF"
     circuit in.rail Rvin self.VIN
-    place resistor Ren value="10kΩ" intent=pull-down
+    place resistor Ren anchor=self.EN_UVLO value="10kΩ" intent=pull-down
     circuit self.EN_UVLO Ren in.gnd
 
-    place resistor Rfbtop value=rfbtop intent=divider
-    place resistor Rfbbottom value="10kΩ" intent=divider
+    place resistor Rfbtop anchor=self.FB value=rfbtop intent=divider
+    place resistor Rfbbottom anchor=self.FB value="10kΩ" intent=divider
     circuit out.rail Rfbtop self.FB Rfbbottom out.gnd
-    place resistor Rc1 value=rc1 intent=series
-    place capacitor Cc1 value=cc1 intent=filter
+    place resistor Rc1 anchor=self.COMP value=rc1 intent=series
+    place capacitor Cc1 anchor=self.COMP value=cc1 intent=filter
     circuit self.FB Rc1 Cc1 self.COMP
-    place capacitor Cc2 value=cc2 intent=filter
+    place capacitor Cc2 anchor=self.COMP value=cc2 intent=filter
     circuit self.FB Cc2 self.COMP
-    place resistor Rc2 value=rc2 intent=series
-    place capacitor Cc3 value=cc3 intent=filter
+    place resistor Rc2 anchor=self.FB value=rc2 intent=series
+    place capacitor Cc3 anchor=self.FB value=cc3 intent=filter
     circuit out.rail Rc2 Cc3 self.FB
 }

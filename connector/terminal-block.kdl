@@ -1,0 +1,53 @@
+// @stackup/connector/terminal-block — wire-to-board terminal blocks.
+//
+// WAGO 2601-1102: a two-pole, 3.5 mm pitch lever-actuated push-in (Push-in CAGE CLAMP) block,
+// through-hole, wire entry parallel to the board. 0.2–1.5 mm² (24–16 AWG) solid, stranded or
+// ferruled wire; open the lever, insert, close — no tool. Each pole has two pins; both are mapped
+// to the one pad number the footprint gives them.
+//
+// Phoenix Contact PTSM 0,5/ 2-2,5-V SMD (1771091): a two-position, 2.5 mm pitch push-in spring
+// terminal for reflow, wire entry from above. 0.14–0.5 mm² (26–20 AWG) solid or ferruled wire,
+// 6 A per contact. The two MP pads are the body's solder anchors and carry no signal; a board
+// declares them `nc`.
+
+part ptsm-2-smd {
+    symbol "Connector_Generic:Conn_01x02"
+    reference J
+    datasheet "https://www.phoenixcontact.com/product/1771091"
+    description "2-position SMD push-in terminal block, 2.5 mm pitch, 6 A, vertical wire entry"
+    manufacturer "Phoenix Contact"
+    order mpn="1771091" mouser="651-1771091"
+
+    pin 1 passive
+    pin 2 passive
+    pin MP passive
+
+    package smd footprint="TerminalBlock_Phoenix:TerminalBlock_Phoenix_PTSM-0,5-2-2,5-V-SMD_1x02-1MP_P2.50mm_Vertical" {
+        pad 1 1
+        pad 2 2
+        pad MP MP
+    }
+
+    port a pin=1
+    port b pin=2
+}
+
+part wago-2601-1102 {
+    symbol "Connector_Generic:Conn_01x02"
+    reference J
+    datasheet "https://www.wago.com/global/pcb-terminal-blocks-and-pluggable-connectors/pcb-terminal-block/p/2601-1102"
+    description "2-pole lever PCB terminal block, 3.5 mm pitch, 0.2-1.5 mm², horizontal wire entry"
+    manufacturer WAGO
+    order mpn="2601-1102" mouser="1089-2601-1102"
+
+    pin 1 passive
+    pin 2 passive
+
+    package tht footprint="TerminalBlock_WAGO:TerminalBlock_WAGO_2601-1102_1x02_P3.50mm_Horizontal" {
+        pad 1 1
+        pad 2 2
+    }
+
+    port a pin=1
+    port b pin=2
+}

@@ -18,7 +18,7 @@ part w25q32 {
     pin HOLD input required symbol="~{HOLD}/~{RESET}"
     pin VCC power_in
 
-    package soic8 footprint="Package_SO:SOIC-8_5.23x5.23mm_P1.27mm" {
+    package soic8 footprint="Package_SO:SOIC-8_5.3x5.3mm_P1.27mm" {
         pad CS 1
         pad DO 2
         pad WP 3
@@ -47,12 +47,12 @@ part w25q32 {
 
     block supply {
         default
-        place decouple Cin node=VCC rail=vdd value="100nF"
+        place decouple Cin anchor=VCC node=VCC rail=vdd value="100nF"
     }
 
     // Tie /WP and /HOLD high to disable write protection and hold in standard SPI mode.
     block single-spi {
-        place pull-up Rwp node=WP rail=vdd value="10kΩ"
-        place pull-up Rhold node=HOLD rail=vdd value="10kΩ"
+        place pull-up Rwp anchor=WP node=WP rail=vdd value="10kΩ"
+        place pull-up Rhold anchor=HOLD node=HOLD rail=vdd value="10kΩ"
     }
 }

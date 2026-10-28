@@ -5,6 +5,12 @@ use "@stackup/passives"
 use "@stackup/clock/ecs2520mv"
 
 part mcp2518fd {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvdd text default=#null
+    param ref-supply-Rint text default=#null
+    param ref-reference-clock-clock text default=#null
+    param ref-reference-clock-clock-supply-Cbypass text default=#null
+
     symbol "Interface_CAN_LIN:MCP2518FD-xQBB"
     reference U
     datasheet "https://ww1.microchip.com/downloads/aemDocuments/documents/OTH/ProductDocuments/DataSheets/External-CAN-FD-Controller-with-SPI-Interface-DS20006027B.pdf"
@@ -27,7 +33,7 @@ part mcp2518fd {
     pin CS input symbol="~{CS}"
     pin VDD power_in
 
-    package vdfn14 footprint="DFN-14-1EP_3x4.5mm_P0.65mm_EP1.65x4.25mm" {
+    package vdfn14 footprint="Package_DFN_QFN:DFN-14-1EP_3x4.5mm_P0.65mm_EP1.65x4.25mm" {
         pad TXCAN 1
         pad RXCAN 2
         pad CLKO_SOF 3
@@ -66,13 +72,14 @@ part mcp2518fd {
 
     block supply {
         default
-        place bypass Cvdd node=VDD rail=vdd value="100nF"
-        place pull-up Rint node=INT rail=vdd value="4.7kΩ"
+        place bypass Cvdd anchor=VDD node=VDD rail=vdd value="100nF" designator=ref-supply-Cvdd
+        place pull-up Rint anchor=INT node=INT rail=vdd value="4.7kΩ" designator=ref-supply-Rint
     }
     // Replace this block when the board supplies OSC1 from another 40 MHz source.
     block reference-clock {
         default
-        place ecs2520mv clock value="40MHz"
+        place ecs2520mv clock value="40MHz" designator=ref-reference-clock-clock \
+            ref-supply-Cbypass=ref-reference-clock-clock-supply-Cbypass
         circuit clock.out OSC1
         connect power from=vdd to=clock.vdd
     }

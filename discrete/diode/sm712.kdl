@@ -1,0 +1,37 @@
+// @stackup/discrete/diode/sm712 — Bourns CDSOT23-SM712 asymmetric TVS array for one RS-485 pair,
+// in SOT-23. Each line clamps to the common pin with a 12 V working voltage positive and 7 V
+// negative, which matches the RS-485 common-mode range of −7 V to +12 V. It is rated to
+// IEC 61000-4-2, -4-4 and -4-5.
+//
+// Junction capacitance is about 75 pF per line. That is acceptable at low and moderate bit rates
+// but loads a fast pair; check the bus budget before using it above about 1 Mbit/s.
+//
+// The working voltages are measured from the line to the common pin, so the common pin must be
+// the transceiver's bus-side ground. Pads 1 and 2 are the line pins and pad 3 is common.
+//
+// KiCad has no SM712 symbol. The NUP2105L symbol has the same three-pin, common-pin topology and
+// pad numbering, so it is used as the drawing; the asymmetry is in the order data, not the symbol.
+
+part sm712 {
+    symbol "Power_Protection:NUP2105L"
+    value "SM712"
+    reference D
+    datasheet "https://www.bourns.com/docs/Product-Datasheets/CDSOT23-SM712.pdf"
+    description "Asymmetric −7 V / +12 V TVS array for one RS-485 pair, SOT-23"
+    manufacturer Bourns
+    order mpn="CDSOT23-SM712" mouser="652-CDSOT23-SM712"
+
+    pin IO1 passive symbol="K"
+    pin IO2 passive symbol="K"
+    pin COM passive symbol="A"
+
+    package sot23 footprint="Package_TO_SOT_SMD:SOT-23" {
+        pad IO1 1
+        pad IO2 2
+        pad COM 3
+    }
+
+    port IO1 pin=IO1
+    port IO2 pin=IO2
+    port COM pin=COM
+}

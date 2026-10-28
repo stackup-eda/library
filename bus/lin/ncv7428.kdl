@@ -10,6 +10,12 @@ use "@stackup/passives"
 
 // NCV7428D13R2G: 3.3 V regulator and normal LIN slew rate.
 part ncv7428d13 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvs text default=#null
+    param ref-supply-Cvout text default=#null
+    param ref-supply-Clin text default=#null
+    param ref-supply-Rrstn text default=#null
+
     symbol "NCV7428:NCV7428D13R2G"   // no standard KiCad symbol; symbol correspondence is not checked
     reference U
     datasheet "https://www.onsemi.com/pdf/datasheet/ncv7428-d.pdf"
@@ -26,7 +32,7 @@ part ncv7428d13 {
     pin RSTN open_collector
     pin VOUT power_out
 
-    package soic8 footprint="SOIC-8_3.9x4.9mm_P1.27mm" {
+    package soic8 footprint="Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" {
         pad VS 1
         pad EN 2
         pad GND 3
@@ -79,13 +85,13 @@ part ncv7428d13 {
     // shared MCU reset filter and debug header.
     block supply {
         default
-        place bypass Cvs node=VS rail=vs value="100nF"
-        place bulk Cvout node=VOUT rail=vout value="10µF" \
-            note="regulator output stability and bulk capacitance"
-        place filter Clin node=LIN rail=vs value="220pF" \
-            note="LIN slave filter capacitor; contributes to total bus capacitance"
-        place pull-up Rrstn node=RSTN rail=vout value="10kΩ" \
-            note="RSTN pull-up for the shared reset circuit; supplements the internal 100k"
+        place bypass Cvs anchor=VS node=VS rail=vs value="100nF" designator=ref-supply-Cvs
+        place bulk Cvout anchor=VOUT node=VOUT rail=vout value="10µF" \
+            note="regulator output stability and bulk capacitance" designator=ref-supply-Cvout
+        place filter Clin anchor=LIN node=LIN rail=vs value="220pF" \
+            note="LIN slave filter capacitor; contributes to total bus capacitance" designator=ref-supply-Clin
+        place pull-up Rrstn anchor=RSTN node=RSTN rail=vout value="10kΩ" \
+            note="RSTN pull-up for the shared reset circuit; supplements the internal 100k" designator=ref-supply-Rrstn
     }
 
     // Tie EN to VOUT for continuous operation. Its internal pull-down otherwise selects Standby

@@ -85,10 +85,10 @@ part bq25185 {
 
     block program {
         default
-        place resistor Riset value=iset intent=series \
+        place resistor Riset anchor=ISET value=iset intent=series \
             note="charge current program — {ichg} from 300 A·Ω / {iset}"
         circuit ISET Riset in.gnd
-        place resistor Rvset value=vset intent=series \
+        place resistor Rvset anchor=VSET value=vset intent=series \
             note="regulation program — {vbatreg} and a {ilim} input limit, Table 7-1"
         circuit VSET Rvset in.gnd
     }
@@ -104,7 +104,7 @@ part bq25185 {
     // floating-TS condition that suspends charging.
     block ts-fixed {
         default
-        place pull-down Rts node=TS rail=in value="10kΩ" \
+        place pull-down Rts anchor=TS node=TS rail=in value="10kΩ" \
             note="TS/MR with no thermistor — floating would suspend charging; an NTC replaces it"
     }
 
@@ -117,13 +117,13 @@ part bq25185 {
     // capacitors on the switching supplies.
     block supply {
         default
-        place bulk Cin node=IN rail=in value="10µF" footprint="C_0805_2012Metric" \
+        place bulk Cin anchor=IN node=IN rail=in value="10µF" footprint="Capacitor_SMD:C_0805_2012Metric" \
             note="input bulk capacitance"
-        place decouple Cin-hf node=IN rail=in value="100nF"
-        place bulk Csys node=SYS rail=sys value="10µF" footprint="C_0805_2012Metric" \
+        place decouple Cin-hf anchor=IN node=IN rail=in value="100nF"
+        place bulk Csys anchor=SYS node=SYS rail=sys value="10µF" footprint="Capacitor_SMD:C_0805_2012Metric" \
             note="system rail bulk capacitance — datasheet minimum"
-        place decouple Csys-hf node=SYS rail=sys value="100nF"
-        place bulk Cbat node=BAT rail=bat value="10µF" footprint="C_0805_2012Metric" \
+        place decouple Csys-hf anchor=SYS node=SYS rail=sys value="100nF"
+        place bulk Cbat anchor=BAT node=BAT rail=bat value="10µF" footprint="Capacitor_SMD:C_0805_2012Metric" \
             note="at the cell terminal"
     }
 }

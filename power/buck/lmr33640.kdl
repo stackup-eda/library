@@ -1,0 +1,243 @@
+// @stackup/power/buck/lmr33640 — TI LMR33640 3.8–36 V, 4 A synchronous buck, internal
+// compensation, 1.0 V feedback reference, HSOP-8 (DDA). `lmr33640` is the 400 kHz A option and
+// `lmr33640d` the 1 MHz D option; they share the package and pinout.
+//
+// The default power stage has two 10 µF input ceramics with a 100 nF bypass at VIN and two 22 µF
+// output ceramics. The A option follows the datasheet's 400 kHz application with a 10 µH
+// inductor. The D option uses 4.7 µH, which clears the subharmonic minimum (0.23 µH·MHz/V × VOUT
+// ÷ fSW) up to a 20 V output and keeps the ripple at 20–40 % of 4 A from 12 V out on a 21 V input.
+// Both inductors saturate well above the 6.2 A high-side peak limit. The ripple suits outputs
+// from about 5 V up to roughly 80 % of the minimum input; check it, and the loop with any extra
+// bulk capacitance on the output, against the datasheet for other settings.
+//
+// The `feedback` block sets a fixed output from `vout` with a 100 kΩ top resistor and an E96
+// bottom resistor, and declares the voltage that divider makes. A board that switches its
+// output (a selectable divider) places `without feedback`, wires FB itself and declares the
+// output voltage on its own rail.
+//
+// EN is tied to VIN by default. `enable-above` places a UVLO divider instead (1.2 V rising
+// threshold). `with external-enable` leaves EN for the board to drive; it must still be driven
+// or pulled, since the pin is required.
+
+use "@stackup/passives"
+
+part lmr33640 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-power-stage-L text default=#null
+    param ref-power-stage-Cin1 text default=#null
+    param ref-power-stage-Cin2 text default=#null
+    param ref-power-stage-Cin-hf text default=#null
+    param ref-power-stage-Cout1 text default=#null
+    param ref-power-stage-Cout2 text default=#null
+    param ref-power-stage-Cboot text default=#null
+    param ref-power-stage-Cvcc text default=#null
+    param ref-feedback-Rtop text default=#null
+    param ref-feedback-Rbottom text default=#null
+    param ref-uvlo-Ren-top text default=#null
+    param ref-uvlo-Ren-bottom text default=#null
+
+    symbol "Regulator_Switching:LMR33640ADDA"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/lmr33640.pdf"
+    description "36V 4A synchronous buck, 400kHz, adjustable, HSOP-8"
+    manufacturer "Texas Instruments"
+    order mpn="LMR33640ADDAR" mouser="595-LMR33640ADDAR" lcsc=C2836966
+
+    param vout voltage default="5V"
+    param enable-above voltage default="0V"
+    // Divider values round to E96; `actual` is what the rounded divider makes.
+    derive rbottom "e96(100kΩ / (vout / 1V - 1))"
+    derive actual "1V * (1 + 100kΩ / rbottom)"
+    derive renbottom "e96(100kΩ / (enable-above / 1.2V - 1))"
+    derive input "out.draw * out.voltage / (0.9 * in.voltage.min)"
+
+    pin GND power_in
+    pin VIN power_in
+    pin EN input required
+    pin PG open_collector
+    pin FB input required
+    pin VCC power_out
+    pin BOOT input required
+    pin SW output
+
+    package hsop8 footprint="Package_SO:Texas_HSOP-8-1EP_3.9x4.9mm_P1.27mm_ThermalVias" {
+        pad GND 1
+        pad GND 9
+        pad VIN 2
+        pad EN 3
+        pad PG 4
+        pad FB 5
+        pad VCC 6
+        pad BOOT 7
+        pad SW 8
+    }
+
+    port in type=power {
+        require net.voltage min="3.8V" max="36V"
+        add net.draw input
+        line rail pin=VIN
+        line gnd pin=GND
+    }
+    // The inductor's output. Its voltage is declared by `feedback`, or by the board without it.
+    port out type=power {
+        assert "draw <= 4A" message="LMR33640 output load {draw} exceeds 4A"
+        line rail
+        line gnd pin=GND
+    }
+    port en pin=EN
+    port pg pin=PG
+    port fb pin=FB
+
+    block power-stage {
+        default
+        place bulk Cin1 anchor=VIN node=VIN rail=in value="10µF" footprint="Capacitor_SMD:C_1210_3225Metric" \
+            designator=ref-power-stage-Cin1
+        place bulk Cin2 anchor=VIN node=VIN rail=in value="10µF" footprint="Capacitor_SMD:C_1210_3225Metric" \
+            designator=ref-power-stage-Cin2
+        place bypass Cin-hf anchor=VIN node=VIN rail=in value="100nF" \
+            note="high-frequency input bypass, closest to VIN and GND" designator=ref-power-stage-Cin-hf
+        place inductor L anchor=SW value="10µH" footprint="Inductor_SMD:L_Coilcraft_XAL1010-XXX" intent=filter \
+            manufacturer="Coilcraft" mpn="XAL1010-103MED" mouser="994-XAL1010-103MED" lcsc=C6358489 designator=ref-power-stage-L
+        circuit SW L out.rail
+        place capacitor Cboot anchor=BOOT value="100nF" intent=filter designator=ref-power-stage-Cboot
+        circuit BOOT Cboot SW
+        place bypass Cvcc anchor=VCC node=VCC rail=in value="1µF" designator=ref-power-stage-Cvcc
+        place bulk Cout1 anchor=L.B node=out.rail rail=out value="22µF" footprint="Capacitor_SMD:C_1210_3225Metric" \
+            designator=ref-power-stage-Cout1
+        place bulk Cout2 anchor=L.B node=out.rail rail=out value="22µF" footprint="Capacitor_SMD:C_1210_3225Metric" \
+            designator=ref-power-stage-Cout2
+    }
+    block feedback {
+        default
+        assert "vout >= 1V && vout <= 24V" message="LMR33640 output setting must be 1-24V"
+        set out.rail net.voltage actual
+        place resistor Rtop anchor=FB value="100kΩ" intent=divider designator=ref-feedback-Rtop
+        place resistor Rbottom anchor=FB value=rbottom intent=divider designator=ref-feedback-Rbottom
+        circuit out.rail Rtop FB Rbottom GND
+    }
+    block always-on {
+        when "enable-above == 0V && !external-enable"
+        circuit EN VIN
+    }
+    block uvlo {
+        when "enable-above > 0V"
+        place resistor Ren-top anchor=EN value="100kΩ" intent=divider designator=ref-uvlo-Ren-top
+        place resistor Ren-bottom anchor=EN value=renbottom intent=divider designator=ref-uvlo-Ren-bottom
+        circuit VIN Ren-top EN Ren-bottom GND
+    }
+    // EN is the board's to drive; nothing here ties it.
+    block external-enable {
+        assert "enable-above == 0V" message="external-enable and enable-above both decide EN; choose one"
+    }
+}
+
+part lmr33640d {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-power-stage-L text default=#null
+    param ref-power-stage-Cin1 text default=#null
+    param ref-power-stage-Cin2 text default=#null
+    param ref-power-stage-Cin-hf text default=#null
+    param ref-power-stage-Cout1 text default=#null
+    param ref-power-stage-Cout2 text default=#null
+    param ref-power-stage-Cboot text default=#null
+    param ref-power-stage-Cvcc text default=#null
+    param ref-feedback-Rtop text default=#null
+    param ref-feedback-Rbottom text default=#null
+    param ref-uvlo-Ren-top text default=#null
+    param ref-uvlo-Ren-bottom text default=#null
+
+    symbol "Regulator_Switching:LMR33640ADDA"   // KiCad has no LMR33640DDDA; same pins in the same order
+    value "LMR33640DDDA"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/lmr33640.pdf"
+    description "36V 4A synchronous buck, 1MHz, adjustable, HSOP-8"
+    manufacturer "Texas Instruments"
+    order mpn="LMR33640DDDAR" mouser="595-LMR33640DDDAR"
+
+    param vout voltage default="5V"
+    param enable-above voltage default="0V"
+    // Divider values round to E96; `actual` is what the rounded divider makes.
+    derive rbottom "e96(100kΩ / (vout / 1V - 1))"
+    derive actual "1V * (1 + 100kΩ / rbottom)"
+    derive renbottom "e96(100kΩ / (enable-above / 1.2V - 1))"
+    derive input "out.draw * out.voltage / (0.9 * in.voltage.min)"
+
+    pin GND power_in
+    pin VIN power_in
+    pin EN input required
+    pin PG open_collector
+    pin FB input required
+    pin VCC power_out
+    pin BOOT input required
+    pin SW output
+
+    package hsop8 footprint="Package_SO:Texas_HSOP-8-1EP_3.9x4.9mm_P1.27mm_ThermalVias" {
+        pad GND 1
+        pad GND 9
+        pad VIN 2
+        pad EN 3
+        pad PG 4
+        pad FB 5
+        pad VCC 6
+        pad BOOT 7
+        pad SW 8
+    }
+
+    port in type=power {
+        require net.voltage min="3.8V" max="36V"
+        add net.draw input
+        line rail pin=VIN
+        line gnd pin=GND
+    }
+    // The inductor's output. Its voltage is declared by `feedback`, or by the board without it.
+    port out type=power {
+        assert "draw <= 4A" message="LMR33640D output load {draw} exceeds 4A"
+        line rail
+        line gnd pin=GND
+    }
+    port en pin=EN
+    port pg pin=PG
+    port fb pin=FB
+
+    block power-stage {
+        default
+        place bulk Cin1 anchor=VIN node=VIN rail=in value="10µF" footprint="Capacitor_SMD:C_1210_3225Metric" \
+            designator=ref-power-stage-Cin1
+        place bulk Cin2 anchor=VIN node=VIN rail=in value="10µF" footprint="Capacitor_SMD:C_1210_3225Metric" \
+            designator=ref-power-stage-Cin2
+        place bypass Cin-hf anchor=VIN node=VIN rail=in value="100nF" \
+            note="high-frequency input bypass, closest to VIN and GND" designator=ref-power-stage-Cin-hf
+        place inductor L anchor=SW value="4.7µH" footprint="Inductor_SMD:L_Coilcraft_XAL8080-XXX" intent=filter \
+            manufacturer="Coilcraft" mpn="XAL8080-472MED" mouser="994-XAL8080-472MED" designator=ref-power-stage-L
+        circuit SW L out.rail
+        place capacitor Cboot anchor=BOOT value="100nF" intent=filter designator=ref-power-stage-Cboot
+        circuit BOOT Cboot SW
+        place bypass Cvcc anchor=VCC node=VCC rail=in value="1µF" designator=ref-power-stage-Cvcc
+        place bulk Cout1 anchor=L.B node=out.rail rail=out value="22µF" footprint="Capacitor_SMD:C_1210_3225Metric" \
+            designator=ref-power-stage-Cout1
+        place bulk Cout2 anchor=L.B node=out.rail rail=out value="22µF" footprint="Capacitor_SMD:C_1210_3225Metric" \
+            designator=ref-power-stage-Cout2
+    }
+    block feedback {
+        default
+        assert "vout >= 1V && vout <= 24V" message="LMR33640D output setting must be 1-24V"
+        set out.rail net.voltage actual
+        place resistor Rtop anchor=FB value="100kΩ" intent=divider designator=ref-feedback-Rtop
+        place resistor Rbottom anchor=FB value=rbottom intent=divider designator=ref-feedback-Rbottom
+        circuit out.rail Rtop FB Rbottom GND
+    }
+    block always-on {
+        when "enable-above == 0V && !external-enable"
+        circuit EN VIN
+    }
+    block uvlo {
+        when "enable-above > 0V"
+        place resistor Ren-top anchor=EN value="100kΩ" intent=divider designator=ref-uvlo-Ren-top
+        place resistor Ren-bottom anchor=EN value=renbottom intent=divider designator=ref-uvlo-Ren-bottom
+        circuit VIN Ren-top EN Ren-bottom GND
+    }
+    // EN is the board's to drive; nothing here ties it.
+    block external-enable {
+        assert "enable-above == 0V" message="external-enable and enable-above both decide EN; choose one"
+    }
+}

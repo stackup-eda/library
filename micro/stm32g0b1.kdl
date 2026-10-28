@@ -1,12 +1,12 @@
-// @stackup/micro/stm32g0b1 — STM32G0B1 in LQFP-64 (STM32G0B1RET7) and UFQFPN-48
-// (STM32G0B1CEU6). Cortex-M0+ at 64 MHz, 512 KB flash, 144 KB RAM, two FDCAN controllers, USB
-// full-speed device, and LIN support on three USARTs.
+// @stackup/micro/stm32g0b1 — STM32G0B1 in LQFP-64 (STM32G0B1RET7), UFQFPN-48 (STM32G0B1CEU6)
+// and LQFP-48 (STM32G0B1CET6). Cortex-M0+ at 64 MHz, 512 KB flash, 144 KB RAM, two FDCAN
+// controllers, USB full-speed device, and LIN support on three USARTs.
 //
 // VDDA connects internally to VDD, and the internal core regulator needs no VCAP pin. Support
 // circuitry includes VDD bypass and bulk capacitance, a reset filter, VBAT connected to VDD
 // when no backup cell is used, and VREF+ supply filtering.
 //
-// One pin/peripheral table covers both packages. UFQFPN-48 omits GPIOs including PC0–PC5,
+// One pin/peripheral table covers every package. The 48-pin packages omit GPIOs including PC0–PC5,
 // PC8–PC12, and PD4–PD9. The selected package filters out unavailable pins.
 //
 // In LQFP-64, pads 43/44 are PA11/PA12 after reset. SYSCFG can remap PA9/PA10 onto them, but
@@ -31,6 +31,14 @@ use "@stackup/passives"
 use "@stackup/types"
 
 part stm32g0b1 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvdd text default=#null
+    param ref-supply-Cbulk text default=#null
+    param ref-supply-Cnrst text default=#null
+    param ref-vbat-tied-Cvbat text default=#null
+    param ref-reference-Cvref text default=#null
+    param ref-reference-Cvref_hf text default=#null
+
     reference U
     datasheet "https://www.st.com/resource/en/datasheet/stm32g0b1re.pdf"
     description "Arm Cortex-M0+ MCU with 2x CAN FD and USB, 512KB flash, 144KB RAM, 64 MHz, 1.7-3.6V"
@@ -141,7 +149,7 @@ part stm32g0b1 {
     // T7 selects −40 to +105 °C instead of T6’s −40 to +85 °C. Pinout is unchanged; KiCad uses
     // STM32G0B1RETx for both. This definition selects T7 for additional ambient-temperature
     // margin.
-    package lqfp64 footprint="LQFP-64_10x10mm_P0.5mm" {
+    package lqfp64 footprint="Package_QFP:LQFP-64_10x10mm_P0.5mm" {
         symbol "MCU_ST_STM32G0:STM32G0B1RETx"
         description "Arm Cortex-M0+ MCU with 2x CAN FD and USB, 512KB flash, 144KB RAM, 64 MHz, 1.7-3.6V, 60 GPIO, LQFP64"
         order mpn=STM32G0B1RET7 mouser="511-STM32G0B1RET7" lcsc=C7021419
@@ -213,7 +221,7 @@ part stm32g0b1 {
 
     // UFQFPN-48 exposes 44 GPIOs. VSS connects to pad 7 and the exposed pad; both must be
     // grounded.
-    package qfn48 footprint="QFN-48-1EP_7x7mm_P0.5mm_EP5.6x5.6mm" {
+    package qfn48 footprint="Package_DFN_QFN:QFN-48-1EP_7x7mm_P0.5mm_EP5.6x5.6mm" {
         symbol "MCU_ST_STM32G0:STM32G0B1CEUx"
         description "Arm Cortex-M0+ MCU with 2x CAN FD and USB, 512KB flash, 144KB RAM, 64 MHz, 1.7-3.6V, 44 GPIO, UFQFPN48"
         order mpn=STM32G0B1CEU6 mouser="511-STM32G0B1CEU6"
@@ -268,6 +276,61 @@ part stm32g0b1 {
         pad PB9 48
     }
 
+    // LQFP-48 has the UFQFPN-48's pinout pad for pad, without the exposed pad.
+    package lqfp48 footprint="Package_QFP:LQFP-48_7x7mm_P0.5mm" {
+        symbol "MCU_ST_STM32G0:STM32G0B1CETx"
+        description "Arm Cortex-M0+ MCU with 2x CAN FD and USB, 512KB flash, 144KB RAM, 64 MHz, 1.7-3.6V, 44 GPIO, LQFP48"
+        order mpn=STM32G0B1CET6 mouser="511-STM32G0B1CET6"
+        pad PC13 1
+        pad PC14 2
+        pad PC15 3
+        pad VBAT 4
+        pad VREF+ 5
+        pad VDD 6
+        pad VSS 7
+        pad PF0 8
+        pad PF1 9
+        pad PF2 10
+        pad PA0 11
+        pad PA1 12
+        pad PA2 13
+        pad PA3 14
+        pad PA4 15
+        pad PA5 16
+        pad PA6 17
+        pad PA7 18
+        pad PB0 19
+        pad PB1 20
+        pad PB2 21
+        pad PB10 22
+        pad PB11 23
+        pad PB12 24
+        pad PB13 25
+        pad PB14 26
+        pad PB15 27
+        pad PA8 28
+        pad PA9 29
+        pad PC6 30
+        pad PC7 31
+        pad PA10 32
+        pad PA11 33
+        pad PA12 34
+        pad PA13 35
+        pad PA14 36
+        pad PA15 37
+        pad PD0 38
+        pad PD1 39
+        pad PD2 40
+        pad PD3 41
+        pad PB3 42
+        pad PB4 43
+        pad PB5 44
+        pad PB6 45
+        pad PB7 46
+        pad PB8 47
+        pad PB9 48
+    }
+
     // Application circuit
     //
     // Default VDD bypass, bulk capacitor, and reset filter; reset has an internal pull-up. Each
@@ -276,10 +339,10 @@ part stm32g0b1 {
     block supply {
         default
 
-        place decouple Cvdd node=VDD rail=vdd value="100nF"
-        place bulk Cbulk node=VDD rail=vdd value="4.7µF" note="VDD bulk capacitance"
-        place filter Cnrst node=PF2 rail=vdd value="100nF" \
-            note="NRST glitch filter — the pin's pull-up is internal"
+        place decouple Cvdd node=VDD anchor=VDD rail=vdd value="100nF" designator=ref-supply-Cvdd
+        place bulk Cbulk anchor=VDD node=VDD rail=vdd value="4.7µF" note="VDD bulk capacitance" designator=ref-supply-Cbulk
+        place filter Cnrst anchor=PF2 node=PF2 rail=vdd value="100nF" \
+            note="NRST glitch filter — the pin's pull-up is internal" designator=ref-supply-Cnrst
     }
 
     // Tie VBAT to VDD with local bypassing when no backup cell is fitted. To use a cell, place
@@ -287,8 +350,8 @@ part stm32g0b1 {
     block vbat-tied {
         default
         circuit VBAT VDD
-        place bypass Cvbat node=VBAT rail=vdd value="100nF" \
-            note="VBAT tied to VDD — no backup cell on this board"
+        place bypass Cvbat anchor=VBAT node=VBAT rail=vdd value="100nF" \
+            note="VBAT tied to VDD — no backup cell on this board" designator=ref-vbat-tied-Cvbat
     }
 
     // Tie VREF+ to the supply with bulk capacitance for ADC sampling transients. To use an
@@ -296,9 +359,9 @@ part stm32g0b1 {
     block reference {
         default
         circuit VREF+ VDD
-        place bulk Cvref node=VREF+ rail=vdd value="1µF" \
-            note="VREF+ bulk capacitance for ADC sampling transients"
-        place bypass Cvref_hf node=VREF+ rail=vdd value="100nF"
+        place bulk Cvref anchor=VREF+ node=VREF+ rail=vdd value="1µF" \
+            note="VREF+ bulk capacitance for ADC sampling transients" designator=ref-reference-Cvref
+        place bypass Cvref_hf anchor=VREF+ node=VREF+ rail=vdd value="100nF" designator=ref-reference-Cvref_hf
     }
 
     // Peripherals
@@ -318,12 +381,16 @@ part stm32g0b1 {
         io PD0 PD1 PD2 PD3 PD4 PD5 PD6 PD8 PD9 PF0 PF1 PF2
     }
 
+    // ROM bindings: ST AN2606, C091/C092 Table 18; G0B1 Table 111 (Rev 70).
+    // This capability checks interface pins, not boot entry or external circuit state.
     peripheral I2C1 i2c {
+        has bootloader when="scl == PB6 && sda == PB7"
         sda PA10 PB7 PB9
         scl PA9 PB6 PB8
     }
 
     peripheral I2C2 i2c {
+        has bootloader when="scl == PB10 && sda == PB11"
         sda PA6 PA10 PA12 PB4 PB11 PB14
         scl PA7 PA9 PA11 PB3 PB10 PB13
     }
@@ -422,6 +489,7 @@ part stm32g0b1 {
     // Two FDCAN instances share message RAM. Firmware must use the instance selected by the pin
     // mapping.
     peripheral FDCAN1 can {
+        has bootloader when="rx == PD0 && tx == PD1"
         rx PA11 PB8 PC4 PD0
         tx PA12 PB9 PC5 PD1
     }

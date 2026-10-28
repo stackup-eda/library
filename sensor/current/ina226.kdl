@@ -12,6 +12,9 @@
 use "@stackup/passives"
 
 part ina226 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvs text default=#null
+
     symbol "Sensor_Energy:INA226"
     reference U
     datasheet "http://www.ti.com/lit/ds/symlink/ina226.pdf"
@@ -35,7 +38,7 @@ part ina226 {
     pin VIN- input symbol="Vin-"
     pin VIN+ input symbol="Vin+"
 
-    package vssop10 footprint="TSSOP-10_3x3mm_P0.5mm" {
+    package vssop10 footprint="Package_SO:TSSOP-10_3x3mm_P0.5mm" {
         pad A1 1
         pad A0 2
         pad ALERT 3
@@ -73,7 +76,7 @@ part ina226 {
 
     block supply {
         default
-        place bypass Cvs node=VS rail=vs value="100nF"
+        place bypass Cvs anchor=VS node=VS rail=vs value="100nF" designator=ref-supply-Cvs
     }
 
     // Conditional address straps for each pin and level.
@@ -102,6 +105,11 @@ part ina226 {
 // accuracy in addition to the INA226’s own error. KDL has no placement `tolerance=` property
 // yet, so the required tolerance is recorded in a note.
 block ina226-sense {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvs text default=#null
+    param ref-Rshunt text default=#null
+    param ref-Ralert text default=#null
+
     param shunt resistance
 
     port a
@@ -110,18 +118,18 @@ block ina226-sense {
     port i2c type=i2c
     port alert
 
-    place ina226 as=self vs=vs i2c=i2c alert=alert
+    place ina226 as=self vs=vs i2c=i2c alert=alert ref-supply-Cvs=ref-supply-Cvs
 
     // Use a 2512 shunt for fault-current dissipation. At 5 A through 20 mΩ, dissipation is 0.5
     // W, half the assumed 1 W rating. The board’s default pull-up resistor package is
     // unsuitable.
-    place resistor Rshunt value=shunt intent=shunt footprint="R_2512_6332Metric" \
-        note="current-sense shunt — tolerance limits measurement accuracy"
+    place resistor Rshunt value=shunt intent=shunt footprint="Resistor_SMD:R_2512_6332Metric" \
+        note="current-sense shunt — tolerance limits measurement accuracy" designator=ref-Rshunt
     circuit a Rshunt b
     circuit a self.VIN+
     circuit b self.VIN- self.VBUS
 
     // Provide the alert pull-up even if the board does not use the output.
-    place pull-up Ralert node=self.ALERT rail=vs value="1kΩ" \
-        note="pull-up for the open-drain alert"
+    place pull-up Ralert anchor=self.ALERT node=self.ALERT rail=vs value="1kΩ" \
+        note="pull-up for the open-drain alert" designator=ref-Ralert
 }

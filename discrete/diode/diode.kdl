@@ -15,11 +15,11 @@ part diode {
     port a pin=A
     port b pin=K
 
-    package sod123 footprint="D_SOD-123" {
+    package sod123 footprint="Diode_SMD:D_SOD-123" {
         pad K 1
         pad A 2
     }
-    package sod323 footprint="D_SOD-323" {
+    package sod323 footprint="Diode_SMD:D_SOD-323" {
         pad K 1
         pad A 2
     }

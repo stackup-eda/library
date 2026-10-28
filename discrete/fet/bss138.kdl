@@ -12,7 +12,7 @@ part bss138 {
     pin SOURCE passive
     pin DRAIN passive
 
-    package sot23 footprint="SOT-23" {
+    package sot23 footprint="Package_TO_SOT_SMD:SOT-23" {
         pad GATE 1
         pad SOURCE 2
         pad DRAIN 3

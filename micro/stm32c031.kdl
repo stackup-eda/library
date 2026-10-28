@@ -1,0 +1,190 @@
+// @stackup/micro/stm32c031 — STM32C031K6 in LQFP-32, with default support circuitry and
+// peripheral pin mappings. 32 KB flash, 12 KB RAM, 48 MHz, 2.0–3.6 V, 30 GPIO.
+//
+// The default `supply` block places decoupling and reset filtering, as on the C011 and C092:
+// `place stm32c031k6 mcu vdd=V3V3` puts components under `mcu/supply/…`.
+//
+// - VDD/VDDA share pad 4, VSS/VSSA pad 5: one decoupler and one bulk capacitor.
+// - Pad 6 is NRST at reset, or PF2 by option byte; `also` names both.
+// - PA14 is SWCLK or BOOT0 by nBOOT_SEL; factory option bytes boot from flash without a strap.
+// - PC14/PC15 can carry HSE or LSE. The C031's remapped-HSE erratum matters only with a crystal
+//   there; without one they are GPIO.
+//
+// The pad table is ST's K package, the same as the C092KBT6's (KiCad symbol
+// MCU_ST_STM32C0:STM32C031K6Tx). Peripheral rows came from stm32-metapac 21's STM32C031K6 data,
+// ST's open pin data. DMA capabilities are not modeled. Other C031 packages (F, G, C) are not
+// here yet.
+
+use "@stackup/passives"
+
+part stm32c031k6 {
+    symbol "MCU_ST_STM32C0:STM32C031K6Tx"
+    reference U
+    datasheet "https://www.st.com/resource/en/datasheet/stm32c031k6.pdf"
+    description "Arm Cortex-M0+ MCU, 32KB flash, 12KB RAM, 48 MHz, 2.0-3.6V, 30 GPIO, LQFP32"
+    manufacturer STMicroelectronics
+    order mpn=STM32C031K6T6 mouser="511-STM32C031K6T6"
+
+    pin VDD power_in
+    pin VSS power_in
+    port vdd type=power {
+        require net.voltage min="2.0V" max="3.6V"
+        line rail pin=VDD
+        line gnd pin=VSS
+    }
+
+    pin NRST bidirectional once {
+        role reset active=low pull=internal
+        also PF2
+    }
+
+    pin PA0 bidirectional once
+    pin PA1 bidirectional once
+    pin PA2 bidirectional once
+    pin PA3 bidirectional once
+    pin PA4 bidirectional once
+    pin PA5 bidirectional once
+    pin PA6 bidirectional once
+    pin PA7 bidirectional once
+    pin PA8 bidirectional once
+    pin PA9 bidirectional once
+    pin PA10 bidirectional once
+    pin PA11 bidirectional once
+    pin PA12 bidirectional once
+    pin PA13 bidirectional once
+    pin PA14 bidirectional once
+    pin PA15 bidirectional once
+    pin PB0 bidirectional once
+    pin PB1 bidirectional once
+    pin PB2 bidirectional once
+    pin PB3 bidirectional once
+    pin PB4 bidirectional once
+    pin PB5 bidirectional once
+    pin PB6 bidirectional once
+    pin PB7 bidirectional once
+    pin PB8 bidirectional once
+    pin PB9 bidirectional once
+    pin PC6 bidirectional once
+    pin PC14 bidirectional once
+    pin PC15 bidirectional once
+
+    package lqfp32 footprint="Package_QFP:LQFP-32_7x7mm_P0.8mm" {
+        pad PB9 1
+        pad PC14 2
+        pad PC15 3
+        pad VDD 4
+        pad VSS 5
+        pad NRST 6
+        pad PA0 7
+        pad PA1 8
+        pad PA2 9
+        pad PA3 10
+        pad PA4 11
+        pad PA5 12
+        pad PA6 13
+        pad PA7 14
+        pad PB0 15
+        pad PB1 16
+        pad PB2 17
+        pad PA8 18
+        pad PA9 19
+        pad PC6 20
+        pad PA10 21
+        pad PA11 22
+        pad PA12 23
+        pad PA13 24
+        pad PA14 25
+        pad PA15 26
+        pad PB3 27
+        pad PB4 28
+        pad PB5 29
+        pad PB6 30
+        pad PB7 31
+        pad PB8 32
+    }
+
+    // Application circuit: 100 nF at pad 4, 4.7 µF bulk, 100 nF on NRST. Placed by default;
+    // disable with `without supply`.
+    block supply {
+        default
+        place decouple Cvdd node=VDD@4 anchor=VDD@4 rail=vdd value="100nF"
+        place bulk Cbulk anchor=VDD node=VDD rail=vdd value="4.7µF" note="VDD bulk capacitance"
+        place filter Cnrst anchor=NRST node=NRST rail=vdd value="100nF" \
+            note="NRST glitch filter — the pull-up is internal"
+    }
+
+    peripheral SWD swd {
+        swdio PA13
+        swclk PA14
+        nrst NRST
+    }
+
+    peripheral GPIO gpio {
+        io PA0 PA1 PA2 PA3 PA4 PA5 PA6 PA7 PA8 PA9 PA10 PA11 PA12 PA13 PA14 PA15
+        io PB0 PB1 PB2 PB3 PB4 PB5 PB6 PB7 PB8 PB9 PC6 PC14 PC15 PF2
+    }
+
+    peripheral I2C1 i2c {
+        sda PA10 PB7 PB9 PC14
+        scl PA9 PB6 PB7 PB8
+    }
+
+    peripheral SPI1 spi {
+        sck PA1 PA5 PB3 PB6
+        mosi PA2 PA7 PA12 PB5 PB6
+        miso PA6 PA11 PB4 PB6
+        nss PA4 PA8 PA14 PA15 PB0
+    }
+
+    peripheral USART1 uart {
+        tx PA0 PA9 PB6 PC14
+        rx PA1 PA8 PA10 PB2 PB7
+        rts PA12 PA14 PA15 PB3 PB6
+        cts PA11 PB4 PB6
+    }
+
+    peripheral USART2 uart {
+        tx PA2 PA4 PA8 PA14
+        rx PA3 PA5 PA13 PA14 PA15
+        rts PA1 PB9 PC14
+        cts PA0 PB7 PB8
+    }
+
+    peripheral ADC1 adc {
+        in PA0 PA1 PA2 PA3 PA4 PA5 PA6 PA7 PA8 PA11 PA12 PA13 PA14 PB0 PB1 PB2
+    }
+
+    peripheral TIM1 timer {
+        has break
+        ch1 PA0 PA5 PA8 PA14 PA15
+        ch2 PA1 PA9 PB3 PB6
+        ch3 PA2 PA10 PB6
+        ch4 PA3 PA11 PB7 PF2
+        ch1n PA3 PA7
+        ch2n PA4 PA8 PB0 PB1
+        ch3n PA5 PA8 PB1
+    }
+
+    peripheral TIM3 timer {
+        ch1 PA6 PB4 PB6 PB7 PB8 PC6
+        ch2 PA7 PB3 PB5 PB6 PB9 PC14
+        ch3 PA8 PB0 PB5 PB6 PC15
+        ch4 PA8 PB1 PB7
+    }
+
+    peripheral TIM14 timer {
+        ch1 PA4 PA7 PA8 PB1
+    }
+
+    peripheral TIM16 timer {
+        has break
+        ch1 PA0 PA6 PB7 PB8
+        ch1n PA2 PB6
+    }
+
+    peripheral TIM17 timer {
+        has break
+        ch1 PA1 PA7 PB9 PC14
+        ch1n PA4 PB7
+    }
+}

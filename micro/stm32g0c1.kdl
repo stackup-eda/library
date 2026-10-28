@@ -113,7 +113,7 @@ part stm32g0c1 {
     // Packages
 
     // The C1 has the same pinout as the G0B1RE. This definition uses the T6 temperature grade.
-    package lqfp64 footprint="LQFP-64_10x10mm_P0.5mm" {
+    package lqfp64 footprint="Package_QFP:LQFP-64_10x10mm_P0.5mm" {
         symbol "MCU_ST_STM32G0:STM32G0C1RCTx"
         description "Arm Cortex-M0+ MCU with 2x CAN FD and USB, 256KB flash, 144KB RAM, 64 MHz, 1.7-3.6V, 60 GPIO, LQFP64"
         order mpn=STM32G0C1RCT6 mouser="511-STM32G0C1RCT6"
@@ -194,9 +194,9 @@ part stm32g0c1 {
     block supply {
         default
 
-        place decouple Cvdd node=VDD rail=vdd value="100nF"
-        place bulk Cbulk node=VDD rail=vdd value="4.7µF" note="VDD bulk capacitance"
-        place filter Cnrst node=PF2 rail=vdd value="100nF" \
+        place decouple Cvdd node=VDD anchor=VDD rail=vdd value="100nF"
+        place bulk Cbulk anchor=VDD node=VDD rail=vdd value="4.7µF" note="VDD bulk capacitance"
+        place filter Cnrst anchor=PF2 node=PF2 rail=vdd value="100nF" \
             note="NRST glitch filter — the pin's pull-up is internal"
     }
 
@@ -205,7 +205,7 @@ part stm32g0c1 {
     block vbat-tied {
         default
         circuit VBAT VDD
-        place bypass Cvbat node=VBAT rail=vdd value="100nF" \
+        place bypass Cvbat anchor=VBAT node=VBAT rail=vdd value="100nF" \
             note="VBAT tied to VDD — no backup cell on this board"
     }
 
@@ -214,9 +214,9 @@ part stm32g0c1 {
     block reference {
         default
         circuit VREF+ VDD
-        place bulk Cvref node=VREF+ rail=vdd value="1µF" \
+        place bulk Cvref anchor=VREF+ node=VREF+ rail=vdd value="1µF" \
             note="VREF+ bulk capacitance for ADC sampling transients"
-        place bypass Cvref_hf node=VREF+ rail=vdd value="100nF"
+        place bypass Cvref_hf anchor=VREF+ node=VREF+ rail=vdd value="100nF"
     }
 
     // Peripherals

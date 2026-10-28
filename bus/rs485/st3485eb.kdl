@@ -12,6 +12,9 @@
 use "@stackup/passives"
 
 part st3485eb {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvcc text default=#null
+
     symbol "Interface_UART:MAX3485"   // MAX3485 symbol has the matching 75176 pinout
     value "ST3485EB"                   // BOM part number
     reference U
@@ -29,7 +32,7 @@ part st3485eb {
     pin B bidirectional
     pin VCC power_in
 
-    package soic8 footprint="SOIC-8_3.9x4.9mm_P1.27mm" {
+    package soic8 footprint="Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" {
         pad RO 1
         pad RE 2
         pad DE 3
@@ -62,6 +65,6 @@ part st3485eb {
 
     block supply {
         default
-        place bypass Cvcc node=VCC rail=vcc value="100nF"
+        place bypass Cvcc anchor=VCC node=VCC rail=vcc value="100nF" designator=ref-supply-Cvcc
     }
 }

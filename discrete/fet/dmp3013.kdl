@@ -20,7 +20,7 @@ part dmp3013 {
     pin DRAIN passive
 
     // Three pads connect to the source.
-    package powerdi3333 footprint="Diodes_PowerDI3333-8" {
+    package powerdi3333 footprint="Package_SON:Diodes_PowerDI3333-8" {
         pad SOURCE 1
         pad SOURCE 2
         pad SOURCE 3
@@ -41,6 +41,11 @@ part dmp3013 {
 // The gate rating is ±25 V. Pulling the gate to ground applies the full input voltage across
 // gate and source. This block includes no gate clamp, so an assertion limits the input voltage.
 block high-side-switch {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-Rpull text default=#null
+    param ref-Css text default=#null
+    param ref-Rgate text default=#null
+
     param pullup resistance default="49.9kΩ"
     param series resistance default="5.1kΩ"
     param softstart capacitance default="1µF"
@@ -68,15 +73,15 @@ block high-side-switch {
     circuit self.drain out.rail
     circuit in.gnd out.gnd
 
-    place pull-up Rpull node=self.gate rail=in value=pullup \
-        note="gate pull-up — switch off by default"
+    place pull-up Rpull anchor=self.GATE node=self.gate rail=in value=pullup \
+        note="gate pull-up — switch off by default" designator=ref-Rpull
     // Use an 0805 X7R capacitor for 1 µF at this voltage. The default filter package is too
     // small. This is a soft-start filter, so precise timing is unnecessary.
-    place capacitor Css value=softstart intent=filter footprint="C_0805_2012Metric" \
-        note="soft-start — ramps the output to limit inrush"
+    place capacitor Css anchor=self.GATE value=softstart intent=filter footprint="Capacitor_SMD:C_0805_2012Metric" \
+        note="soft-start — ramps the output to limit inrush" designator=ref-Css
     circuit self.gate Css in.rail
 
-    place resistor Rgate value=series intent=series note="gate-drive series resistor"
+    place resistor Rgate anchor=self.GATE value=series intent=series note="gate-drive series resistor" designator=ref-Rgate
     circuit gate-drive Rgate self.gate
     // Name the gate node for debugging the switch state.
     circuit self.gate name="GATE"

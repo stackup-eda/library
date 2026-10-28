@@ -15,12 +15,52 @@ part swd-header {
     pin VTREF passive
     pin GND passive
 
-    package header footprint="PinHeader_1x05_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical" {
         pad SWDIO 1
         pad SWCLK 2
         pad RESET 3
         pad VTREF 4
         pad GND 5
+    }
+
+    port swd type=swd {
+        line swdio pin=SWDIO
+        line swclk pin=SWCLK
+        line nrst pin=RESET
+    }
+
+    // Target voltage reference and ground.
+    port vref type=power {
+        add net.draw "0A"
+        line rail pin=VTREF
+        line gnd pin=GND
+    }
+}
+
+// SWD on a Tag-Connect TC2030-NL land: six pads and three locating holes, nothing to assemble.
+// The TC2030-CTX-NL cable carries VTREF on 1, SWDIO on 2, nRESET on 3, SWCLK on 4, GND on 5 and
+// SWO on 6; the board declares SWO `nc` if it has no trace output. The "NL" (no legs) land needs
+// the probe held or clipped in place.
+part swd-tag-connect {
+    symbol "Connector:Conn_ARM_SWD_TagConnect_TC2030-NL"
+    reference J
+    description "SWD on a Tag-Connect TC2030-NL footprint"
+    manufacturer "Tag-Connect"
+
+    pin VTREF passive
+    pin SWDIO passive
+    pin RESET passive
+    pin SWCLK passive
+    pin GND passive
+    pin SWO passive
+
+    package tc2030 footprint="Connector:Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical" {
+        pad VTREF 1
+        pad SWDIO 2
+        pad RESET 3
+        pad SWCLK 4
+        pad GND 5
+        pad SWO 6
     }
 
     port swd type=swd {

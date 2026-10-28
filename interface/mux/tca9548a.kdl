@@ -1,0 +1,131 @@
+// @stackup/interface/mux/tca9548a — 8-channel I²C switch with reset, TSSOP-24. A control-register
+// write connects any set of the eight downstream channels to the upstream bus. Each channel is its
+// own bus and needs its own pull-ups. A0–A2 select 0x70–0x77. ~RESET is active low and must not
+// float; pulling it low clears the control register, which disconnects every channel, and frees an
+// upstream bus that a stuck channel is holding low. VCC 1.65–5.5 V, 400 kHz.
+
+use "@stackup/passives"
+
+part tca9548a {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvcc text default=#null
+
+    symbol "Interface_Expansion:TCA9548APWR"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/tca9548a.pdf"
+    description "8-channel I²C switch with reset, TSSOP-24"
+    manufacturer "Texas Instruments"
+    order mpn=TCA9548APWR mouser="595-TCA9548APWR"
+
+    param offset number default=0
+    assert "offset >= 0 && offset <= 7" message="I²C address offset must be 0–7"
+    derive address "0x70 + offset"
+
+    pin A0 input required
+    pin A1 input required
+    pin RESET input required symbol="~{RESET}"
+    pin SD0 bidirectional
+    pin SC0 bidirectional
+    pin SD1 bidirectional
+    pin SC1 bidirectional
+    pin SD2 bidirectional
+    pin SC2 bidirectional
+    pin SD3 bidirectional
+    pin SC3 bidirectional
+    pin GND power_in
+    pin SD4 bidirectional
+    pin SC4 bidirectional
+    pin SD5 bidirectional
+    pin SC5 bidirectional
+    pin SD6 bidirectional
+    pin SC6 bidirectional
+    pin SD7 bidirectional
+    pin SC7 bidirectional
+    pin A2 input required
+    pin SCL input
+    pin SDA bidirectional
+    pin VCC power_in
+
+    package tssop24 footprint="Package_SO:TSSOP-24_4.4x7.8mm_P0.65mm" {
+        pad A0 1
+        pad A1 2
+        pad RESET 3
+        pad SD0 4
+        pad SC0 5
+        pad SD1 6
+        pad SC1 7
+        pad SD2 8
+        pad SC2 9
+        pad SD3 10
+        pad SC3 11
+        pad GND 12
+        pad SD4 13
+        pad SC4 14
+        pad SD5 15
+        pad SC5 16
+        pad SD6 17
+        pad SC6 18
+        pad SD7 19
+        pad SC7 20
+        pad A2 21
+        pad SCL 22
+        pad SDA 23
+        pad VCC 24
+    }
+
+    port vcc type=power {
+        require net.voltage min="1.65V" max="5.5V"
+        add net.draw "50µA"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+    port i2c type=i2c {
+        claim signal.address address
+        line sda pin=SDA
+        line scl pin=SCL
+    }
+    port reset pin=RESET
+    port ch0 type=i2c {
+        line sda pin=SD0
+        line scl pin=SC0
+    }
+    port ch1 type=i2c {
+        line sda pin=SD1
+        line scl pin=SC1
+    }
+    port ch2 type=i2c {
+        line sda pin=SD2
+        line scl pin=SC2
+    }
+    port ch3 type=i2c {
+        line sda pin=SD3
+        line scl pin=SC3
+    }
+    port ch4 type=i2c {
+        line sda pin=SD4
+        line scl pin=SC4
+    }
+    port ch5 type=i2c {
+        line sda pin=SD5
+        line scl pin=SC5
+    }
+    port ch6 type=i2c {
+        line sda pin=SD6
+        line scl pin=SC6
+    }
+    port ch7 type=i2c {
+        line sda pin=SD7
+        line scl pin=SC7
+    }
+
+    block supply {
+        default
+        place decouple Cvcc anchor=VCC node=VCC rail=vcc value="100nF" designator=ref-supply-Cvcc
+    }
+    block a0-low { when "offset == 0 || offset == 2 || offset == 4 || offset == 6"; circuit A0 vcc.gnd }
+    block a0-high { when "offset == 1 || offset == 3 || offset == 5 || offset == 7"; circuit A0 vcc.rail }
+    block a1-low { when "offset == 0 || offset == 1 || offset == 4 || offset == 5"; circuit A1 vcc.gnd }
+    block a1-high { when "offset == 2 || offset == 3 || offset == 6 || offset == 7"; circuit A1 vcc.rail }
+    block a2-low { when "offset == 0 || offset == 1 || offset == 2 || offset == 3"; circuit A2 vcc.gnd }
+    block a2-high { when "offset == 4 || offset == 5 || offset == 6 || offset == 7"; circuit A2 vcc.rail }
+}

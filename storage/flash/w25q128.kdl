@@ -20,7 +20,7 @@ part w25q128 {
     pin IO3 bidirectional symbol="~{HOLD}/~{RESET}/IO_{3}"
     pin VCC power_in
 
-    package soic8 footprint="SOIC-8_5.23x5.23mm_P1.27mm" {
+    package soic8 footprint="Package_SO:SOIC-8_5.3x5.3mm_P1.27mm" {
         pad CS 1
         pad IO1 2
         pad IO2 3
@@ -49,6 +49,6 @@ part w25q128 {
 
     block supply {
         default
-        place decouple Cvcc node=VCC rail=vdd value="100nF"
+        place decouple Cvcc anchor=VCC node=VCC rail=vdd value="100nF"
     }
 }

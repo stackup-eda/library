@@ -5,6 +5,10 @@
 use "@stackup/passives"
 
 part cat24c256 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvcc text default=#null
+    param ref-write-protected-Rwp text default=#null
+
     symbol "Memory_EEPROM:CAT24C256"
     reference U
     datasheet "https://www.onsemi.com/pdf/datasheet/cat24c256-d.pdf"
@@ -23,7 +27,7 @@ part cat24c256 {
     pin WP input required
     pin VCC power_in
 
-    package soic8 footprint="SOIC-8_3.9x4.9mm_P1.27mm" {
+    package soic8 footprint="Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" {
         pad A0 1
         pad A1 2
         pad A2 3
@@ -51,7 +55,7 @@ part cat24c256 {
 
     block supply {
         default
-        place decouple Cvcc node=VCC rail=vdd value="100nF"
+        place decouple Cvcc anchor=VCC node=VCC rail=vdd value="100nF" designator=ref-supply-Cvcc
     }
     block a0-low { when "address == 0 || address == 2 || address == 4 || address == 6"; circuit A0 vdd.gnd }
     block a0-high { when "address == 1 || address == 3 || address == 5 || address == 7"; circuit A0 vdd.rail }
@@ -65,6 +69,6 @@ part cat24c256 {
         circuit WP vdd.gnd
     }
     block write-protected {
-        place pull-up Rwp node=WP rail=vdd value="10kΩ" note="WP high makes EEPROM read-only; ground it through a jumper to write"
+        place pull-up Rwp anchor=WP node=WP rail=vdd value="10kΩ" note="WP high makes EEPROM read-only; ground it through a jumper to write" designator=ref-write-protected-Rwp
     }
 }

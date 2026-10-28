@@ -26,6 +26,9 @@
 use "@stackup/passives"
 
 part ncv7321 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvbb text default=#null
+
     symbol "NCV7321:NCV7321D12R2G"
     reference U
     datasheet "https://www.onsemi.com/pdf/datasheet/ncv7321-d.pdf"
@@ -42,7 +45,7 @@ part ncv7321 {
     pin VBB power_in
     pin INH output
 
-    package soic8 footprint="SOIC-8_3.9x4.9mm_P1.27mm" {
+    package soic8 footprint="Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" {
         pad RxD 1
         pad EN 2
         pad WAKE 3
@@ -92,6 +95,6 @@ part ncv7321 {
     // related system-basis chip’s recommendation of more than 100 nF ceramic.
     block supply {
         default
-        place bypass Cvbb node=VBB rail=vbb value="100nF"
+        place bypass Cvbb anchor=VBB node=VBB rail=vbb value="100nF" designator=ref-supply-Cvbb
     }
 }

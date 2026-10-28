@@ -1,0 +1,65 @@
+// @stackup/bus/usb/tusb2046b — TI TUSB2046B four-port USB 1.1 full-speed hub, LQFP-32.
+//
+// Per-port active-low PWRON outputs and OVRCUR inputs drive external power switches. The hub
+// needs a 6 MHz clock on XTAL1 (a crystal, or a powered oscillator with XTAL2 open), an
+// external 1.5 kΩ D+ pull-up on the upstream port, 15 kΩ pull-downs on every downstream pair,
+// and its reset held low until the clock is stable. Those are board circuits, so no support
+// block is placed by default.
+
+use "@stackup/types"
+
+part tusb2046b {
+    symbol "TUSB2046B:TUSB2046BVFR"
+    reference U
+    manufacturer "Texas Instruments"
+    order mpn="TUSB2046BVFR" mouser="595-TUSB2046BVFR"
+    datasheet "https://www.ti.com/lit/ds/symlink/tusb2046b.pdf"
+    description "Four-port USB full-speed hub, individual active-low port power controls"
+    pin DP0 bidirectional
+    pin DM0 bidirectional
+    pin VCC power_in
+    pin RESET input required
+    pin EECLK output
+    pin GANGED input required
+    pin GND power_in
+    pin BUSPWR input required
+    pin PWRON1 output
+    pin OVRCUR1 input required
+    pin DM1 bidirectional
+    pin DP1 bidirectional
+    pin PWRON2 output
+    pin OVRCUR2 input required
+    pin DM2 bidirectional
+    pin DP2 bidirectional
+    pin PWRON3 output
+    pin OVRCUR3 input required
+    pin DM3 bidirectional
+    pin DP3 bidirectional
+    pin PWRON4 output
+    pin OVRCUR4 input required
+    pin DM4 bidirectional
+    pin DP4 bidirectional
+    pin EXTMEM input required
+    pin CLK48 input required
+    pin XTAL2 output
+    pin XTAL1 input required
+    pin TSTMODE input required
+    pin SUSPND output
+    package lqfp32 footprint="Package_QFP:LQFP-32_7x7mm_P0.8mm" {
+        pad DP0 1; pad DM0 2; pad VCC 3; pad RESET 4
+        pad EECLK 5; pad GANGED 6; pad GND 7; pad BUSPWR 8
+        pad PWRON1 9; pad OVRCUR1 10; pad DM1 11; pad DP1 12
+        pad PWRON2 13; pad OVRCUR2 14; pad DM2 15; pad DP2 16
+        pad PWRON3 17; pad OVRCUR3 18; pad DM3 19; pad DP3 20
+        pad PWRON4 21; pad OVRCUR4 22; pad DM4 23; pad DP4 24
+        pad VCC 25; pad EXTMEM 26; pad CLK48 27; pad GND 28
+        pad XTAL2 29; pad XTAL1 30; pad TSTMODE 31; pad SUSPND 32
+    }
+    port vdd type=power {
+        require net.voltage min="3V" max="3.6V"
+        add net.draw "40mA"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+    port usb type=usb { line dp pin=DP0; line dm pin=DM0 }
+}

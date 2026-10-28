@@ -1,0 +1,43 @@
+// @stackup/connector/usb-pigtail — a USB cable's cut end soldered into six plated holes.
+
+use "@stackup/types"
+
+// The cut end of a USB-C cable, soldered into six plated holes. A C-to-C cable carries one CC
+// conductor; the board's 5.1 kΩ pull-down on it is what makes the host turn on VBUS. A C-to-A
+// cable has no CC conductor and the hole stays empty. The footprint is a 2×3 2.54 mm header
+// pattern: its 1.0 mm holes take the 24–28 AWG conductors of a USB 2.0 cable. The cable tie
+// slots that take the strain off these joints are drawn in KiCad.
+part usb-pigtail {
+    symbol "Connector_Generic:Conn_02x03_Odd_Even"
+    reference J
+    description "USB-C cable pigtail, six solder holes"
+
+    pin VBUS passive
+    pin GND passive
+    pin D+ bidirectional
+    pin D- bidirectional
+    pin CC bidirectional
+    pin SHIELD passive
+
+    package holes footprint="Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical" {
+        pad VBUS 1
+        pad GND 2
+        pad D+ 3
+        pad D- 4
+        pad CC 5
+        pad SHIELD 6
+    }
+
+    // USB 2.0 allows 4.40 V at a low-power device after cable drop.
+    port vbus type=power {
+        set net.voltage min="4.4V" max="5.25V"
+        line rail pin=VBUS
+        line gnd pin=GND
+    }
+    port usb type=usb {
+        line dp pin=D+
+        line dm pin=D-
+    }
+    port cc pin=CC
+    port shield pin=SHIELD
+}

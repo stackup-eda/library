@@ -1,0 +1,100 @@
+// @stackup/power/switch/tps2116 — TI TPS2116, a two-input power mux, 1.6–5.5 V, 2.5 A, SOT-5X3
+// (DRL, 8 pins, 1.6 × 1.6 mm).
+//
+// Two N-FET channels pick one of two supplies for VOUT, 40 mΩ typical, 1.32 µA quiescent. Each
+// channel blocks reverse current: once VOUT is 42 mV above the input in use, that channel shuts off
+// (datasheet SLVSFG1A, section 7.3.4), so neither input is ever powered from the other or from the
+// output. The device runs from the higher of its two inputs.
+//
+// Priority mode (the `priority` block): MODE tied to VIN1 and PR1 on a divider from VIN1. VIN1
+// powers the output while PR1 is above VREF (0.92–1.08 V); below it, VIN2 does. Manual mode (MODE
+// to an external bias, PR1 driven) is left to the board.
+//
+// Soft start: an output under 1 V rises over 1.3 ms from 3.3 V (1.7 ms from 5 V; table 6.6), so
+// what sits behind the mux draws COUT × VOUT / tSS from the input that wakes it: 22 µF at 3.3 V is
+// about 56 mA. A switchover with VOUT above 1 V skips soft start. ST is an open drain, released
+// while VIN1 is in use and pulled low on VIN2 or in thermal shutdown.
+
+use "@stackup/passives"
+
+part tps2116 {
+    symbol "Power_Management:TPS2116DRL"
+    reference U
+    datasheet "https://www.ti.com/lit/ds/symlink/tps2116.pdf"
+    description "Power mux, two inputs, 1.6–5.5 V, 2.5 A, priority or manual switchover, SOT-5X3"
+    manufacturer "Texas Instruments"
+    order mpn=TPS2116DRLR mouser="595-TPS2116DRLR"
+
+    // The PR1 divider, top (VIN1 to PR1) and bottom (PR1 to ground). VIN1 is chosen above
+    // `switchover`, which spans VREF's 0.92–1.08 V.
+    param rtop resistance default="100kΩ"
+    param rbottom resistance default="68kΩ"
+    derive switchover "1V * (rtop + rbottom) / rbottom"
+
+    // The output is whichever input is selected, less 40 mΩ: the placement states the range that
+    // spans across both, so the loads behind the mux sum through it to each input.
+    param vmin voltage
+    param vmax voltage
+
+    pin GND power_in
+    pin VIN1 power_in
+    pin VIN2 power_in
+    pin VOUT power_out
+    pin PR1 input required
+    pin MODE input required
+    pin ST output
+
+    package drl footprint="Package_TO_SOT_SMD:SOT-583-8" {
+        pad GND 1
+        pad VOUT 2
+        pad VIN1 3
+        pad PR1 4
+        pad MODE 5
+        pad VIN2 6
+        pad VOUT 7
+        pad ST 8
+    }
+
+    // Either input carries the whole load while it is selected.
+    port in1 type=power {
+        require net.voltage min="1.6V" max="5.5V"
+        add net.draw "out.draw + 2µA"
+        line rail pin=VIN1
+        line gnd pin=GND
+    }
+    port in2 type=power {
+        require net.voltage min="1.6V" max="5.5V"
+        add net.draw "out.draw + 2µA"
+        line rail pin=VIN2
+        line gnd pin=GND
+    }
+    port out type=power {
+        set net.voltage min=vmin max=vmax
+        assert "draw <= 2.5A" message="the TPS2116 is rated for 2.5 A; its loads draw {draw}"
+        line rail pin=VOUT
+        line gnd pin=GND
+    }
+    port pr1 pin=PR1
+    port mode pin=MODE
+    port st type=output pin=ST
+
+    // Application circuits
+
+    // Input and output capacitors. The output's 0.1 µF is the least soft start wants; more sits
+    // with the loads.
+    block supply {
+        default
+        place bypass Cin1 anchor=VIN1 node=VIN1 rail=in1 value="1µF"
+        place bypass Cin2 anchor=VIN2 node=VIN2 rail=in2 value="1µF"
+        place bypass Cout anchor=VOUT@2 node=VOUT rail=out value="100nF"
+    }
+
+    // Priority mode: MODE on VIN1 and PR1 from VIN1 through the divider.
+    block priority {
+        default
+        circuit MODE VIN1
+        place resistor Rpr1-top anchor=PR1 value=rtop intent=divider
+        place resistor Rpr1-bottom anchor=PR1 value=rbottom intent=divider
+        circuit VIN1 Rpr1-top PR1 Rpr1-bottom GND
+    }
+}

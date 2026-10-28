@@ -45,7 +45,7 @@ part tmp102 {
 
     block supply {
         default
-        place decouple Cin node=V+ rail=vdd value="100nF"
+        place decouple Cin anchor=V+ node=V+ rail=vdd value="100nF"
     }
 
     // Place the strap block matching the selected address.

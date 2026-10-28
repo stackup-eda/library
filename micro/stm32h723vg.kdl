@@ -110,7 +110,7 @@ part stm32h723vg {
     pin PE0 bidirectional once
     pin PE1 bidirectional once
 
-    package lqfp100 footprint="LQFP-100_14x14mm_P0.5mm" {
+    package lqfp100 footprint="Package_QFP:LQFP-100_14x14mm_P0.5mm" {
         symbol "MCU_ST_STM32H7:STM32H723VGTx"
         order mpn=STM32H723VGT6
         pad PE2 1
@@ -233,33 +233,33 @@ part stm32h723vg {
 
     block supply {
         default
-        place decouple Cvdd11 node=VDD@11 rail=vdd value="100nF"
-        place decouple Cvdd27 node=VDD@27 rail=vdd value="100nF"
-        place decouple Cvdd50 node=VDD@50 rail=vdd value="100nF"
-        place decouple Cvdd75 node=VDD@75 rail=vdd value="100nF"
-        place decouple Cvdd100 node=VDD@100 rail=vdd value="100nF"
-        place bulk Cbulk node=VDD rail=vdd value="10µF"
-        place filter Cnrst node=NRST rail=vdd value="100nF"
-        place pull-down Rboot0 node=BOOT0 rail=vdd value="10kΩ"
-        place bypass Cvcap48 node=VCAP@48 rail=vdd value="2.2µF" note="low-ESR core regulator capacitor"
-        place bypass Cvcap73 node=VCAP@73 rail=vdd value="2.2µF" note="low-ESR core regulator capacitor"
+        place decouple Cvdd11 node=VDD@11 anchor=VDD@11 rail=vdd value="100nF"
+        place decouple Cvdd27 node=VDD@27 anchor=VDD@27 rail=vdd value="100nF"
+        place decouple Cvdd50 node=VDD@50 anchor=VDD@50 rail=vdd value="100nF"
+        place decouple Cvdd75 node=VDD@75 anchor=VDD@75 rail=vdd value="100nF"
+        place decouple Cvdd100 node=VDD@100 anchor=VDD@100 rail=vdd value="100nF"
+        place bulk Cbulk anchor=VDD@11 node=VDD rail=vdd value="10µF"
+        place filter Cnrst anchor=NRST node=NRST rail=vdd value="100nF"
+        place pull-down Rboot0 anchor=BOOT0 node=BOOT0 rail=vdd value="10kΩ"
+        place bypass Cvcap48 anchor=VCAP@48 node=VCAP@48 rail=vdd value="2.2µF" note="low-ESR core regulator capacitor"
+        place bypass Cvcap73 anchor=VCAP@73 node=VCAP@73 rail=vdd value="2.2µF" note="low-ESR core regulator capacitor"
     }
     block backup {
         default
         circuit VBAT VDD
-        place bypass Cvbat node=VBAT rail=vdd value="100nF"
+        place bypass Cvbat anchor=VBAT node=VBAT rail=vdd value="100nF"
     }
     block analog {
         default
-        place ferrite-bead FB value="600Ω@100MHz"
+        place ferrite-bead FB anchor=VDDA value="600Ω@100MHz"
         circuit VDD FB.a
         circuit FB.b VDDA
-        place bulk Cvdda node=VDDA rail=vdd value="1µF"
-        place bypass Cvdda_hf node=VDDA rail=vdd value="100nF"
+        place bulk Cvdda anchor=VDDA node=VDDA rail=vdd value="1µF"
+        place bypass Cvdda_hf anchor=VDDA node=VDDA rail=vdd value="100nF"
         circuit VSSA vdd.gnd
         circuit "VREF+" VDDA
-        place bulk Cvref node="VREF+" rail=vdd value="1µF"
-        place bypass Cvref_hf node="VREF+" rail=vdd value="100nF"
+        place bulk Cvref anchor=VREF+ node="VREF+" rail=vdd value="1µF"
+        place bypass Cvref_hf anchor=VREF+ node="VREF+" rail=vdd value="100nF"
     }
 
     peripheral GPIO gpio {

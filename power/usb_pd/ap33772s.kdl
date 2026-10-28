@@ -1,0 +1,114 @@
+// @stackup/power/usb_pd/ap33772s — Diodes AP33772S USB PD 3.1 sink controller, W-QFN4040-24.
+//
+// The host MCU drives it over I²C (0x52): after attach it takes a 5 V contract and waits, the
+// MCU reads the source's PDOs (SRCPDO 0x20) and writes a request (PD_REQMSG 0x31), fixed or
+// PPS/AVS. Nothing above 5 V is requested without firmware. It can also request EPR (AVS up to
+// 28 V); a board whose VBUS parts are rated for SPR's 21 V must never let firmware enter EPR.
+//
+// PWR_EN drives an external high-side N-FET through about 6.2 kΩ, with a 5 mΩ shunt between
+// ISENP and VOUT for its OCP; the chip opens that switch on OVP, UVP, OCP or OTP. A board that
+// switches its power path itself leaves PWR_EN open and ties ISENP and VOUT to VBUS.
+//
+// SDA, SCL, INT, FLIP and LED are 5 V I/O: the I²C pins' recommended range is 4.37–5.33 V
+// (logic high from 1.4 V), and INT, FLIP and LED are push-pull to the 4.85 V V5V rail. Pull
+// the bus up to V5V and take INT to a 5 V-tolerant input. DP/DN only serve moisture detection
+// and may be left open. GPIO and VSEL work on the FA02 variant only; this is the FA01.
+
+use "@stackup/passives"
+
+part ap33772s {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvcc text default=#null
+    param ref-supply-Cv5v text default=#null
+    param ref-supply-Cv18 text default=#null
+    param ref-supply-Cifb text default=#null
+    param ref-otp-fixed-Rotp text default=#null
+
+    symbol "Interface_USB:AP33772SDKZ-xx-FA02"
+    reference U
+    datasheet "https://www.diodes.com/datasheet/download/AP33772S.pdf"
+    description "USB PD 3.1 EPR sink controller, I2C host-controlled, PPS/AVS, W-QFN4040-24"
+    manufacturer "Diodes Incorporated"
+    order mpn="AP33772SDKZ-13-FA01" mouser="621-P33772SDKZ13FA01"
+
+    derive address "0x52"
+
+    pin ISENP power_in
+    pin GND power_in
+    pin SDA bidirectional
+    pin SCL input
+    pin FLIP output
+    pin GPIO bidirectional
+    pin LED output
+    pin INT output
+    pin VSEL input
+    pin V18 power_out
+    pin OTP passive
+    pin IFB passive
+    pin CC2 bidirectional
+    pin CC1 bidirectional
+    pin DN bidirectional
+    pin DP bidirectional
+    pin V5V power_out
+    pin VOUT input
+    pin PWR_EN output
+    pin VCC power_in
+    pin NC no_connect
+    package wqfn24 footprint="Package_DFN_QFN:QFN-24-1EP_4x4mm_P0.5mm_EP2.7x2.7mm" {
+        pad ISENP 1; pad NC 2; pad GND 3; pad SDA 4; pad SCL 5; pad FLIP 6
+        pad GPIO 7; pad LED 8; pad INT 9; pad NC 10; pad VSEL 11; pad V18 12
+        pad OTP 13; pad NC 14; pad IFB 15; pad CC2 16; pad CC1 17; pad DN 18
+        pad DP 19; pad V5V 20; pad NC 21; pad VOUT 22; pad PWR_EN 23; pad VCC 24
+        pad GND 25
+    }
+
+    // VCC runs from 3.3 V to 31 V; abs max 34 V.
+    port vbus type=power {
+        require net.voltage min="3.3V" max="31V"
+        add net.draw "6mA"
+        line rail pin=VCC
+        line gnd pin=GND
+    }
+    // The internal 4.85 V LDO: the I²C pull-up rail, 30 mA available.
+    port v5v type=power {
+        set net.voltage min="4.37V" max="5.33V"
+        line rail pin=V5V
+        line gnd pin=GND
+    }
+    port cc1 pin=CC1
+    port cc2 pin=CC2
+    port dp pin=DP
+    port dn pin=DN
+    port i2c type=i2c {
+        claim signal.address address
+        line sda pin=SDA
+        line scl pin=SCL
+    }
+    // Active high.
+    port int pin=INT
+    port flip pin=FLIP
+    port led pin=LED
+    port isenp pin=ISENP
+    port vout pin=VOUT
+    port pwr-en pin=PWR_EN
+    port otp pin=OTP
+
+    block supply {
+        default
+        // VCC sees the full VBUS range, so Cvcc wants a 50 V rating; 1 µF at 50 V is scarce in
+        // 0402 and common in 0603.
+        place bypass Cvcc anchor=VCC node=VCC rail=vbus value="1µF" footprint="Capacitor_SMD:C_0603_1608Metric" \
+            designator=ref-supply-Cvcc
+        place bypass Cv5v anchor=V5V node=V5V rail=v5v value="1µF" designator=ref-supply-Cv5v
+        place bypass Cv18 anchor=V18 node=V18 rail=vbus value="100nF" designator=ref-supply-Cv18
+        place bypass Cifb anchor=IFB node=IFB rail=vbus value="100nF" designator=ref-supply-Cifb
+    }
+    // A fixed 10 kΩ on OTP reads as 25 °C on the default NCP03XH103 curve, so neither OTP nor
+    // de-rating trips. Replace it with an NTC at the hot spot to use them.
+    block otp-fixed {
+        default
+        place resistor Rotp anchor=OTP value="10kΩ" note="OTP reads a constant 25 °C" \
+            designator=ref-otp-fixed-Rotp
+        circuit OTP Rotp GND
+    }
+}

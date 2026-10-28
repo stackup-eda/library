@@ -52,7 +52,7 @@ part ne555 {
 
     pin OUT output
 
-    package dip8 footprint="DIP-8_W7.62mm" {
+    package dip8 footprint="Package_DIP:DIP-8_W7.62mm" {
         pad GND 1
         pad TRIG 2
         pad OUT 3
@@ -68,7 +68,7 @@ part ne555 {
     // Default supply decoupling at the pin.
     block supply {
         default
-        place decouple Cin node=VCC rail=vcc value="100nF"
+        place decouple Cin anchor=VCC node=VCC rail=vcc value="100nF"
     }
 
     // Explicitly select support blocks for unused reset and control pins: `place ne555 u { with
@@ -80,7 +80,7 @@ part ne555 {
     }
 
     block unused-cont {
-        place bypass Ccont node=CONT rail=vcc value="10nF"
+        place bypass Ccont anchor=CONT node=CONT rail=vcc value="10nF"
     }
 }
 
@@ -114,9 +114,9 @@ block ne555-astable {
         with unused-rst
         with unused-cont
     }
-    place resistor Ra value=ra intent=timing note="charge R — {summary}"
-    place resistor Rb value=rb intent=timing note="discharge R — {summary}"
-    place capacitor C value=c intent=timing note="timing C — {summary}"
+    place resistor Ra anchor=u.DISCH value=ra intent=timing note="charge R — {summary}"
+    place resistor Rb anchor=u.DISCH value=rb intent=timing note="discharge R — {summary}"
+    place capacitor C anchor=u.THRES value=c intent=timing note="timing C — {summary}"
 
     // C charges through Ra and Rb and discharges through Rb into DISCH. Adjacent THRES and TRIG
     // terminals connect to the same timing node.

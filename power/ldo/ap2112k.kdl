@@ -7,6 +7,10 @@
 use "@stackup/passives"
 
 part ap2112k3v3 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cin text default=#null
+    param ref-supply-Cout text default=#null
+
     symbol "Regulator_Linear:AP2112K-3.3"
     reference U
     datasheet "https://www.diodes.com/assets/Datasheets/AP2112.pdf"
@@ -20,7 +24,7 @@ part ap2112k3v3 {
     pin NC no_connect
     pin VOUT power_out
 
-    package sot23-5 footprint="SOT-23-5" {
+    package sot23-5 footprint="Package_TO_SOT_SMD:SOT-23-5" {
         pad VIN 1
         pad GND 2
         pad EN 3
@@ -54,8 +58,8 @@ part ap2112k3v3 {
     // Add separate bulk capacitance near loads as needed.
     block supply {
         default
-        place bypass Cin node=VIN rail=in value="1µF"
-        place bypass Cout node=VOUT rail=out value="1µF"
+        place bypass Cin anchor=VIN node=VIN rail=in value="1µF" designator=ref-supply-Cin
+        place bypass Cout anchor=VOUT node=VOUT rail=out value="1µF" designator=ref-supply-Cout
     }
 
     // Tie EN to input for automatic startup. To sequence the rail, place `without always-on`

@@ -47,7 +47,7 @@ part sk6812mini-e {
 
     block supply {
         default
-        place bypass Cbypass node=VDD rail=vdd value="100nF" \
+        place bypass Cbypass anchor=VDD node=VDD rail=vdd value="100nF" \
             note="local bypass for the pixel's PWM switching current"
     }
 }

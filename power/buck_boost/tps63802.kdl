@@ -1,0 +1,118 @@
+// @stackup/power/buck_boost/tps63802 — TI TPS63802 2 A buck-boost converter, VSON-HR-10, and its
+// adjustable-output application block.
+
+use "@stackup/passives"
+
+// TI TPS63802, a 2 A buck-boost converter in the 3 × 2.5 mm VSON-HR-10 (DLA). Input 1.3–5.5 V
+// (start-up needs 1.8 V). From a 5 V input it runs as a buck, and boosts when the input sags: a
+// 3.3 V output holds until VIN falls below 1.3 V, so logic rides through a motor stall that pulls
+// a shared 5 V rail down. 2 A out at 3.3 V for VIN ≥ 2.3 V; 11 µA quiescent. EN and MODE must not float. Feedback is 500 mV ±1 %.
+//
+// KiCad has neither a symbol nor a footprint for this part. The footprint named here is TI's, from
+// its Ultra Librarian download, library `TPS63802DLA`. Ultra Librarian files are licensed for use in
+// designs, not for redistribution, so this library does not carry them (NOTICE.md): a board that
+// places the part downloads them and registers `TPS63802DLA` in its fp-lib-table. The download
+// carries no symbol; the symbol named here is a placeholder. Pinout from the datasheet (SLVSEU9D,
+// figure 7-1). There is no thermal pad.
+part tps63802 {
+    symbol "TPS63802DLA:TPS63802DLA"
+    reference U
+    value "TPS63802"
+    datasheet "https://www.ti.com/lit/ds/symlink/tps63802.pdf"
+    description "2A buck-boost converter, 1.3-5.5V input, adjustable output, VSON-HR-10"
+    manufacturer "Texas Instruments"
+    order mpn=TPS63802DLAT mouser="595-TPS63802DLAT"
+
+    pin EN input required {
+        role enable active=high pull=none
+        require net.rest not=float
+    }
+    pin MODE input required
+    pin AGND power_in
+    pin FB input required
+    pin PG open_collector
+    pin VOUT power_out
+    pin L2 passive
+    pin GND power_in
+    pin L1 passive
+    pin VIN power_in
+
+    package dla footprint="TPS63802DLA:VREG_TPS63802DLAR" {
+        pad EN 1
+        pad MODE 2
+        pad AGND 3
+        pad FB 4
+        pad PG 5
+        pad VOUT 6
+        pad L2 7
+        pad GND 8
+        pad L1 9
+        pad VIN 10
+    }
+
+    port vin type=power {
+        require net.voltage min="1.8V" max="5.5V"
+        line rail pin=VIN
+        line gnd pin=GND
+    }
+    port vout pin=VOUT
+    port en pin=EN
+    port mode pin=MODE
+    port fb pin=FB
+    port pg pin=PG
+    port l1 pin=L1
+    port l2 pin=L2
+}
+
+// The converter with the datasheet's 3.3 V application (figure 10-1): 0.47 µH, 10 µF in, 511 kΩ
+// over 91 kΩ for 3.31 V. Two 22 µF on the output where the datasheet asks for one, for load bursts
+// such as a radio's transmit current or downstream switches turning on. MODE low is power save at light load; PG is left
+// open.
+block tps63802-buckboost {
+    param inductance inductance default="0.47µH"
+    param cin capacitance default="10µF"
+    param cout capacitance default="22µF"
+    param rtop resistance default="511kΩ"
+    param rbottom resistance default="91kΩ"
+    // Efficiency for the worst-case input-current estimate at minimum input voltage.
+    param efficiency ratio default="90%"
+
+    // VOUT = VFB × (1 + Rtop / Rbottom), VFB = 0.5 V.
+    derive vout "0.5V * (1 + rtop / rbottom)"
+    derive input "out.draw * vout / (efficiency * in.voltage.min)"
+
+    port in type=power {
+        require net.voltage min="1.8V" max="5.5V"
+        add net.draw input
+    }
+    port out type=power {
+        set net.voltage vout tolerance="2%"
+        assert "draw <= 2A" message="the TPS63802 is rated for 2A at 3.3V; its loads draw {draw}"
+    }
+    port en
+
+    place tps63802 as=self
+    circuit in.rail self.vin.rail
+    circuit in.gnd self.vin.gnd self.AGND out.gnd
+    circuit en self.en
+    circuit self.vout out.rail
+    circuit self.mode in.gnd
+    nc self.PG note="power good unused"
+
+    // Table 10-2's Coilcraft XFL4015-471ME is out of stock; the Vishay IHLP-1212 0.47 µH is rated
+    // 8.5 A against the 5.75 A peak switch limit.
+    place inductor L anchor=self.L1 value=inductance intent=filter footprint="Inductor_SMD:L_Vishay_IHLP-1212" \
+        note="buck-boost inductor — datasheet value, 0.37–0.57 µH effective"
+    circuit self.l1 L self.l2
+
+    place bulk Cin anchor=self.VIN node=self.vin.rail rail=in value=cin footprint="Capacitor_SMD:C_0805_2012Metric" \
+        note="input capacitor, at VIN"
+    place bulk Cout anchor=self.VOUT node=out.rail rail=out value=cout footprint="Capacitor_SMD:C_0805_2012Metric" \
+        note="output capacitor, at VOUT — at least 7 µF effective after DC bias"
+    place bulk Cout2 anchor=self.VOUT node=out.rail rail=out value=cout footprint="Capacitor_SMD:C_0805_2012Metric" \
+        note="second output capacitor, for load bursts"
+
+    place resistor Rtop anchor=self.FB value=rtop intent=divider note="feedback divider, top — sets {vout}"
+    place resistor Rbottom anchor=self.FB value=rbottom intent=divider note="feedback divider, bottom"
+    circuit out.rail Rtop self.fb Rbottom out.gnd
+}

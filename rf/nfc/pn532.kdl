@@ -50,7 +50,7 @@ part pn532 {
     pin RSTPD input symbol="~{RSTPD}"
     pin DVDD power_out
     pin VBAT power_in
-    package hvqfn40 footprint="HVQFN-40-1EP_6x6mm_P0.5mm_EP4.1x4.1mm" {
+    package hvqfn40 footprint="Package_DFN_QFN:HVQFN-40-1EP_6x6mm_P0.5mm_EP4.1x4.1mm" {
         pad DVSS 1
         pad LOADMOD 2
         pad TVSS1 3
@@ -123,6 +123,37 @@ part pn532 {
 // are NXP's starting values for a roughly 1.83 µH loop; tune them for the actual board antenna.
 // The 50 V C0G requirement for antenna capacitors and 5% L0 tolerance are purchase constraints.
 block pn532-reader {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-Cvbat text default=#null
+    param ref-Cvbat-bulk text default=#null
+    param ref-Cdvdd text default=#null
+    param ref-FBtvdd text default=#null
+    param ref-FBavdd text default=#null
+    param ref-Ctvdd text default=#null
+    param ref-Ctvdd-bulk text default=#null
+    param ref-Cavdd text default=#null
+    param ref-Cavdd-bulk text default=#null
+    param ref-Cpvdd text default=#null
+    param ref-X text default=#null
+    param ref-Cx1 text default=#null
+    param ref-Cx2 text default=#null
+    param ref-L1 text default=#null
+    param ref-L2 text default=#null
+    param ref-C01 text default=#null
+    param ref-C02 text default=#null
+    param ref-C11 text default=#null
+    param ref-C12 text default=#null
+    param ref-C21 text default=#null
+    param ref-C22 text default=#null
+    param ref-Rq1 text default=#null
+    param ref-Rq2 text default=#null
+    param ref-Rrx text default=#null
+    param ref-Crx text default=#null
+    param ref-Rvmid text default=#null
+    param ref-Cvmid text default=#null
+    param ref-Rrst text default=#null
+    param ref-Rirq text default=#null
+
     param l0 inductance default="560nH"
     param c0 capacitance default="220pF"
     param c1 capacitance default="22pF"
@@ -153,41 +184,41 @@ block pn532-reader {
 
     // Keep the regulator output separate from the host rail. Beads isolate the analog and
     // transmitter supplies from its digital supply.
-    place bypass Cvbat node=self.VBAT rail=vbat value="100nF"
-    place bulk Cvbat-bulk node=self.VBAT rail=vbat value="10µF"
-    place bypass Cdvdd node=self.DVDD rail=vbat value="100nF"
-    place ferrite-bead FBtvdd value="600Ω@100MHz"
-    place ferrite-bead FBavdd value="600Ω@100MHz"
+    place bypass Cvbat anchor=self.VBAT node=self.VBAT rail=vbat value="100nF" designator=ref-Cvbat
+    place bulk Cvbat-bulk anchor=self.VBAT node=self.VBAT rail=vbat value="10µF" designator=ref-Cvbat-bulk
+    place bypass Cdvdd anchor=self.DVDD node=self.DVDD rail=vbat value="100nF" designator=ref-Cdvdd
+    place ferrite-bead FBtvdd anchor=self.TVDD value="600Ω@100MHz" designator=ref-FBtvdd
+    place ferrite-bead FBavdd anchor=self.AVDD value="600Ω@100MHz" designator=ref-FBavdd
     circuit self.DVDD FBtvdd self.TVDD
     circuit self.DVDD FBavdd self.AVDD
-    place bypass Ctvdd node=self.TVDD rail=vbat value="100nF"
-    place bulk Ctvdd-bulk node=self.TVDD rail=vbat value="10µF"
-    place bypass Cavdd node=self.AVDD rail=vbat value="100nF"
-    place bulk Cavdd-bulk node=self.AVDD rail=vbat value="10µF"
-    place bypass Cpvdd node=self.PVDD rail=host value="100nF"
+    place bypass Ctvdd anchor=self.TVDD node=self.TVDD rail=vbat value="100nF" designator=ref-Ctvdd
+    place bulk Ctvdd-bulk anchor=self.TVDD node=self.TVDD rail=vbat value="10µF" designator=ref-Ctvdd-bulk
+    place bypass Cavdd anchor=self.AVDD node=self.AVDD rail=vbat value="100nF" designator=ref-Cavdd
+    place bulk Cavdd-bulk anchor=self.AVDD node=self.AVDD rail=vbat value="10µF" designator=ref-Cavdd-bulk
+    place bypass Cpvdd anchor=self.PVDD node=self.PVDD rail=host value="100nF" designator=ref-Cpvdd
 
     // A 27.12 MHz crystal with two 15 pF load capacitors and a grounded lid.
-    place crystal-3225 X value="27.12MHz 10pF"
+    place crystal-3225 X anchor=self.OSCIN value="27.12MHz 10pF" designator=ref-X
     circuit self.OSCIN X.xtal1
     circuit self.OSCOUT X.xtal2
     circuit X.ground vbat.gnd
-    place capacitor Cx1 value="15pF" intent=timing
-    place capacitor Cx2 value="15pF" intent=timing
+    place capacitor Cx1 anchor=X.XTAL1 value="15pF" intent=timing designator=ref-Cx1
+    place capacitor Cx2 anchor=X.XTAL2 value="15pF" intent=timing designator=ref-Cx2
     circuit self.OSCIN Cx1 vbat.gnd
     circuit self.OSCOUT Cx2 vbat.gnd
 
     // The two matching branches are symmetric: TX → 560 nH → shunt C0 → series C1 →
     // shunt C2 → 1.5 Ω → antenna. Antenna capacitors need C0G dielectric and 50 V rating.
-    place inductor L1 value=l0 intent=filter footprint="L_0603_1608Metric" note="EMC filter, 5% inductor"
-    place inductor L2 value=l0 intent=filter footprint="L_0603_1608Metric" note="EMC filter, 5% inductor"
-    place capacitor C01 value=c0 intent=filter note="C0G, 50 V antenna filter"
-    place capacitor C02 value=c0 intent=filter note="C0G, 50 V antenna filter"
-    place capacitor C11 value=c1 intent=filter note="C0G, 50 V series matching"
-    place capacitor C12 value=c1 intent=filter note="C0G, 50 V series matching"
-    place capacitor C21 value=c2 intent=filter note="C0G, 50 V parallel matching"
-    place capacitor C22 value=c2 intent=filter note="C0G, 50 V parallel matching"
-    place resistor Rq1 value=rq intent=series note="antenna Q damping"
-    place resistor Rq2 value=rq intent=series note="antenna Q damping"
+    place inductor L1 anchor=self.TX1 value=l0 intent=filter footprint="Inductor_SMD:L_0603_1608Metric" note="EMC filter, 5% inductor" designator=ref-L1
+    place inductor L2 anchor=self.TX2 value=l0 intent=filter footprint="Inductor_SMD:L_0603_1608Metric" note="EMC filter, 5% inductor" designator=ref-L2
+    place capacitor C01 anchor=L1.B value=c0 intent=filter note="C0G, 50 V antenna filter" designator=ref-C01
+    place capacitor C02 anchor=L2.B value=c0 intent=filter note="C0G, 50 V antenna filter" designator=ref-C02
+    place capacitor C11 anchor=L1.B value=c1 intent=filter note="C0G, 50 V series matching" designator=ref-C11
+    place capacitor C12 anchor=L2.B value=c1 intent=filter note="C0G, 50 V series matching" designator=ref-C12
+    place capacitor C21 anchor=C11.B value=c2 intent=filter note="C0G, 50 V parallel matching" designator=ref-C21
+    place capacitor C22 anchor=C12.B value=c2 intent=filter note="C0G, 50 V parallel matching" designator=ref-C22
+    place resistor Rq1 anchor=C11.B value=rq intent=series note="antenna Q damping" designator=ref-Rq1
+    place resistor Rq2 anchor=C12.B value=rq intent=series note="antenna Q damping" designator=ref-Rq2
     circuit self.TX1 L1 C11 Rq1 ant1
     circuit self.TX2 L2 C12 Rq2 ant2
     circuit L1.b C01 vbat.gnd
@@ -196,15 +227,15 @@ block pn532-reader {
     circuit C12.b C22 vbat.gnd
 
     // Receive from TX2 after its EMC inductor, before its matching capacitor.
-    place resistor Rrx value="1.8kΩ" intent=series
-    place capacitor Crx value="1nF" intent=filter note="C0G, 50 V receiver coupling"
-    place resistor Rvmid value="1kΩ" intent=series
+    place resistor Rrx anchor=self.RX value="1.8kΩ" intent=series designator=ref-Rrx
+    place capacitor Crx anchor=self.RX value="1nF" intent=filter note="C0G, 50 V receiver coupling" designator=ref-Crx
+    place resistor Rvmid anchor=self.VMID value="1kΩ" intent=series designator=ref-Rvmid
     circuit L2.b Rrx Crx self.RX
     circuit self.RX Rvmid self.VMID
-    place bypass Cvmid node=self.VMID rail=vbat value="100nF"
+    place bypass Cvmid anchor=self.VMID node=self.VMID rail=vbat value="100nF" designator=ref-Cvmid
 
-    place pull-up Rrst node=self.RSTPD rail=host value="10kΩ"
-    place pull-up Rirq node=self.P70_IRQ rail=host value="10kΩ"
+    place pull-up Rrst anchor=self.RSTPD node=self.RSTPD rail=host value="10kΩ" designator=ref-Rrst
+    place pull-up Rirq anchor=self.P70_IRQ node=self.P70_IRQ rail=host value="10kΩ" designator=ref-Rirq
     nc self.LOADMOD self.AUX1 self.AUX2 self.P35 self.NC self.P30_UART_RX \
         self.RSTOUT self.P31_UART_TX self.P32_INT0 self.P33_INT1 self.SIC_CLK_P34 \
         self.SIGOUT self.SIGIN self.SVDD

@@ -15,7 +15,7 @@ part dmg2305ux {
     pin SOURCE passive symbol=S
     pin DRAIN passive symbol=D
 
-    package sot23 footprint="SOT-23" {
+    package sot23 footprint="Package_TO_SOT_SMD:SOT-23" {
         pad GATE 1
         pad SOURCE 2
         pad DRAIN 3

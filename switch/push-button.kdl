@@ -18,7 +18,7 @@ part push-button {
     port a pin=1
     port b pin=2
 
-    package alps footprint="SW_Push_1P1T-MP_NO_Horizontal_Alps_SKRTLAE010" {
+    package alps footprint="Button_Switch_SMD:SW_Push_1P1T-MP_NO_Horizontal_Alps_SKRTLAE010" {
         value "Alps_SKRTLAE010"
         description "Alps SKRTLAE010 side-actuated tactile switch"
         order mpn=SKRTLAE010 lcsc=C110293
@@ -26,14 +26,14 @@ part push-button {
         pad 2 2
         pad MP MP
     }
-    package tact6x6 footprint="SW_Push_1TS009xxxx-xxxx-xxxx_6x6x5mm" {
+    package tact6x6 footprint="Button_Switch_SMD:SW_Push_1TS009xxxx-xxxx-xxxx_6x6x5mm" {
         value "6x6x5mm SMD Tactile"
         description "6x6x5mm SMD tactile switch"
         order mpn="1TS009A-1800-5000-CT" lcsc=C319409
         pad 1 1
         pad 2 2
     }
-    package evqp2 footprint="SW_SPST_EVQP2_ShortPushTravel_H2.1mm" {
+    package evqp2 footprint="Button_Switch_SMD:SW_SPST_EVQP2_ShortPushTravel_H2.1mm" {
         value "Panasonic_EVQP2"
         description "Panasonic EVQP2 short-travel tactile switch"
         order mpn=EVQP2T02M lcsc=C2915174

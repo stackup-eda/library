@@ -13,8 +13,11 @@ part lmr36510 {
 
     param vout voltage default="5V"
     param enable-above voltage default="0V"
-    derive rtop "20kΩ * (vout / 1V - 1)"
-    derive rentop "10kΩ * (enable-above / 1.2V - 1)"
+    // Divider values round to E96; `actual` is what the rounded divider makes, and is what the
+    // output port declares.
+    derive rtop "e96(20kΩ * (vout / 1V - 1))"
+    derive actual "1V * (1 + rtop / 20kΩ)"
+    derive rentop "e96(10kΩ * (enable-above / 1.2V - 1))"
     derive input "out.draw * out.voltage / (0.9 * in.voltage.min)"
 
     pin PGND power_in
@@ -44,7 +47,7 @@ part lmr36510 {
         line gnd pin=PGND
     }
     port out type=power {
-        set net.voltage vout
+        set net.voltage actual
         assert "draw <= 1A" message="LMR36510 output load {draw} exceeds 1A"
         line rail
         line gnd
@@ -53,26 +56,26 @@ part lmr36510 {
 
     block power-stage {
         default
-        place inductor L value="22µH" footprint="L_Bourns-SRN6045TA" intent=filter
+        place inductor L anchor=SW value="22µH" footprint="Inductor_SMD:L_Bourns_SRN6045TA" intent=filter
         circuit SW L out.rail
         circuit PAD PGND
-        place bulk Cin node=VIN rail=in value="2.2µF" footprint="C_1210_3225Metric" \
+        place bulk Cin anchor=VIN node=VIN rail=in value="2.2µF" footprint="Capacitor_SMD:C_1210_3225Metric" \
             note="100V-rated input ceramic"
-        place bypass Chf node=VIN rail=in value="220nF" footprint="C_0805_2012Metric" \
+        place bypass Chf anchor=VIN node=VIN rail=in value="220nF" footprint="Capacitor_SMD:C_0805_2012Metric" \
             note="100V-rated high-frequency input bypass"
-        place bypass Cout-hf node=out.rail rail=out value="100nF"
-        place bulk Cout1 node=out.rail rail=out value="22µF" footprint="C_1210_3225Metric" \
+        place bypass Cout-hf anchor=L.B node=out.rail rail=out value="100nF"
+        place bulk Cout1 anchor=L.B node=out.rail rail=out value="22µF" footprint="Capacitor_SMD:C_1210_3225Metric" \
             note="25V-rated output reservoir"
-        place bulk Cout2 node=out.rail rail=out value="22µF" footprint="C_1210_3225Metric" \
+        place bulk Cout2 anchor=L.B node=out.rail rail=out value="22µF" footprint="Capacitor_SMD:C_1210_3225Metric" \
             note="25V-rated output reservoir"
-        place bypass Cvcc node=VCC rail=in value="1µF"
-        place capacitor Cboot value="100nF" intent=filter
+        place bypass Cvcc anchor=VCC node=VCC rail=in value="1µF"
+        place capacitor Cboot anchor=BOOT value="100nF" intent=filter
         circuit BOOT Cboot SW
     }
     block feedback {
         default
-        place resistor Rtop value=rtop intent=divider
-        place resistor Rbottom value="20kΩ" intent=divider
+        place resistor Rtop anchor=FB value=rtop intent=divider
+        place resistor Rbottom anchor=FB value="20kΩ" intent=divider
         circuit out.rail Rtop FB Rbottom out.gnd
     }
     block always-on {
@@ -81,8 +84,8 @@ part lmr36510 {
     }
     block uvlo {
         when "enable-above > 0V"
-        place resistor Ren-top value=rentop intent=divider
-        place resistor Ren-bottom value="10kΩ" intent=divider
+        place resistor Ren-top anchor=EN value=rentop intent=divider
+        place resistor Ren-bottom anchor=EN value="10kΩ" intent=divider
         circuit VIN Ren-top EN Ren-bottom PGND
     }
 }

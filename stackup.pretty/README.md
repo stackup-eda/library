@@ -24,6 +24,18 @@ as the reference design does for C<sub>FILT</sub>.
 Source: Raspberry Pi's `RPI-RP2350A-MINIMAL_R4-S1` reference design, MIT licensed; see the
 `LICENSE.txt` included in that download.
 
+## `ESP32-C6-MINI-1U`
+
+Footprint for the ESP32-C6-MINI-1U, the MINI-1 with an external antenna socket instead of the PCB
+antenna: a 13.2 × 12.5 mm body on the MINI-1's land pattern, pad for pad (ESP32-C6-MINI-1 &
+MINI-1U datasheet v1.5, figures 11-1 and 11-2). The pads sit where they do on the MINI-1, with the
+body's bottom edge at y = 5.6 mm, so the body runs to y = −6.9 mm and the socket end is the top.
+There is no antenna keepout. No 3D model is referenced.
+
+Source: KiCad's `RF_Module:ESP32-C6-MINI-1` (CC BY-SA 4.0 with the KiCad libraries' exception),
+with the antenna keepout zone, its courtyard wings, the antenna-area text and the model removed,
+and the silkscreen, fabrication outline and courtyard shortened to the 12.5 mm body.
+
 ## `L_Abracon_AOTA-B201610`
 
 Footprint for the AOTA-B201610S3R3-101-T, the 3.3 µH, 2.0 × 1.6 × 1.0 mm inductor specified
@@ -72,6 +84,23 @@ The exposed-pad corner radius remains 0.05 mm, using `roundrect_rratio` 0.0294 i
 has no `F.Paste`; the datasheet specifies four stencil apertures with 80% total coverage, to be
 provided in the stencil design.
 
+## `Maxim_T1633-4_TQFN-16-1EP_3x3mm_P0.5mm_EP1.23x1.23mm`
+
+MAX98357A footprint for Maxim's T1633+4 package. It is derived from KiCad's
+`Package_DFN_QFN:TQFN-16-1EP_3x3mm_P0.5mm_EP1.23x1.23mm`, which is drawn for the T1633-5 on the
+same outline (21-0136). The two share the 3 × 3 mm body, the 0.5 mm pitch and the exposed pad
+(1.10 mm nominal, 1.25 mm at most), but the T1633-4's terminals are 0.1 mm longer: L is 0.45 mm
+nominal and 0.55 mm at most, against 0.35 and 0.45 mm (MAX98357A data sheet Rev 7, p. 37).
+
+KiCad's terminal pads end 1.025 mm from the centre, short of a nominal T1633-4 terminal's inner
+end at 1.05 mm and 0.075 mm inside a longest one's at 0.95 mm, leaving no heel. The pads are
+lengthened inward, keeping their outer ends at 1.85 mm: the two mid-side pads on each side by
+0.1 mm, to 0.925 × 0.25 mm, and the corner pads by 0.04 mm, to 0.865 × 0.25 mm. Corner pads on
+adjacent sides meet diagonally, and 0.04 mm keeps them 0.207 mm apart, over a 0.2 mm clearance;
+0.1 mm would close that to 0.12 mm. The gap to the exposed pad is at least 0.31 mm. Maxim's land
+pattern 90-0031 was not consulted. Pad numbers, the exposed pad, its paste apertures and the STEP
+reference are unchanged.
+
 ## `Arduino_UNO_R3_Shield`
 
 Arduino Uno R3 shield header pattern: four 2.54 mm stacking headers with 8 power, 6 analog,
@@ -109,6 +138,37 @@ the Amphenol widths of 13.62 and 14.42 mm and extend 7.9 mm ahead of the pegs. S
 a 13.08 mm body, a 15.80 mm panel stop, and a face 10.34 mm ahead of the pegs. Adjacent jacks
 on a pitch below 15.8 mm collide at the stops even if the courtyards do not overlap.
 
+## `RotaryEncoder_Bourns_Vertical_PEL12T-4xxxx-S1024`
+
+Bourns PEL12T-4 illuminated rotary encoder (`@stackup/switch/pel12t`), shaft perpendicular to the
+board, origin at the shaft. The five LED and switch pins (common anode on 5, push switch 3 to 5),
+the three encoder pins and the tab positions follow the PEL12T data sheet's suggested layout
+(REV. 09/19). The tab slots are copied from KiCad's `RotaryEncoder_Bourns_Vertical_PEL12D-4`,
+the same 12 mm body, so the footprint carries that library's licence. No 3D model.
+
+## `ST_VL53L4CD`
+
+ST VL53L4CD time-of-flight sensor (`@stackup/sensor/tof/vl53l4cd`), optical LGA12, 4.4 × 2.4 ×
+1.0 mm. Twelve 0.5 mm square pads on a 0.8 mm grid, from DS13812 Rev 8, Figure 19, which is drawn
+from below; the footprint is that view mirrored for the top. Pad 1 is the corner under the Tx
+aperture. F.Fab marks the body, its pin-1 corner and both apertures (Rx 0.665 mm and Tx 3.665 mm
+from the end away from pad 1, Figure 17), for placing a cover window. The VL53L4CX and VL53L3CX
+use the same package. Original, MIT licensed. No 3D model.
+
+## `Thumbstick_Alps_RKJXV`
+
+ALPS RKJXV thumbstick (`@stackup/switch/rkjxv`), origin at the lever. Every hole is from the RKJXV
+catalog's Drawing No. 1 (Update 2510), which is viewed from the mounting side, so it is drawn as
+it is: VR1's three Ø1.0 holes at x = 8.73 mm, VR2's at y = −8.73 mm, both on 2.5 mm; the switch's
+four Ø1.2 holes at x = ±3.25 mm, y = 5.75 and 10.25 mm; the four Ø1.5 legs at (±6.325, ±5) mm as
+`MP`; and unplated Ø1.6 holes at (±4.3, 0) for the two 0.75 mm locating bosses. The drawing's
+prohibited wiring areas (Ø4 at the lever, Ø3.5 at y = 8 mm joined to it by a 2.2 mm channel, and
+Ø2.6 at (±3.5, ±3.5) mm) are keepouts on F.Cu. F.Fab marks the 13.15 mm frame and the 18.2 ×
+21.7 mm envelope, placed by scaling the outline drawing, which gives the overall sizes but not
+their offsets. Pads are numbered for the generic connector symbol the part borrows: 1–3 VR1, 4–6
+VR2 (the drawing's circled 1–3), 7–10 the switch's a, b, c, d. Hall-effect and TMR drop-in sticks
+use the same land. Original, MIT licensed. No 3D model.
+
 ## 3D models
 
 Standard footprints reference KiCad's models. When a model is missing, a part may specify a
@@ -122,7 +182,7 @@ three SnapMagic downloads; their sources and licences are listed in [../NOTICE.m
 Downloaded models have adjacent `.LICENSE.txt` files.
 
 Bundled footprints use `(model …)` references like standard KiCad footprints. `CP_Elec_10x16.5`
-uses the cylinder, `Converter_DCDC_RECOM_R-78K-0.5_THT` uses KiCad's R-78E model, and the RJ11
+uses a can drawn with build123d, `Converter_DCDC_RECOM_R-78K-0.5_THT` uses KiCad's R-78E model, and the RJ11
 footprint uses the Stewart model with the alignment described above.
 
 Only include models whose licences permit redistribution. Models licensed solely for use in

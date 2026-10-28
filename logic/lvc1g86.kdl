@@ -3,6 +3,9 @@
 use "@stackup/passives"
 
 part lvc1g86 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvcc text default=#null
+
     symbol "74xGxx:74LVC1G86"
     reference U
     datasheet "https://www.ti.com/lit/gpn/sn74lvc1g86"
@@ -13,7 +16,7 @@ part lvc1g86 {
     pin GND power_in
     pin Y output
     pin VCC power_in
-    package sc70 footprint="SOT-353_SC-70-5" {
+    package sc70 footprint="Package_TO_SOT_SMD:SOT-353_SC-70-5" {
         pad A 1
         pad B 2
         pad GND 3
@@ -21,7 +24,7 @@ part lvc1g86 {
         pad VCC 5
         order mpn=SN74LVC1G86DCKR mouser="595-SN74LVC1G86DCKR" lcsc=C52350
     }
-    package sot23 footprint="SOT-23-5" {
+    package sot23 footprint="Package_TO_SOT_SMD:SOT-23-5" {
         pad A 1
         pad B 2
         pad GND 3
@@ -39,6 +42,6 @@ part lvc1g86 {
     port y type=output pin=Y
     block supply {
         default
-        place bypass Cvcc node=VCC rail=vcc value="100nF"
+        place bypass Cvcc anchor=VCC node=VCC rail=vcc value="100nF" designator=ref-supply-Cvcc
     }
 }

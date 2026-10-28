@@ -21,7 +21,7 @@ part hc86 {
     pin D_Y output symbol=Y
     pin GND power_in
     pin VCC power_in
-    package soic footprint="SOIC-14_3.9x8.7mm_P1.27mm" {
+    package soic footprint="Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" {
         pad A_A 1
         pad A_B 2
         pad A_Y 3
@@ -37,7 +37,7 @@ part hc86 {
         pad D_B 13
         pad VCC 14
     }
-    package tssop footprint="TSSOP-14_4.4x5mm_P0.65mm" {
+    package tssop footprint="Package_SO:TSSOP-14_4.4x5mm_P0.65mm" {
         pad A_A 1
         pad A_B 2
         pad A_Y 3
@@ -53,7 +53,7 @@ part hc86 {
         pad D_B 13
         pad VCC 14
     }
-    package ssop footprint="SSOP-14_5.3x6.2mm_P0.65mm" {
+    package ssop footprint="Package_SO:SSOP-14_5.3x6.2mm_P0.65mm" {
         pad A_A 1
         pad A_B 2
         pad A_Y 3
@@ -69,7 +69,7 @@ part hc86 {
         pad D_B 13
         pad VCC 14
     }
-    package dip footprint="DIP-14_W7.62mm" {
+    package dip footprint="Package_DIP:DIP-14_W7.62mm" {
         pad A_A 1
         pad A_B 2
         pad A_Y 3
@@ -92,6 +92,6 @@ part hc86 {
     }
     block supply {
         default
-        place bypass Cvcc node=VCC rail=vcc value="100nF"
+        place bypass Cvcc anchor=VCC node=VCC rail=vcc value="100nF"
     }
 }

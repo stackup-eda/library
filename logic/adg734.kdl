@@ -4,6 +4,9 @@
 use "@stackup/passives"
 
 part adg734 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvdd text default=#null
+
     symbol "Analog_Switch:ADG734"
     reference U
     datasheet "https://www.analog.com/media/en/technical-documentation/data-sheets/ADG733_734.pdf"
@@ -30,7 +33,7 @@ part adg734 {
     pin D4 passive
     pin S4A passive
     pin IN4 input
-    package tssop20 footprint="TSSOP-20_4.4x6.5mm_P0.65mm" {
+    package tssop20 footprint="Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" {
         pad IN1 1
         pad S1A 2
         pad D1 3
@@ -59,7 +62,7 @@ part adg734 {
     }
     block supply {
         default
-        place bypass Cvdd node=VDD rail=vdd value="100nF"
+        place bypass Cvdd anchor=VDD node=VDD rail=vdd value="100nF" designator=ref-supply-Cvdd
         circuit VSS vdd.gnd
     }
 }

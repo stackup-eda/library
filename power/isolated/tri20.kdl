@@ -42,6 +42,6 @@ part tri20-2415 {
     // The 150 mV peak-to-peak ripple figure assumes this capacitor is installed.
     block output-capacitor {
         default
-        place bulk Cout node=PVOUT rail=out value="4.7µF"
+        place bulk Cout anchor=PVOUT node=PVOUT rail=out value="4.7µF"
     }
 }

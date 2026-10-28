@@ -93,19 +93,19 @@ Generic components and shared types live at the root. Part families are grouped 
 | `bus/can`, `bus/lin`, `bus/rs485`, `bus/usb` | Transceivers and bridges |
 | `clock/` | Oscillators |
 | `audio/` | Audio amplifiers |
-| `connector/` | Headers, JST PH, power jacks, Qwiic, SWD, and USB-C |
+| `connector/` | Headers, JST PH, power jacks, Qwiic, SWD (header and Tag-Connect), USB-C, and terminal blocks |
 | `discrete/fet`, `discrete/bjt`, `discrete/diode`, `discrete/led` | Transistors, diodes including BAT54W, TVS protection, and LEDs |
 | `driver/led`, `driver/motor` | LED and motor drivers |
 | `interface/expander` | GPIO expanders |
 | `isolator/` | Digital isolators and optocouplers |
 | `logic/` | Gates and buffers |
 | `micro/` | Microcontrollers and modules |
-| `power/` | Regulators, converter modules, chargers, eFuses, ideal diodes, isolated supplies, and USB-PD controllers |
+| `power/` | Regulators (buck, buck-boost, LDO), converter modules, chargers, eFuses, power-distribution switches, ideal diodes, isolated supplies, and USB-PD controllers |
 | `radio/` | Radio modules |
 | `rf/nfc` | NFC controllers |
-| `sensor/current`, `sensor/hall`, `sensor/accel`, `sensor/temp` | Sensors grouped by measurement |
+| `sensor/current`, `sensor/hall`, `sensor/accel`, `sensor/temp`, `sensor/tof` | Sensors grouped by measurement |
 | `storage/flash`, `storage/eeprom` | Flash and EEPROM memory |
-| `switch/` | Push buttons |
+| `switch/` | Push buttons and rotary encoders |
 | `timer/` | 555 timers |
 | `examples/` | Complete designs used to test the library |
 | `stackup.pretty/`, `stackup.3dshapes/` | Custom footprints and 3D models |
@@ -178,6 +178,41 @@ The root `manifest.kdl` declares the library name and required stackup version.
 
 ## Licence
 
-The KDL library and original assets are [MIT licensed](LICENSE). Four footprints derived from
+The KDL library and original assets are [MIT licensed](LICENSE). Seven footprints derived from
 KiCad and three models from SnapMagic retain their CC BY-SA 4.0 licences. [NOTICE.md](NOTICE.md)
 lists the files, sources, attribution requirements, and design-use exceptions.
+
+## Stable child references
+
+Parts and blocks expose optional `ref-…` text parameters for their support components.
+For example, `place indicator power designator="POWER" ref-R="R17"` names the LED and
+its resistor. Nested names follow the component path with `/` replaced by `-`, such as
+`ref-supply-Cvdd="C4"`. Omit the parameter to retain automatic numbering. Existing
+fixed names remain the parameter's default where a block already supplied one.
+
+Definitions forward these parameters explicitly with `designator=ref-R` on the child,
+or `ref-R=ref-indicator-R` on a nested block. Use `default=#null` for an optional name;
+this requires an engine that supports null designators and reserves explicit names
+when numbering unnamed parts. The board's KDL ID remains independent of its reference.
+
+## Placement anchors
+
+Support components with a known physical host pin declare `anchor=PIN` inside
+parts, or `anchor=self.PIN`/`anchor=chip.PIN` inside application blocks.
+All six shunt helpers (`decouple`, `bypass`, `bulk`, `filter`, `pull-up`,
+`pull-down`) accept an optional `anchor` reference and forward it to their root
+passive. `node=` specifies wiring; it does not imply a placement anchor.
+Use actual pin names for anchors, rather than power ports or net names.
+Select a physical pad with `@pad` when a pin maps to multiple pads. For a bulk
+bank this is a starting location; per-pad high-frequency bypasses retain their
+individual anchors. Buck output capacitors anchor to the inductor's output pad,
+while feedback components anchor to the feedback pin. These are initial
+placement hints; hot loops, Kelvin connections, clearances, and routing still
+need layout review.
+
+Run `python3 scripts/audit_anchors.py` to audit every library-owned passive
+placement and its pin/package mappings. `--json` emits the inventory. The audit
+fails on missing anchors and invalid mappings, with an explicit list of reviewed
+exceptions for circuits whose physical location depends on the board. Stackup
+checks remain authoritative for elaboration and conditional block behavior.
+See [ANCHOR_AUDIT.md](ANCHOR_AUDIT.md) for coverage and validation.

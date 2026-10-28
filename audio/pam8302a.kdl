@@ -5,6 +5,10 @@
 use "@stackup/passives"
 
 part pam8302a {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvdd text default=#null
+    param ref-supply-Cbulk text default=#null
+
     symbol "Amplifier_Audio:PAM8302AAD"
     reference U
     datasheet "https://www.diodes.com/assets/Datasheets/PAM8302A.pdf"
@@ -43,12 +47,18 @@ part pam8302a {
 
     block supply {
         default
-        place bypass Cvdd node=VDD rail=vdd value="1µF" note="place close to VDD"
-        place bulk Cbulk node=VDD rail=vdd value="10µF"
+        place bypass Cvdd anchor=VDD node=VDD rail=vdd value="1µF" note="place close to VDD" designator=ref-supply-Cvdd
+        place bulk Cbulk anchor=VDD node=VDD rail=vdd value="10µF" designator=ref-supply-Cbulk
     }
 }
 
 block pam8302a-amplifier {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvdd text default=#null
+    param ref-supply-Cbulk text default=#null
+    param ref-Cin-plus text default=#null
+    param ref-Cin-minus text default=#null
+
     port vdd type=power
     port input
     port input-return
@@ -56,9 +66,10 @@ block pam8302a-amplifier {
     port speaker-minus
     port shutdown
 
-    place pam8302a as=self vdd=vdd speaker-plus=speaker-plus speaker-minus=speaker-minus shutdown=shutdown
-    place capacitor Cin-plus value="100nF" intent=filter
-    place capacitor Cin-minus value="100nF" intent=filter
+    place pam8302a as=self vdd=vdd speaker-plus=speaker-plus speaker-minus=speaker-minus shutdown=shutdown \
+        ref-supply-Cbulk=ref-supply-Cbulk ref-supply-Cvdd=ref-supply-Cvdd
+    place capacitor Cin-plus anchor=self.IN+ value="100nF" intent=filter designator=ref-Cin-plus
+    place capacitor Cin-minus anchor=self.IN- value="100nF" intent=filter designator=ref-Cin-minus
     circuit input Cin-plus self.IN+
     circuit input-return Cin-minus self.IN-
 }

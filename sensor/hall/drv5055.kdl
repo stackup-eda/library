@@ -19,7 +19,7 @@ part drv5055a2 {
     pin GND power_in
     pin OUT output
 
-    package to92 footprint="TO-92_Inline" {
+    package to92 footprint="Package_TO_SOT_THT:TO-92_Inline" {
         pad VCC 1
         pad GND 2
         pad OUT 3
@@ -38,6 +38,6 @@ part drv5055a2 {
 
     block supply {
         default
-        place decouple Cvcc node=VCC rail=vcc value="100nF" note="VCC decoupling, close to the pin"
+        place decouple Cvcc anchor=VCC node=VCC rail=vcc value="100nF" note="VCC decoupling, close to the pin"
     }
 }

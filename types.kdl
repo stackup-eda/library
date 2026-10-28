@@ -5,12 +5,16 @@ use "@stackup/passives"
 // I²C pull-ups with a single `i2c` port for connecting both lines. The `rail` sets the pull-up
 // voltage, which the checker compares with the connected devices’ voltage limits.
 block i2c-pull-ups {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-sda text default=#null
+    param ref-scl text default=#null
+
     param value resistance default="4.7kΩ"
     port i2c type=i2c
     port rail type=power
 
-    place pull-up sda node=i2c.sda rail=rail value=value
-    place pull-up scl node=i2c.scl rail=rail value=value
+    place pull-up sda node=i2c.sda rail=rail value=value designator=ref-sda
+    place pull-up scl node=i2c.scl rail=rail value=value designator=ref-scl
 }
 
 // USB 2.0 data pair: D+ connects to D+ and D− to D−. An ESD array connects to the same pair;

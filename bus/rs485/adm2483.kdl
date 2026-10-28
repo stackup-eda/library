@@ -25,7 +25,7 @@ part adm2483 {
     pin B bidirectional
     pin VDD2 power_in
 
-    package soic16w footprint="SOIC-16W_7.5x10.3mm_P1.27mm" {
+    package soic16w footprint="Package_SO:SOIC-16W_7.5x10.3mm_P1.27mm" {
         pad VDD1 1
         pad GND1 2
         pad RxD 3
@@ -61,8 +61,8 @@ part adm2483 {
 
     block supply {
         default
-        place bypass Chost node=VDD1 rail=host value="100nF"
-        place bypass Clink node=VDD2 rail=link value="100nF"
+        place bypass Chost anchor=VDD1 node=VDD1 rail=host value="100nF"
+        place bypass Clink anchor=VDD2 node=VDD2 rail=link value="100nF"
     }
     block power-valid {
         default

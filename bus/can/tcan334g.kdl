@@ -9,6 +9,9 @@
 use "@stackup/passives"
 
 part tcan334g {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvcc text default=#null
+
     symbol "Interface_CAN_LIN:TCAN334G"
     reference U
     datasheet "https://www.ti.com/lit/ds/symlink/tcan334g.pdf"
@@ -27,7 +30,7 @@ part tcan334g {
     pin CANH bidirectional
     pin STB input
 
-    package soic8 footprint="SOIC-8_3.9x4.9mm_P1.27mm" {
+    package soic8 footprint="Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" {
         pad TXD 1
         pad GND 2
         pad VCC 3
@@ -63,6 +66,6 @@ part tcan334g {
     // 0.1 µF close to VCC, per the datasheet's layout guidance.
     block supply {
         default
-        place bypass Cvcc node=VCC rail=vcc value="100nF"
+        place bypass Cvcc anchor=VCC node=VCC rail=vcc value="100nF" designator=ref-supply-Cvcc
     }
 }

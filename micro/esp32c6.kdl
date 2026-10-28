@@ -1,0 +1,447 @@
+// @stackup/micro/esp32c6 — Espressif ESP32-C6-MINI-1 module with supply, reset-delay and
+// boot-strap blocks.
+//
+// A 13.2 × 16.6 mm module: ESP32-C6 (RISC-V, Wi-Fi 6, Bluetooth LE 5, 802.15.4), 4 MB flash
+// and a PCB antenna. 22 GPIOs. The chip's USB Serial/JTAG controller sits on fixed pins
+// (IO12 = USB_D−, IO13 = USB_D+), exposed as the `usb` port; the C6 has no USB OTG.
+//
+// Strapping requirements check the net's resting level at reset (ESP32-C6-MINI-1 datasheet
+// v1.5, chapter 4):
+//
+// - IO9 must rest high for SPI boot. The default `boot` block adds a pull-up; a button or a
+//   programming interface pulls it low for download mode.
+// - IO8 must be high when IO9 is low to enter download mode, and it also steers ROM message
+//   printing; it has no internal pull, so the `boot` block pulls it up as well. The board may
+//   drive it as a GPIO afterwards.
+// - IO15 selects the JTAG source only once EFUSE_JTAG_SEL_ENABLE is burnt. No requirement is
+//   imposed; leave it `nc` or use it.
+// - IO4 (MTMS) and IO5 (MTDI) set the SDIO clock edges and matter only to an SDIO slave.
+//
+// EN is reset, not a strap. The datasheet asks for an RC delay of 10 kΩ and 1 µF so the chip
+// releases reset after its rails settle; the default `enable` block provides it. Its net must
+// not rest low.
+//
+// The ESP32-C6 has one SAR ADC, ADC1, on IO0–IO6; it is usable while the radio is active.
+// IO0–IO7 are also the low-power GPIOs the LP core can drive in deep sleep.
+//
+// The datasheet asks the supply for at least 500 mA (table 6-2); Wi-Fi transmit peaks at
+// 382 mA. The EPAD (pad 49, with KiCad's nine thermal vias) may be left unpasted: the
+// datasheet calls soldering it optional and warns that too much paste lifts the module.
+//
+// Packages: `n4` (default, −40 to 85 °C) and `h4` (−40 to 105 °C), and the MINI-1U with an
+// external antenna connector, `u-n4` and `u-h4`. The MINI-1U is the same module with the PCB
+// antenna replaced by a third-generation socket (MHF III, W.FL, AMMC; not U.FL) and is 12.5 mm
+// long instead of 16.6. Its land pattern is the MINI-1's, pad for pad (datasheet v1.5, figures
+// 11-1 and 11-2), so its footprint, `stackup:ESP32-C6-MINI-1U`, is KiCad's MINI-1 without the
+// antenna keepout. Espressif certified it with a monopole of 2.33 dBi; an antenna of another
+// type or more gain needs its own testing (section 10.2).
+//
+// `peak` is what the module adds to its supply's budget: the datasheet's 500 mA supply
+// requirement by default. A supply budgeted below that, such as a slot with a declared share,
+// states the radio's real peak instead (382 mA sending 802.11b at 20.5 dBm, table 6-4) and
+// keeps it there in firmware.
+
+use "@stackup/passives"
+use "@stackup/types"
+
+part esp32-c6-mini-1 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cbulk text default=#null
+    param ref-supply-Cbypass text default=#null
+    param ref-enable-Ren text default=#null
+    param ref-enable-Cen text default=#null
+    param ref-boot-Rboot text default=#null
+    param ref-boot-Rdownload text default=#null
+
+    param peak current default="500mA"
+
+    symbol "RF_Module:ESP32-C6-MINI-1"
+    reference U
+    datasheet "https://documentation.espressif.com/esp32-c6-mini-1_mini-1u_datasheet_en.pdf"
+    description "ESP32-C6 Wi-Fi 6 + Bluetooth LE + 802.15.4 module, 4 MB flash, PCB antenna"
+    manufacturer "Espressif Systems"
+    order mpn=ESP32-C6-MINI-1-N4 mouser="356-ESP32C6MINI-1-N4"
+
+    // Supply
+
+    pin "3V3" power_in
+    pin GND power_in
+
+    // Datasheet table 6-2: the external supply must deliver at least 0.5 A.
+    port v3v3 type=power {
+        require net.voltage min="3.0V" max="3.6V"
+        add net.draw peak
+        line rail pin="3V3"
+        line gnd pin=GND
+    }
+
+    // Reset and straps
+
+    pin EN input required {
+        role reset active=low pull=none
+        require net.rest not=low
+    }
+    port en pin=EN
+
+    pin IO9 bidirectional once {
+        role strap sampled=reset pull=internal-up \
+            note="boot mode — high is SPI boot, low (with IO8 high) is download; a GPIO afterwards"
+        require net.rest high
+    }
+    port boot pin=IO9
+
+    pin IO8 bidirectional once {
+        role strap sampled=reset pull=none \
+            note="download mode needs it high while IO9 is low; also ROM UART0 message control"
+        require net.rest not=low
+    }
+
+    pin IO15 bidirectional once {
+        role strap sampled=reset pull=none \
+            note="JTAG source — read only once EFUSE_JTAG_SEL_ENABLE is burnt; no external bias required"
+    }
+
+    // GPIO pins. IO0–IO6 carry ADC1 channels 0–6 and IO0–IO7 are the LP GPIOs.
+
+    pin IO0 bidirectional once
+    pin IO1 bidirectional once
+    pin IO2 bidirectional once
+    pin IO3 bidirectional once
+    pin IO4 bidirectional once
+    pin IO5 bidirectional once
+    pin IO6 bidirectional once
+    pin IO7 bidirectional once
+    pin IO12 bidirectional once
+    pin IO13 bidirectional once
+    pin IO14 bidirectional once
+    pin IO18 bidirectional once
+    pin IO19 bidirectional once
+    pin IO20 bidirectional once
+    pin IO21 bidirectional once
+    pin IO22 bidirectional once
+    pin IO23 bidirectional once
+    pin RXD0 bidirectional once
+    pin TXD0 bidirectional once
+
+    // No-connect pads of the module.
+    pin NC no_connect
+
+    // Fixed USB full-speed pair of the USB Serial/JTAG controller: IO13 is D+, IO12 is D−.
+    port usb type=usb {
+        line dp pin=IO13
+        line dm pin=IO12
+    }
+
+    // Pad 49 is the grounded EPAD; KiCad's footprint numbers it and its nine thermal vias 49.
+    package n4 footprint="RF_Module:ESP32-C6-MINI-1" {
+        pad GND 1
+        pad GND 2
+        pad "3V3" 3
+        pad NC 4
+        pad IO2 5
+        pad IO3 6
+        pad NC 7
+        pad EN 8
+        pad IO4 9
+        pad IO5 10
+        pad GND 11
+        pad IO0 12
+        pad IO1 13
+        pad GND 14
+        pad IO6 15
+        pad IO7 16
+        pad IO12 17
+        pad IO13 18
+        pad IO14 19
+        pad IO15 20
+        pad NC 21
+        pad IO8 22
+        pad IO9 23
+        pad IO18 24
+        pad IO19 25
+        pad IO20 26
+        pad IO21 27
+        pad IO22 28
+        pad IO23 29
+        pad RXD0 30
+        pad TXD0 31
+        pad NC 32
+        pad NC 33
+        pad NC 34
+        pad NC 35
+        pad GND 36
+        pad GND 37
+        pad GND 38
+        pad GND 39
+        pad GND 40
+        pad GND 41
+        pad GND 42
+        pad GND 43
+        pad GND 44
+        pad GND 45
+        pad GND 46
+        pad GND 47
+        pad GND 48
+        pad GND 49
+        pad GND 50
+        pad GND 51
+        pad GND 52
+        pad GND 53
+    }
+
+    // H4 variant: the same module rated to 105 °C.
+    package h4 footprint="RF_Module:ESP32-C6-MINI-1" {
+        value "ESP32-C6-MINI-1-H4"
+        description "ESP32-C6 Wi-Fi 6 + Bluetooth LE + 802.15.4 module, 4 MB flash, PCB antenna, 105 °C"
+        order mpn=ESP32-C6-MINI-1-H4 mouser="356-ESP32C6MINI1-H4"
+        pad GND 1
+        pad GND 2
+        pad "3V3" 3
+        pad NC 4
+        pad IO2 5
+        pad IO3 6
+        pad NC 7
+        pad EN 8
+        pad IO4 9
+        pad IO5 10
+        pad GND 11
+        pad IO0 12
+        pad IO1 13
+        pad GND 14
+        pad IO6 15
+        pad IO7 16
+        pad IO12 17
+        pad IO13 18
+        pad IO14 19
+        pad IO15 20
+        pad NC 21
+        pad IO8 22
+        pad IO9 23
+        pad IO18 24
+        pad IO19 25
+        pad IO20 26
+        pad IO21 27
+        pad IO22 28
+        pad IO23 29
+        pad RXD0 30
+        pad TXD0 31
+        pad NC 32
+        pad NC 33
+        pad NC 34
+        pad NC 35
+        pad GND 36
+        pad GND 37
+        pad GND 38
+        pad GND 39
+        pad GND 40
+        pad GND 41
+        pad GND 42
+        pad GND 43
+        pad GND 44
+        pad GND 45
+        pad GND 46
+        pad GND 47
+        pad GND 48
+        pad GND 49
+        pad GND 50
+        pad GND 51
+        pad GND 52
+        pad GND 53
+    }
+
+    // MINI-1U: the external-antenna module on the same pads.
+    package u-n4 footprint="stackup:ESP32-C6-MINI-1U" {
+        value "ESP32-C6-MINI-1U-N4"
+        description "ESP32-C6 Wi-Fi 6 + Bluetooth LE + 802.15.4 module, 4 MB flash, external antenna connector"
+        order mpn=ESP32-C6-MINI-1U-N4 mouser="356-ESP32-C6MINI1UN4"
+        pad GND 1
+        pad GND 2
+        pad "3V3" 3
+        pad NC 4
+        pad IO2 5
+        pad IO3 6
+        pad NC 7
+        pad EN 8
+        pad IO4 9
+        pad IO5 10
+        pad GND 11
+        pad IO0 12
+        pad IO1 13
+        pad GND 14
+        pad IO6 15
+        pad IO7 16
+        pad IO12 17
+        pad IO13 18
+        pad IO14 19
+        pad IO15 20
+        pad NC 21
+        pad IO8 22
+        pad IO9 23
+        pad IO18 24
+        pad IO19 25
+        pad IO20 26
+        pad IO21 27
+        pad IO22 28
+        pad IO23 29
+        pad RXD0 30
+        pad TXD0 31
+        pad NC 32
+        pad NC 33
+        pad NC 34
+        pad NC 35
+        pad GND 36
+        pad GND 37
+        pad GND 38
+        pad GND 39
+        pad GND 40
+        pad GND 41
+        pad GND 42
+        pad GND 43
+        pad GND 44
+        pad GND 45
+        pad GND 46
+        pad GND 47
+        pad GND 48
+        pad GND 49
+        pad GND 50
+        pad GND 51
+        pad GND 52
+        pad GND 53
+    }
+
+    // MINI-1U rated to 105 °C.
+    package u-h4 footprint="stackup:ESP32-C6-MINI-1U" {
+        value "ESP32-C6-MINI-1U-H4"
+        description "ESP32-C6 Wi-Fi 6 + Bluetooth LE + 802.15.4 module, 4 MB flash, external antenna connector, 105 °C"
+        order mpn=ESP32-C6-MINI-1U-H4 mouser="356-ESP32-C6MINI1UH4"
+        pad GND 1
+        pad GND 2
+        pad "3V3" 3
+        pad NC 4
+        pad IO2 5
+        pad IO3 6
+        pad NC 7
+        pad EN 8
+        pad IO4 9
+        pad IO5 10
+        pad GND 11
+        pad IO0 12
+        pad IO1 13
+        pad GND 14
+        pad IO6 15
+        pad IO7 16
+        pad IO12 17
+        pad IO13 18
+        pad IO14 19
+        pad IO15 20
+        pad NC 21
+        pad IO8 22
+        pad IO9 23
+        pad IO18 24
+        pad IO19 25
+        pad IO20 26
+        pad IO21 27
+        pad IO22 28
+        pad IO23 29
+        pad RXD0 30
+        pad TXD0 31
+        pad NC 32
+        pad NC 33
+        pad NC 34
+        pad NC 35
+        pad GND 36
+        pad GND 37
+        pad GND 38
+        pad GND 39
+        pad GND 40
+        pad GND 41
+        pad GND 42
+        pad GND 43
+        pad GND 44
+        pad GND 45
+        pad GND 46
+        pad GND 47
+        pad GND 48
+        pad GND 49
+        pad GND 50
+        pad GND 51
+        pad GND 52
+        pad GND 53
+    }
+
+    // Application circuit
+
+    // The datasheet's peripheral schematic: 22 µF bulk for transmit bursts plus 100 nF.
+    block supply {
+        default
+        place bulk Cbulk anchor="3V3" node="3V3" rail=v3v3 value="22µF" \
+            footprint="Capacitor_SMD:C_0805_2012Metric" designator=ref-supply-Cbulk \
+            note="bulk capacitance for radio transmit bursts of hundreds of milliamps"
+        place decouple Cbypass anchor="3V3" node="3V3" rail=v3v3 value="100nF" designator=ref-supply-Cbypass
+    }
+
+    // EN reset delay, the datasheet's recommended 10 kΩ and 1 µF. A programming interface can
+    // pulse `en` low.
+    block enable {
+        default
+        place pull-up Ren anchor=EN node=EN rail=v3v3 value="10kΩ" designator=ref-enable-Ren \
+            note="enable pull-up to release reset"
+        place filter Cen anchor=EN node=EN rail=v3v3 value="1µF" designator=ref-enable-Cen \
+            note="reset-release delay"
+    }
+
+    // Boot straps at rest: IO9 high for SPI boot, IO8 high so pulling IO9 low gives download
+    // mode rather than an undefined combination.
+    block boot {
+        default
+        place pull-up Rboot anchor=IO9 node=IO9 rail=v3v3 value="10kΩ" designator=ref-boot-Rboot \
+            note="boot strap pull-up — SPI boot unless something pulls it low"
+        place pull-up Rdownload anchor=IO8 node=IO8 rail=v3v3 value="10kΩ" designator=ref-boot-Rdownload \
+            note="download-mode strap pull-up"
+    }
+
+    // Peripherals
+    //
+    // The GPIO matrix routes most functions to most pins, represented by the `io` rows. UART0
+    // uses the fixed ROM-bootloader and default-console pair.
+
+    peripheral GPIO gpio {
+        io IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO12 IO13 IO14 IO15 IO18 IO19 IO20 IO21 IO22 IO23 RXD0 TXD0
+    }
+
+    peripheral UART0 uart {
+        tx TXD0
+        rx RXD0
+    }
+
+    peripheral UART1 uart {
+        tx IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO12 IO13 IO14 IO15 IO18 IO19 IO20 IO21 IO22 IO23 RXD0 TXD0
+        rx IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO12 IO13 IO14 IO15 IO18 IO19 IO20 IO21 IO22 IO23 RXD0 TXD0
+    }
+
+    peripheral TWAI0 can {
+        tx IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO12 IO13 IO14 IO15 IO18 IO19 IO20 IO21 IO22 IO23 RXD0 TXD0
+        rx IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO12 IO13 IO14 IO15 IO18 IO19 IO20 IO21 IO22 IO23 RXD0 TXD0
+    }
+    peripheral TWAI1 can {
+        tx IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO12 IO13 IO14 IO15 IO18 IO19 IO20 IO21 IO22 IO23 RXD0 TXD0
+        rx IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO12 IO13 IO14 IO15 IO18 IO19 IO20 IO21 IO22 IO23 RXD0 TXD0
+    }
+
+    peripheral I2C0 i2c {
+        sda IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO12 IO13 IO14 IO15 IO18 IO19 IO20 IO21 IO22 IO23 RXD0 TXD0
+        scl IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO12 IO13 IO14 IO15 IO18 IO19 IO20 IO21 IO22 IO23 RXD0 TXD0
+    }
+
+    peripheral SPI2 spi {
+        sck IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO12 IO13 IO14 IO15 IO18 IO19 IO20 IO21 IO22 IO23 RXD0 TXD0
+        mosi IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO12 IO13 IO14 IO15 IO18 IO19 IO20 IO21 IO22 IO23 RXD0 TXD0
+        miso IO0 IO1 IO2 IO3 IO4 IO5 IO6 IO7 IO8 IO9 IO12 IO13 IO14 IO15 IO18 IO19 IO20 IO21 IO22 IO23 RXD0 TXD0
+    }
+
+    // The single SAR ADC. Its channels are fixed to IO0–IO6 and it works alongside the radio.
+    peripheral ADC1 adc {
+        has wifi-safe
+        in IO0 IO1 IO2 IO3 IO4 IO5 IO6
+    }
+}

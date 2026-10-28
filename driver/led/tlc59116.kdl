@@ -3,6 +3,11 @@
 use "@stackup/passives"
 
 part tlc59116 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-support-Cvcc text default=#null
+    param ref-support-Rext text default=#null
+    param ref-support-Rreset text default=#null
+
     symbol "TLC59116:TLC59116IPWR"
     reference U
     datasheet "https://www.ti.com/lit/ds/symlink/tlc59116.pdf"
@@ -88,10 +93,10 @@ part tlc59116 {
 
     block support {
         default
-        place bypass Cvcc node=VCC rail=vdd value="100nF"
-        place resistor Rext value=rext intent=series
+        place bypass Cvcc anchor=VCC node=VCC rail=vdd value="100nF" designator=ref-support-Cvcc
+        place resistor Rext anchor=REXT value=rext intent=series designator=ref-support-Rext
         circuit REXT Rext vdd.gnd
-        place pull-up Rreset node=RESET rail=vdd value="10kΩ"
+        place pull-up Rreset anchor=RESET node=RESET rail=vdd value="10kΩ" designator=ref-support-Rreset
     }
     port out0 pin=OUT0
     port out1 pin=OUT1

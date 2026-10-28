@@ -1,0 +1,77 @@
+// @stackup/power/ldo/ap7361c — AP7361C-33, a 1 A, 3.3 V LDO with enable, in SOT-89-5.
+//
+// Input 2.2 V to 6.0 V (6.5 V absolute maximum), 360 mV dropout at 1 A, ±1 % output, 60 µA
+// quiescent. A good fit for a 5 V USB supply feeding a radio module: dissipation is
+// (Vin − 3.3 V) × I, 0.65 W at a 380 mA transmit peak from 5 V, and the SOT-89-5 tab is rated
+// 1.19 W on the datasheet's test board. Give the tab (pad 2, GND) copper.
+//
+// Only the SOT-89-5 body (ordering code Y5) is defined. The SOT-223 body has no EN pin and the
+// DFN body has a different pad map; add them as packages with their own pin lists if needed.
+// Pin 3 is ADJ on the adjustable version and a no-connect on the fixed 3.3 V part.
+
+use "@stackup/passives"
+
+part ap7361c3v3 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cin text default=#null
+    param ref-supply-Cout text default=#null
+
+    // KiCad has no 5-pin AP7361C symbol; the SOT-223 symbol lacks EN and NC.
+    symbol "Regulator_Linear:AP7361C-33E"
+    reference U
+    datasheet "https://www.diodes.com/assets/Datasheets/AP7361C.pdf"
+    description "1A LDO with enable, 3.3V fixed, SOT-89-5"
+    manufacturer "Diodes Incorporated"
+    order mpn="AP7361C-33Y5-13" mouser="621-AP7361C-33Y5-13"
+
+    pin IN power_in
+    pin GND power_in
+    pin EN input required
+    pin NC no_connect
+    pin OUT power_out
+
+    // Datasheet pin table, SOT89-5 column. Pad 2 is also the thermal tab.
+    package sot89-5 footprint="Package_TO_SOT_SMD:SOT-89-5" {
+        pad EN 1
+        pad GND 2
+        pad NC 3
+        pad IN 4
+        pad OUT 5
+    }
+
+    // Datasheet operating input range. Input current is the load plus 60 µA quiescent.
+    port in type=power {
+        require net.voltage min="2.2V" max="6V"
+        add net.draw "out.draw + 60µA"
+        line rail pin=IN
+        line gnd pin=GND
+    }
+
+    // 3.3 V output with the same ground as the input.
+    port out type=power {
+        set net.voltage "3.3V" tolerance="1%"
+        assert "draw <= 1A" message="the AP7361C is rated for 1A; its loads draw {draw}"
+        line rail pin=OUT
+        line gnd pin=GND
+    }
+
+    // Drive EN externally or keep the default tie to the input.
+    port en type=output pin=EN
+
+    // Application circuits
+
+    // Datasheet minimums: at least 1 µF on IN, at least 2.2 µF ceramic on OUT; 4.7 µF is the
+    // value its characteristics are measured with. Keep Cout close to OUT.
+    block supply {
+        default
+        place bypass Cin anchor=IN node=IN rail=in value="1µF" designator=ref-supply-Cin
+        place bypass Cout anchor=OUT node=OUT rail=out value="4.7µF" designator=ref-supply-Cout
+    }
+
+    // Tie EN to the input for automatic start-up. To sequence the rail, place
+    // `without always-on` and drive `en`.
+    block always-on {
+        default
+        circuit EN IN
+    }
+}

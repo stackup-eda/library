@@ -11,6 +11,9 @@
 use "@stackup/passives"
 
 part ws2812b-2020 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cbypass text default=#null
+
     symbol "LED:WS2812B-2020"
     reference D
     datasheet "https://www.lcsc.com/datasheet/C52917434.pdf"
@@ -25,7 +28,7 @@ part ws2812b-2020 {
     pin DIN input
     pin VDD power_in
 
-    package plcc4 footprint="LED_WS2812B-2020_PLCC4_2.0x2.0mm" {
+    package plcc4 footprint="LED_SMD:LED_WS2812B-2020_PLCC4_2.0x2.0mm" {
         pad DOUT 1
         pad VSS 2
         pad DIN 3
@@ -53,7 +56,7 @@ part ws2812b-2020 {
     // capacitor at the start of the chain does not replace it.
     block supply {
         default
-        place bypass Cbypass node=VDD rail=vdd value="100nF" \
-            note="local bypass for the pixel's PWM switching current"
+        place bypass Cbypass anchor=VDD node=VDD rail=vdd value="100nF" \
+            note="local bypass for the pixel's PWM switching current" designator=ref-supply-Cbypass
     }
 }

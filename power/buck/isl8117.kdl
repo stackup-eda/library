@@ -74,7 +74,7 @@ block isl8117-buck {
     place isl8117 as=self
     place bsc030n08ns5 Qhs
     place bsc030n08ns5 Qls
-    place inductor L value="10µH" footprint="L_Bourns-SRN8040TA" intent=filter
+    place inductor L anchor=self.PHASE value="10µH" footprint="L_Bourns-SRN8040TA" intent=filter
     circuit in.rail self.VIN Qhs.DRAIN
     circuit Qhs.SOURCE self.PHASE Qls.DRAIN L
     circuit Qhs.GATE self.UGATE
@@ -86,20 +86,20 @@ block isl8117-buck {
     circuit self.RT in.gnd
     circuit en self.EN
     circuit pgood self.PGOOD
-    place resistor Ren value="10kΩ" intent=pull-down
+    place resistor Ren anchor=self.EN value="10kΩ" intent=pull-down
     circuit self.EN Ren in.gnd
-    place resistor Rboot value="2.2Ω" intent=series
-    place capacitor Cboot value="220nF" intent=filter
+    place resistor Rboot anchor=self.BOOT value="2.2Ω" intent=series
+    place capacitor Cboot anchor=self.BOOT value="220nF" intent=filter
     circuit self.BOOT Rboot Cboot self.PHASE
-    place resistor Risen value="4.22kΩ" intent=series
+    place resistor Risen anchor=self.ISEN value="4.22kΩ" intent=series
     circuit self.PHASE Risen self.ISEN
-    place resistor Rocs value="13.6kΩ" intent=series
+    place resistor Rocs anchor=self.LGATE_OCS value="13.6kΩ" intent=series
     circuit self.LGATE_OCS Rocs in.gnd
     circuit self.MOD_SYNC self.VCC5V
-    place bypass Cvcc node=self.VCC5V rail=in value="4.7µF"
-    place bypass Css node=self.SS_TRK rail=in value="27nF"
-    place bypass Cin node=self.VIN rail=in value="100nF"
-    place resistor Rfb-top value=rtop intent=divider
-    place resistor Rfb-bottom value="10kΩ" intent=divider
+    place bypass Cvcc anchor=self.VCC5V node=self.VCC5V rail=in value="4.7µF"
+    place bypass Css anchor=self.SS_TRK node=self.SS_TRK rail=in value="27nF"
+    place bypass Cin anchor=self.VIN node=self.VIN rail=in value="100nF"
+    place resistor Rfb-top anchor=self.FB value=rtop intent=divider
+    place resistor Rfb-bottom anchor=self.FB value="10kΩ" intent=divider
     circuit out.rail Rfb-top self.FB Rfb-bottom out.gnd
 }

@@ -15,7 +15,7 @@ part fodm214 {
     pin IN2 passive
     pin E passive
     pin C passive
-    package sop4 footprint="SOP-4_4.4x2.6mm_P1.27mm" {
+    package sop4 footprint="Package_SO:SOP-4_4.4x2.6mm_P1.27mm" {
         pad IN1 1
         pad IN2 2
         pad E 3
@@ -26,6 +26,10 @@ part fodm214 {
 // Active-low flag for an alternating pair. `swing` states the differential amplitude at the
 // placement; KDL has no differential voltage fact to derive it from the two input nodes.
 block pair-flag {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-R_in text default=#null
+    param ref-R_out text default=#null
+
     param swing voltage
     param current current default="1mA"
     param pullup resistance default="100kΩ"
@@ -36,10 +40,10 @@ block pair-flag {
     port observer type=power
     port out
     place fodm214 as=self
-    place resistor R_in value=r intent=series
+    place resistor R_in anchor=self.IN1 value=r intent=series designator=ref-R_in
     circuit a R_in self.IN1
     circuit self.IN2 b
-    place pull-up R_out node=out rail=observer value=pullup
+    place pull-up R_out anchor=self.C node=out rail=observer value=pullup designator=ref-R_out
     circuit self.C out
     circuit self.E observer.gnd
 }

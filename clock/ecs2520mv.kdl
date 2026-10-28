@@ -8,6 +8,9 @@
 use "@stackup/passives"
 
 part ecs2520mv {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cbypass text default=#null
+
     symbol "Oscillator:ECS-2520MV-xxx-xx"
     reference Y
     datasheet "https://www.ecsxtal.com/store/pdf/ECS-2520MV.pdf"
@@ -19,7 +22,7 @@ part ecs2520mv {
     pin OUT output
     pin VDD power_in
 
-    package smd2520 footprint="Oscillator_SMD_ECS_2520MV-xxx-xx-4Pin_2.5x2.0mm" {
+    package smd2520 footprint="Oscillator:Oscillator_SMD_ECS_2520MV-xxx-xx-4Pin_2.5x2.0mm" {
         pad TRISTATE 1
         pad GND 2
         pad OUT 3
@@ -40,7 +43,7 @@ part ecs2520mv {
     // 100 nF close to VDD.
     block supply {
         default
-        place bypass Cbypass node=VDD rail=vdd value="100nF"
+        place bypass Cbypass anchor=VDD node=VDD rail=vdd value="100nF" designator=ref-supply-Cbypass
     }
 
     // Tie Tri-State to the supply to enable the output. To control it externally, place

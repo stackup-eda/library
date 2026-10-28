@@ -1,0 +1,99 @@
+// @stackup/audio/max98357a — Analog Devices (Maxim) MAX98357A mono class-D amplifier with I²S input,
+// TQFN-16. A DAC and a bridge output in one package; no MCLK. Neither speaker terminal is ground.
+
+use "@stackup/passives"
+
+// Analog Devices (Maxim) MAX98357A, a mono class-D amplifier with I²S in: a DAC and a 3.2 W bridge
+// output in one 3 × 3 mm TQFN-16, no MCLK (data sheet 19-6779, Rev 7, 2/16).
+//
+// SD_MODE is shutdown and channel select: below 0.16 V (B0) shut down, under 0.6 µA; above 1.4 V
+// (B2) it plays the left word, which a 3.3 V push-pull pin gives. Its internal 100 kΩ pull-down
+// keeps the amplifier off until something drives it high. GAIN_SLOT sets the gain by strap
+// (Table 8: 3, 6, 9, 12 or 15 dB; blocks below). LRCLK must sit in one of four bands, 8, 16, 48 or
+// 96 kHz ±5 % (16 kHz is 15.2 to 16.8 kHz), with BCLK at 32, 48 or 64 times it.
+//
+// The exposed pad is not connected inside; the data sheet asks for it on the ground plane for
+// heat, so it is ground here. The part is Maxim's T1633+4 (outline 21-0136): the same 1.10 mm
+// exposed pad as the T1633-5 that KiCad's footprint is drawn for, but terminals 0.1 mm longer
+// (L 0.45 mm nominal, 0.55 mm at most, against 0.35 mm). The footprint is KiCad's with the
+// terminal pads lengthened inward to match (stackup.pretty/README.md).
+part max98357a {
+    symbol "Audio:MAX98357A"
+    reference U
+    description "Mono class-D amplifier with I²S input, 3.2 W, TQFN-16 3 × 3 mm"
+    datasheet "https://www.analog.com/media/en/technical-documentation/data-sheets/max98357a-max98357b.pdf"
+    manufacturer "Analog Devices"
+    order mpn="MAX98357AETE+T" mouser="700-MAX98357AETE+T"
+
+    pin DIN input
+    pin GAIN_SLOT input required
+    pin SD_MODE input required symbol="~{SD_MODE}"
+    pin VDD power_in
+    pin GND power_in
+    pin OUTP output
+    pin OUTN output
+    pin LRCLK input
+    pin BCLK input
+    pin NC no_connect
+
+    package tqfn16 footprint="stackup:Maxim_T1633-4_TQFN-16-1EP_3x3mm_P0.5mm_EP1.23x1.23mm" {
+        pad DIN 1
+        pad GAIN_SLOT 2
+        pad GND 3
+        pad SD_MODE 4
+        pad NC 5
+        pad NC 6
+        pad VDD 7
+        pad VDD 8
+        pad OUTP 9
+        pad OUTN 10
+        pad GND 11
+        pad NC 12
+        pad NC 13
+        pad LRCLK 14
+        pad GND 15
+        pad BCLK 16
+        pad GND 17
+    }
+
+    port vdd type=power {
+        require net.voltage min="2.5V" max="5.5V"
+        line rail pin=VDD
+        line gnd pin=GND
+    }
+    port bclk pin=BCLK
+    port lrclk pin=LRCLK
+    port din pin=DIN
+    port shutdown pin=SD_MODE
+    port speaker-plus pin=OUTP
+    port speaker-minus pin=OUTN
+
+    // The data sheet's 0.1 µF and 10 µF at VDD (Typical Application Circuit).
+    block supply {
+        default
+        place decouple Cvdd anchor=VDD@7 node=VDD rail=vdd value="100nF" note="place close to VDD"
+        place bulk Cbulk anchor=VDD@8 node=VDD rail=vdd value="10µF"
+    }
+
+    // GAIN_SLOT straps (Table 8), one block per gain; a placement picks one, `with gain-6db`. With
+    // none the pin floats, which is 9 dB, the same as `gain-9db`; name it to say so. The
+    // comparator reads 3 dB at 0.65–0.85 × VDD, 6 dB above 0.9 × VDD, 9 dB at 0.4–0.6 × VDD (where
+    // the pin floats), 12 dB below 0.1 × VDD and 15 dB at 0.15–0.35 × VDD. At 6 dB full scale is
+    // 2.54 V rms (3.6 V peak) across the speaker, clear of clipping down to a 4.3 V supply; each
+    // step up is 3 dB more, and from 9 dB a 5 V supply clips at full scale.
+    block gain-3db {
+        place pull-up Rgain anchor=GAIN_SLOT node=GAIN_SLOT rail=vdd value="100kΩ" note="3 dB"
+    }
+    block gain-6db {
+        circuit GAIN_SLOT vdd.rail
+    }
+    block gain-9db {
+        nc GAIN_SLOT note="open: 9 dB"
+    }
+    block gain-12db {
+        circuit GAIN_SLOT vdd.gnd
+    }
+    block gain-15db {
+        place pull-down Rgain anchor=GAIN_SLOT node=GAIN_SLOT rail=vdd value="100kΩ" note="15 dB"
+    }
+}

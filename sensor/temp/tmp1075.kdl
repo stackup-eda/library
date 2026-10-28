@@ -5,6 +5,9 @@
 use "@stackup/passives"
 
 part tmp1075 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-supply-Cvdd text default=#null
+
     symbol "Sensor_Temperature:TMP1075DSG"
     reference U
     datasheet "https://www.ti.com/lit/gpn/tmp1075"
@@ -26,7 +29,7 @@ part tmp1075 {
     pin V+ power_in
     pin EP passive
 
-    package wson8 footprint="WSON-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm" {
+    package wson8 footprint="Package_SON:WSON-8-1EP_2x2mm_P0.5mm_EP0.9x1.6mm" {
         pad SDA 1
         pad SCL 2
         pad ALERT 3
@@ -52,7 +55,7 @@ part tmp1075 {
 
     block supply {
         default
-        place decouple Cvdd node=V+ rail=vdd value="100nF"
+        place decouple Cvdd anchor=V+ node=V+ rail=vdd value="100nF" designator=ref-supply-Cvdd
         circuit EP vdd.gnd
     }
     block a0-low { when "offset == 0 || offset == 2 || offset == 4 || offset == 6"; circuit A0 vdd.gnd }

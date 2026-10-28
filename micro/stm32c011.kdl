@@ -1,4 +1,4 @@
-// @stackup/micro/stm32c011 — STM32C011 in TSSOP-20, with default support circuitry and
+// @stackup/micro/stm32c011 — STM32C011 in TSSOP-20 and SO8N, with default support circuitry and
 // peripheral pin mappings.
 //
 // The default `supply` block places decoupling and reset filtering. `place stm32c011f6 mcu
@@ -67,9 +67,9 @@ part stm32c011f6 {
     block supply {
         default
 
-        place decouple Cvdd node=VDD@4 rail=vdd value="100nF"
-        place bulk Cbulk node=VDD rail=vdd value="4.7µF" note="VDD bulk capacitance"
-        place filter Cnrst node=NRST rail=vdd value="100nF" \
+        place decouple Cvdd node=VDD@4 anchor=VDD@4 rail=vdd value="100nF"
+        place bulk Cbulk anchor=VDD node=VDD rail=vdd value="4.7µF" note="VDD bulk capacitance"
+        place filter Cnrst anchor=NRST node=NRST rail=vdd value="100nF" \
             note="NRST glitch filter — the pull-up is internal"
     }
 
@@ -94,7 +94,7 @@ part stm32c011f6 {
     pin PC14 bidirectional once
     pin PC15 bidirectional once
 
-    package tssop20 footprint="TSSOP-20_4.4x6.5mm_P0.65mm" {
+    package tssop20 footprint="Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm" {
         pad PB7 1
         pad PC14 2
         pad PC15 3
@@ -208,5 +208,151 @@ part stm32c011f6 {
         has break
         ch1 PA1 PA7 PC14 { has dma }
         ch1n PA4 PB7
+    }
+}
+
+// STM32C011J in SO8N: the same die as the F6, with six I/O pads, most of which carry several port
+// pins bonded together (DS13866, Figure 3 and Table 12). It is its own part rather than a package of
+// `stm32c011f6` because the bonding is the package's: in TSSOP-20, PA0 and NRST are separate pins,
+// here they are one pad. Each pad is one pin, named for its function out of reset, and the other
+// port pins on it are `also` names, so naming two of them in one design is using the pad twice.
+// Firmware must leave the unused pins on a pad as inputs or analog, never drive two of them.
+//
+// Pad 4 is NRST out of reset; option byte NRST_MODE makes it GPIO (PF2, with PA0–PA2 on the same
+// pad). Even as GPIO it must rise above VIH(NRST) at power-on or the die stays in reset (DS13866,
+// 5.3.14), so a switch to ground on it holds the chip in reset while pressed at power-up. Pads 5 and
+// 6 are PA11 and PA12 out of reset and PA9 and PA10 behind the SYSCFG remap, which is where
+// I2C1 lives on this package unless pad 1 or 8 gives up SWD or a pin. Pad 8 is SWCLK and also BOOT0
+// unless nBOOT_SEL is set.
+part stm32c011j6 {
+    symbol "MCU_ST_STM32C0:STM32C011J6Mx"
+    reference U
+    datasheet "https://www.st.com/resource/en/datasheet/stm32c011f6.pdf"
+    description "Arm Cortex-M0+ MCU, 32KB flash, 6KB RAM, 48 MHz, 2.0-3.6V, 6 I/O pads, SO8N"
+    manufacturer STMicroelectronics
+    order mpn=STM32C011J6M6 mouser="511-STM32C011J6M6"
+
+    pin VDD power_in
+    pin VSS power_in
+
+    port vdd type=power {
+        require net.voltage min="2.0V" max="3.6V"
+        line rail pin=VDD
+        line gnd pin=VSS
+    }
+
+    pin PB7 bidirectional once symbol="PB7/PC14" { also PC14 }
+    pin NRST bidirectional once symbol="PA0/PA1/PA2/PF2" {
+        role reset active=low pull=internal
+        also PF2
+        also PA0
+        also PA1
+        also PA2
+    }
+    pin PA11 bidirectional once symbol="PA8/PA9/PA11" {
+        also PA9
+        also PA8
+    }
+    pin PA12 bidirectional once symbol="PA10/PA12" { also PA10 }
+    pin PA13 bidirectional once
+    pin PA14 bidirectional once symbol="PA14/PB6/PC15" {
+        also PB6
+        also PC15
+    }
+
+    // As the F6's: one VDD pad, so one decoupling capacitor beside it.
+    block supply {
+        default
+
+        place decouple Cvdd node=VDD@2 anchor=VDD@2 rail=vdd value="100nF"
+        place bulk Cbulk anchor=VDD node=VDD rail=vdd value="4.7µF" note="VDD bulk capacitance"
+        place filter Cnrst anchor=NRST node=NRST rail=vdd value="100nF" \
+            note="NRST glitch filter — the pull-up is internal"
+    }
+
+    package so8n footprint="Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" {
+        pad PB7 1
+        pad VDD 2
+        pad VSS 3
+        pad NRST 4
+        pad PA11 5
+        pad PA12 6
+        pad PA13 7
+        pad PA14 8
+    }
+
+    // The F6's tables, cut to the pins this package bonds.
+    peripheral SWD swd {
+        swdio PA13
+        swclk PA14
+        nrst NRST
+    }
+
+    peripheral GPIO gpio {
+        io PA0 PA1 PA2 PA8 PA9 PA10 PA11 PA12 PA13 PA14
+        io PB6 PB7 PC14 PC15 PF2
+    }
+
+    peripheral I2C1 i2c {
+        sda PA10 PB7 PC14
+        scl PA9 PB6 PB7
+    }
+
+    peripheral SPI1 spi {
+        sck PA1 PB6
+        mosi PA2 PA12 PB6
+        miso PA11 PB6
+        nss PA8 PA14
+    }
+
+    peripheral USART1 uart {
+        tx PA0 PA9 PB6 PC14
+        rx PA1 PA8 PA10 PB7
+        rts PA12 PA14 PB6
+        cts PA11 PB6
+    }
+
+    peripheral USART2 uart {
+        tx PA2 PA8 PA14
+        rx PA13 PA14
+        rts PA1 PC14
+        cts PA0 PB7
+    }
+
+    peripheral ADC1 adc {
+        in PA0 PA1 PA2 PA8 PA11 PA12 PA13 PA14
+    }
+
+    peripheral TIM1 timer {
+        has break
+        ch1 PA0 PA8 PA14 { has dma }
+        ch2 PA1 PA9 PB6 { has dma }
+        ch3 PA2 PA10 PB6 { has dma }
+        ch4 PA11 PB7 PF2 { has dma }
+        ch2n PA8
+        ch3n PA8
+    }
+
+    peripheral TIM3 timer {
+        ch1 PB6 PB7 { has dma }
+        ch2 PB6 PC14 { has dma }
+        ch3 PA8 PB6 PC15 { has dma }
+        ch4 PA8 PB7 { has dma }
+    }
+
+    peripheral TIM14 timer {
+        ch1 PA8
+    }
+
+    peripheral TIM16 timer {
+        has break
+        ch1 PA0 PB7 { has dma }
+        ch1n PA2 PB6
+    }
+
+    peripheral TIM17 timer {
+        has break
+        ch1 PA1 PC14 { has dma }
+        ch1n PB7
     }
 }

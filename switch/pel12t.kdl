@@ -1,0 +1,58 @@
+// @stackup/switch/pel12t — Bourns PEL12T illuminated rotary encoder with push switch.
+
+use "@stackup/types"
+
+// Bourns PEL12T-4225T-S1024: a 12 mm rotary encoder with a push switch and an RGB-lit knurled
+// shaft, 24 detents and 24 pulses a turn, shaft perpendicular to the board, with an M9 × 0.75
+// bushing that bolts through a panel so a wrenched knob loads the panel, not the pins.
+// Mouser 652-PEL12T4225TS1024. Data sheet REV. 09/19.
+//
+// - Encoder: A and B against C, 2-bit quadrature, contacts rated 0.5 mA at 5 V, bounce 2 ms at
+//   15 RPM, 100 RPM at most.
+// - LEDs: common anode on 5; cathodes red 1, green 2, blue 4. 25 mA DC each at most; Vf red 2.0 V
+//   typical (2.4 V max), green and blue 3.3 V typical (3.7 V max), so the anode wants about 5 V,
+//   not 3.3 V.
+// - Switch: 3 to 5, momentary, so a press pulls 3 up to whatever the anode is on. Rated 10 mA at
+//   5 V.
+// - Through-hole, specified for wave soldering; Bourns does not recommend hand soldering. Hand
+//   soldered prototypes are fine; production goes to selective or wave.
+part pel12t {
+    symbol "Device:RotaryEncoder_Switch"
+    reference SW
+    datasheet "https://www.bourns.com/docs/Product-Datasheets/PEL12T.pdf"
+    description "12 mm rotary encoder, 24 detents, push switch, RGB illuminated shaft, M9 bushing"
+    manufacturer Bourns
+    order mpn="PEL12T-4225T-S1024" mouser="652-PEL12T4225TS1024"
+
+    pin A passive
+    pin B passive
+    pin C passive
+    pin RED passive
+    pin GREEN passive
+    pin SW passive
+    pin BLUE passive
+    pin COM passive
+    pin MP passive
+
+    package vertical footprint="stackup:RotaryEncoder_Bourns_Vertical_PEL12T-4xxxx-S1024" {
+        pad RED 1
+        pad GREEN 2
+        pad SW 3
+        pad BLUE 4
+        pad COM 5
+        pad A A
+        pad C C
+        pad B B
+        pad MP MP
+    }
+
+    port a pin=A
+    port b pin=B
+    port c pin=C
+    port red pin=RED
+    port green pin=GREEN
+    port blue pin=BLUE
+    port sw pin=SW
+    port com pin=COM
+    port mp pin=MP
+}

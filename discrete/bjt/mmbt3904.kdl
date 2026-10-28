@@ -13,7 +13,7 @@ part mmbt3904 {
     pin EMITTER passive symbol=E
     pin COLLECTOR passive symbol=C
 
-    package sot23 footprint="SOT-23" {
+    package sot23 footprint="Package_TO_SOT_SMD:SOT-23" {
         pad BASE 1
         pad EMITTER 2
         pad COLLECTOR 3

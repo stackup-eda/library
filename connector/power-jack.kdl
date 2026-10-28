@@ -11,7 +11,7 @@ part power-jack {
     pin P1 passive
     pin P2 passive
 
-    package header footprint="PinHeader_1x02_P2.54mm_Vertical" {
+    package header footprint="Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" {
         pad P1 1
         pad P2 2
     }

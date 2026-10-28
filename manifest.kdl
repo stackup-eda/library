@@ -4,4 +4,4 @@
 // `sensor/current/ina226.kdl`. This library has no external library dependencies.
 
 name stackup
-stackup "0.1"
+stackup "0.2"

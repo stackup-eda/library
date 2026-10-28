@@ -74,10 +74,10 @@ part qma6100p {
     // are uncertain readings of the preliminary diagram.
     block supply {
         default
-        place decouple Cvdd node=VDD rail=vdd value="10nF" note="VDD decoupling, Figure 4"
-        place decouple "Cvdd/hf" node=VDD rail=vdd value="100pF" \
+        place decouple Cvdd anchor=VDD node=VDD rail=vdd value="10nF" note="VDD decoupling, Figure 4"
+        place decouple "Cvdd/hf" anchor=VDD node=VDD rail=vdd value="100pF" \
             note="VDD decoupling, Figure 4 — value needs verification; preliminary figure is difficult to read"
-        place decouple "Cvdd/mid" node=VDD rail=vdd value="2.2nF" \
+        place decouple "Cvdd/mid" anchor=VDD node=VDD rail=vdd value="2.2nF" \
             note="VDD decoupling, Figure 4 — value needs verification; preliminary figure is difficult to read"
     }
 

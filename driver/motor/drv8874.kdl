@@ -3,6 +3,16 @@
 use "@stackup/passives"
 
 part drv8874 {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-support-Cvm text default=#null
+    param ref-support-Cflying text default=#null
+    param ref-support-Cvcp text default=#null
+    param ref-support-Rfault text default=#null
+    param ref-imode-cycle-retry-Rimode text default=#null
+    param ref-imode-cycle-latch-Rimode text default=#null
+    param ref-current-limit-Rtop text default=#null
+    param ref-current-limit-Rbottom text default=#null
+
     symbol "DRV8874:DRV8874PWPR"
     reference U
     datasheet "https://www.ti.com/lit/ds/symlink/drv8874.pdf"
@@ -28,7 +38,7 @@ part drv8874 {
     pin PMODE input required
     pin PAD power_in
 
-    package htssop16 footprint="Package_SO:HTSSOP-16-1EP_4.4x5mm_P0.65mm" {
+    package htssop16 footprint="Package_SO:HTSSOP-16-1EP_4.4x5mm_P0.65mm_EP3.4x5mm" {
         pad EN_IN1 1
         pad PH_IN2 2
         pad SLEEP 3
@@ -73,23 +83,23 @@ part drv8874 {
 
     block support {
         default
-        place bypass Cvm node=VM rail=drive value="100nF"
+        place bypass Cvm anchor=VM node=VM rail=drive value="100nF" designator=ref-support-Cvm
         circuit GND PGND PAD drive.gnd
         circuit PMODE drive.gnd
-        place capacitor Cflying value="22nF" intent=filter
+        place capacitor Cflying anchor=CPH value="22nF" intent=filter designator=ref-support-Cflying
         circuit CPH Cflying CPL
-        place capacitor Cvcp value="100nF" intent=filter
+        place capacitor Cvcp anchor=VCP value="100nF" intent=filter designator=ref-support-Cvcp
         circuit VM Cvcp VCP
-        place pull-up Rfault node=FAULT rail=logic value="10kΩ"
+        place pull-up Rfault anchor=FAULT node=FAULT rail=logic value="10kΩ" designator=ref-support-Rfault
     }
     block imode-cycle-retry {
         when "regulation == cycle-retry"
-        place resistor Rimode value="20kΩ" intent=series
+        place resistor Rimode anchor=IMODE value="20kΩ" intent=series designator=ref-imode-cycle-retry-Rimode
         circuit IMODE Rimode logic.gnd
     }
     block imode-cycle-latch {
         when "regulation == cycle-latch"
-        place resistor Rimode value="62kΩ" intent=series
+        place resistor Rimode anchor=IMODE value="62kΩ" intent=series designator=ref-imode-cycle-latch-Rimode
         circuit IMODE Rimode logic.gnd
     }
     block imode-fixed-retry { when "regulation == fixed-retry"; circuit IMODE logic.gnd }
@@ -103,8 +113,8 @@ part drv8874 {
         assert "vref > 0V && vref < logic-design-voltage" message="VREF must be between ground and the design logic supply"
         assert "actual-vref.min >= 0.95 * vref && actual-vref.max <= 1.05 * vref" \
             message="The actual logic rail makes VREF {actual-vref}, outside 5% of the requested {vref}"
-        place resistor Rtop value=top intent=divider
-        place resistor Rbottom value="30kΩ" intent=divider
+        place resistor Rtop anchor=VREF value=top intent=divider designator=ref-current-limit-Rtop
+        place resistor Rbottom anchor=VREF value="30kΩ" intent=divider designator=ref-current-limit-Rbottom
         circuit logic.rail Rtop VREF Rbottom logic.gnd
     }
 }

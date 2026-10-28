@@ -60,6 +60,7 @@ design c092-lqfp48 {
 
     // FDCAN1 on the ROM bootloader pins, available only in LQFP-48.
     connect can {
+        require peripheral.bootloader
         from mcu rx=PD0 tx=PD1
         to can
     }
