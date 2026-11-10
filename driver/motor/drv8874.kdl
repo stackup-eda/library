@@ -1,4 +1,10 @@
 // @stackup/driver/motor/drv8874 — TI 40 V / 6 A brushed-motor H-bridge in HTSSOP-16.
+//
+// PMODE is latched when nSLEEP rises (§7.3.2). `control=ph-en` (the default) ties it to ground:
+// EN/IN1 is the PWM enable and PH/IN2 the direction, and EN low brakes. `control=pwm` ties it to
+// the logic rail (V_TIH 1.5–5.5 V): IN1/IN2 drive the bridge directly, and both low coasts with
+// the outputs Hi-Z without sleeping the device (Table 4), which back-EMF sampling needs. The port
+// names `enable` and `phase` remain the EN/IN1 and PH/IN2 pins in either mode.
 
 use "@stackup/passives"
 
@@ -80,18 +86,21 @@ part drv8874 {
     param logic-design-voltage voltage default="3.3V"
     // IMODE selects both the current-chopping behavior and whether a fault latches the outputs off.
     param regulation strap default=cycle-retry
+    // ph-en | pwm; see the header.
+    param control strap default=ph-en
 
     block support {
         default
         place bypass Cvm anchor=VM node=VM rail=drive value="100nF" designator=ref-support-Cvm
         circuit GND PGND PAD drive.gnd
-        circuit PMODE drive.gnd
         place capacitor Cflying anchor=CPH value="22nF" intent=filter designator=ref-support-Cflying
         circuit CPH Cflying CPL
         place capacitor Cvcp anchor=VCP value="100nF" intent=filter designator=ref-support-Cvcp
         circuit VM Cvcp VCP
         place pull-up Rfault anchor=FAULT node=FAULT rail=logic value="10kΩ" designator=ref-support-Rfault
     }
+    block pmode-ph-en { when "control == ph-en"; circuit PMODE drive.gnd }
+    block pmode-pwm { when "control == pwm"; circuit PMODE logic.rail }
     block imode-cycle-retry {
         when "regulation == cycle-retry"
         place resistor Rimode anchor=IMODE value="20kΩ" intent=series designator=ref-imode-cycle-retry-Rimode

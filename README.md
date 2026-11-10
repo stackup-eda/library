@@ -93,7 +93,7 @@ Generic components and shared types live at the root. Part families are grouped 
 | `bus/can`, `bus/lin`, `bus/rs485`, `bus/usb` | Transceivers and bridges |
 | `clock/` | Oscillators |
 | `audio/` | Audio amplifiers |
-| `connector/` | Headers, JST PH, power jacks, Qwiic, SWD (header and Tag-Connect), USB-C, and terminal blocks |
+| `connector/` | Headers, JST PH, power jacks, Qwiic, SWD and ESP-Prog (header and Tag-Connect), USB-C, and terminal blocks |
 | `discrete/fet`, `discrete/bjt`, `discrete/diode`, `discrete/led` | Transistors, diodes including BAT54W, TVS protection, and LEDs |
 | `driver/led`, `driver/motor` | LED and motor drivers |
 | `interface/expander` | GPIO expanders |
@@ -179,7 +179,8 @@ The root `manifest.kdl` declares the library name and required stackup version.
 ## Licence
 
 The KDL library and original assets are [MIT licensed](LICENSE). Seven footprints derived from
-KiCad and three models from SnapMagic retain their CC BY-SA 4.0 licences. [NOTICE.md](NOTICE.md)
+KiCad and three models from SnapMagic retain their CC BY-SA 4.0 licences, and one WAGO model its
+CC BY-ND 4.0 licence. [NOTICE.md](NOTICE.md)
 lists the files, sources, attribution requirements, and design-use exceptions.
 
 ## Stable child references

@@ -43,7 +43,11 @@ part wago-2601-1102 {
     pin 1 passive
     pin 2 passive
 
+    // KiCad's land names a model it never shipped. WAGO's own body, unmodified (CC BY-ND 4.0; see
+    // its .LICENSE.txt): Y up, pin rows along X and poles along Z, turned onto the land here.
+    // Closed, the levers reach about 2 mm past the land's front edge.
     package tht footprint="TerminalBlock_WAGO:TerminalBlock_WAGO_2601-1102_1x02_P3.50mm_Horizontal" {
+        model "../stackup.3dshapes/WAGO_2601-1102.step" offset="4.56 0 0" rotate="-90 0 90"
         pad 1 1
         pad 2 2
     }

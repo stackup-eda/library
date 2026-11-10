@@ -1,0 +1,26 @@
+// @stackup/discrete/bjt/mmbt3906 — MMBT3906, a 40 V / 200 mA PNP transistor in SOT-23, the
+// MMBT3904's complement. hFE is 100–300 at 10 mA and at least 60 at 50 mA; VCE(sat) is at most
+// 0.25 V at 10 mA (Diodes DS30037).
+
+part mmbt3906 {
+    symbol "Transistor_BJT:Q_PNP_BEC"
+    reference Q
+    value "MMBT3906"
+    datasheet "https://www.diodes.com/assets/Datasheets/MMBT3906.pdf"
+    description "40V Vce, 200mA Ic, PNP transistor, SOT-23"
+    order mpn="MMBT3906-7-F"
+
+    pin BASE input symbol=B
+    pin EMITTER passive symbol=E
+    pin COLLECTOR passive symbol=C
+
+    package sot23 footprint="Package_TO_SOT_SMD:SOT-23" {
+        pad BASE 1
+        pad EMITTER 2
+        pad COLLECTOR 3
+    }
+
+    port base pin=BASE
+    port emitter pin=EMITTER
+    port collector pin=COLLECTOR
+}

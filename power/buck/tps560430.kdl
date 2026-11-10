@@ -1,0 +1,100 @@
+// @stackup/power/buck/tps560430 — TI TPS560430X3F, a 4–36 V, 600 mA synchronous buck with a fixed
+// 3.3 V output, in SOT-23-6 (data sheet SLVSE22B, June 2018). 1.1 MHz, forced PWM: it switches at a
+// fixed frequency down to no load, so its ripple never falls into the audio band the way the PFM
+// versions' light-load bursts can.
+//
+// The fixed-output version senses VOUT at FB directly; there is no divider (Table 1 lists the
+// adjustable versions' dividers). FB must not be shorted to ground in operation. EN is a precision
+// enable (rising 1.10–1.36 V) and must not float; tie it to VIN or divide VIN for a higher UVLO.
+// VIN UVLO is 3.55–4.00 V rising, 3.25–3.65 V falling.
+//
+// Peak current limit is 0.8–1.4 A, valley 0.62–0.98 A; the inductor should carry the peak limit.
+// KiCad ships no symbol for this part.
+
+use "@stackup/passives"
+
+part tps560430x3f {
+    symbol "TPS560430:TPS560430X3FDBVR"
+    reference U
+    value "TPS560430X3F"
+    datasheet "https://www.ti.com/lit/ds/symlink/tps560430.pdf"
+    description "4-36V 600mA synchronous buck, fixed 3.3V output, 1.1MHz FPWM, SOT-23-6"
+    manufacturer "Texas Instruments"
+    order mpn="TPS560430X3FDBVR"
+
+    pin CB passive
+    pin GND power_in
+    pin FB input required
+    pin EN input required {
+        role enable active=high pull=none
+        require net.rest not=float
+    }
+    pin VIN power_in
+    pin SW passive
+
+    package sot23-6 footprint="Package_TO_SOT_SMD:SOT-23-6" {
+        pad CB 1
+        pad GND 2
+        pad FB 3
+        pad EN 4
+        pad VIN 5
+        pad SW 6
+    }
+
+    port vin type=power {
+        require net.voltage min="4V" max="36V"
+        line rail pin=VIN
+        line gnd pin=GND
+    }
+    port en pin=EN
+    port sw pin=SW
+    port fb pin=FB
+}
+
+// The converter with its inductor, bootstrap, input and output capacitors. EN rides VIN, so it
+// runs whenever VIN clears UVLO. The values are Table 1's 1.1 MHz, 3.3 V row with the inductor one
+// step down: 10 µH (SRN4018-100M, Isat 1.4 A, 1.8 mm tall) in place of 12 µH puts the ripple at
+// 0.26 A from 22 V, 42 % of the full 600 mA, inside §9.2.2.4's 20–60 %.
+block tps560430x3f-buck {
+    // Optional child reference names; null keeps automatic numbering.
+    param ref-reg text default=#null
+    param ref-L text default=#null
+    param ref-Cin text default=#null
+    param ref-Cin-hf text default=#null
+    param ref-Cboot text default=#null
+    param ref-Cout text default=#null
+
+    // Efficiency used for the worst-case input-current estimate at minimum input voltage.
+    param efficiency ratio default="80%"
+    derive input "out.draw * 3.3V / (efficiency * in.voltage.min)"
+
+    port in type=power {
+        require net.voltage min="4V" max="36V"
+        add net.draw input
+    }
+    port out type=power {
+        set net.voltage min="3.25V" max="3.35V"
+        assert "draw <= 600mA" message="the TPS560430 is rated for 600mA; its loads draw {draw}"
+    }
+
+    place tps560430x3f reg designator=ref-reg
+    circuit in.rail reg.vin.rail reg.en
+    circuit in.gnd reg.vin.gnd out.gnd
+
+    place inductor L anchor=reg.SW value="10µH" intent=filter footprint="Inductor_SMD:L_Bourns-SRN4018" \
+        mpn="SRN4018-100M" manufacturer="Bourns" note="buck inductor — Isat 1.4 A covers the peak current limit" \
+        designator=ref-L
+    circuit reg.sw L out.rail
+    // Fixed output: FB is the output sense.
+    circuit reg.fb out.rail
+
+    place capacitor Cboot anchor=reg.CB value="100nF" intent=filter designator=ref-Cboot
+    circuit reg.CB Cboot reg.sw
+
+    // §9.2.2.6: 2.2 µF or more at VIN, plus 100 nF as close as possible to the pins.
+    place bulk Cin anchor=reg.VIN node=reg.vin.rail rail=in value="2.2µF" footprint="Capacitor_SMD:C_0805_2012Metric" \
+        note="input capacitor, at VIN" designator=ref-Cin
+    place bypass Cin-hf anchor=reg.VIN node=reg.vin.rail rail=in value="100nF" designator=ref-Cin-hf
+    place bulk Cout anchor=L.B node=out.rail rail=out value="22µF" footprint="Capacitor_SMD:C_0805_2012Metric" \
+        note="output capacitor — Table 1's 22 µF at 1.1 MHz" designator=ref-Cout
+}

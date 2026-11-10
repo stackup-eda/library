@@ -1,0 +1,85 @@
+// @stackup/display/da08 — Kingbright DA08-11, a 20.3 mm (0.8 inch) dual-digit seven-segment
+// display, common anode. Entered from the DA08-11EWA spec (DSAP8270, Rev V.1A, 27 Feb 2020).
+//
+// Two digits, each with segments a–g and a right-hand decimal point, every segment on a pin of
+// its own and each digit's anode on its own pin: 16 cathodes and 2 anodes on 18 pins, so the
+// display can be driven statically, without multiplexing. One LED chip per segment: the EWA
+// (GaAsP on GaP, high-efficiency red, 617 nm dominant) is 1.9 V typical and 2.3 V at most at
+// 10 mA, so a 5 V anode leaves room for a constant-current sink. 30 mA DC per segment at most;
+// 8800 µcd typical at 10 mA.
+//
+// The body is 35.8 × 25.85 mm and 10 mm high, with two rows of nine pins at 2.54 mm, 22.0 mm
+// apart. The footprint is `stackup:Kingbright_DA08-11` (see stackup.pretty/README.md).
+//
+// The symbol is KiCad's DA56-11, the 0.56 inch display: the two share the pin names and
+// numbering, not the package. The other colours in the family (SURKWA, GWA, CGKWA, SYKWA, YWA)
+// share this pinout; the DC08-11 family is common cathode on the same pins and is not this part.
+part da08-11 {
+    symbol "Display_Character:DA56-11EWA"
+    value "DA08-11EWA"
+    reference U
+    datasheet "https://www.mouser.com/datasheet/3/308/1/DA08_11EWA.pdf"
+    description "Dual-digit 7-segment display, 20.3 mm (0.8 in), common anode, high-efficiency red"
+    manufacturer Kingbright
+    order mpn="DA08-11EWA" mouser="604-DA08-11EWA"
+
+    pin DIG1_A passive
+    pin DIG1_B passive
+    pin DIG1_C passive
+    pin DIG1_D passive
+    pin DIG1_E passive
+    pin DIG1_F passive
+    pin DIG1_G passive
+    pin DP1 passive
+    pin DIG1_CA passive
+    pin DIG2_A passive
+    pin DIG2_B passive
+    pin DIG2_C passive
+    pin DIG2_D passive
+    pin DIG2_E passive
+    pin DIG2_F passive
+    pin DIG2_G passive
+    pin DP2 passive
+    pin DIG2_CA passive
+
+    package tht footprint="stackup:Kingbright_DA08-11" {
+        pad DIG1_E 1
+        pad DIG1_D 2
+        pad DIG1_C 3
+        pad DP1 4
+        pad DIG2_E 5
+        pad DIG2_D 6
+        pad DIG2_G 7
+        pad DIG2_C 8
+        pad DP2 9
+        pad DIG2_B 10
+        pad DIG2_A 11
+        pad DIG2_F 12
+        pad DIG2_CA 13
+        pad DIG1_CA 14
+        pad DIG1_B 15
+        pad DIG1_A 16
+        pad DIG1_G 17
+        pad DIG1_F 18
+    }
+
+    // Each digit's common anode, and its eight cathodes.
+    port d1-anode pin=DIG1_CA
+    port d1-a pin=DIG1_A
+    port d1-b pin=DIG1_B
+    port d1-c pin=DIG1_C
+    port d1-d pin=DIG1_D
+    port d1-e pin=DIG1_E
+    port d1-f pin=DIG1_F
+    port d1-g pin=DIG1_G
+    port d1-dp pin=DP1
+    port d2-anode pin=DIG2_CA
+    port d2-a pin=DIG2_A
+    port d2-b pin=DIG2_B
+    port d2-c pin=DIG2_C
+    port d2-d pin=DIG2_D
+    port d2-e pin=DIG2_E
+    port d2-f pin=DIG2_F
+    port d2-g pin=DIG2_G
+    port d2-dp pin=DP2
+}

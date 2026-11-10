@@ -1,5 +1,9 @@
 // @stackup/storage/flash/w25q128 — Winbond W25Q128JV, 128 Mbit (16 MiB) NOR flash in SOIC-8.
 // The four data pins support standard, dual, and quad SPI. RP2350 uses this as program flash.
+//
+// The WSON-8 6 × 5 mm package (W25Q128JVPIQ, package code P) has the SOIC's pinout pad for pad.
+// Its exposed pad has no internal connection and may float or join GND (data sheet rev F §10.3);
+// here it is ground. The data sheet asks for no exposed vias under it.
 
 use "@stackup/passives"
 use "@stackup/types"
@@ -29,6 +33,19 @@ part w25q128 {
         pad CLK 6
         pad IO3 7
         pad VCC 8
+    }
+
+    package wson8 footprint="Package_SON:WSON-8-1EP_6x5mm_P1.27mm_EP3.4x4.3mm" {
+        order mpn="W25Q128JVPIQ"
+        pad CS 1
+        pad IO1 2
+        pad IO2 3
+        pad GND 4
+        pad IO0 5
+        pad CLK 6
+        pad IO3 7
+        pad VCC 8
+        pad GND 9
     }
 
     port vdd type=power {

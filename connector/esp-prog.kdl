@@ -1,4 +1,5 @@
-// Espressif ESP-Prog's 2x3 programming header. TXD and RXD are named from the target's view.
+// Espressif ESP-Prog's 2x3 programming connection, as a header or a Tag-Connect land. TXD and RXD
+// are named from the target's view.
 
 part esp-prog-header {
     symbol "Connector_Generic:Conn_02x03_Odd_Even"
@@ -11,6 +12,43 @@ part esp-prog-header {
     pin RXD passive
     pin IO0 passive
     package header footprint="Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical" {
+        pad EN 1
+        pad VDD 2
+        pad TXD 3
+        pad GND 4
+        pad RXD 5
+        pad IO0 6
+    }
+    port vdd type=power {
+        add net.draw "0A"
+        line rail pin=VDD
+        line gnd pin=GND
+    }
+    // These lines describe the adapter end; connecting it to the target UART crosses TX/RX.
+    port uart type=uart {
+        line tx pin=RXD
+        line rx pin=TXD
+    }
+    port en pin=EN
+    port io0 pin=IO0
+}
+
+// The same six lines on a Tag-Connect TC2030-NL land: six pads and three locating holes, nothing
+// to assemble. The TC2030-IDC cable ends in a 2x3 2.54 mm socket wired pin for pin to the land, so
+// it plugs straight into the ESP-Prog's program header; TC2030-IDC-050 is the 1.27 mm version. The
+// "NL" (no legs) land needs the probe held or clipped in place.
+part esp-prog-tag-connect {
+    symbol "Connector_Generic:Conn_02x03_Odd_Even"
+    reference J
+    description "ESP programming connection on a Tag-Connect TC2030-NL footprint"
+    manufacturer "Tag-Connect"
+    pin EN passive
+    pin VDD passive
+    pin TXD passive
+    pin GND passive
+    pin RXD passive
+    pin IO0 passive
+    package tc2030 footprint="Connector:Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical" {
         pad EN 1
         pad VDD 2
         pad TXD 3

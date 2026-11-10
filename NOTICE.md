@@ -2,7 +2,8 @@
 
 The KDL definitions and original assets are MIT licensed; see [LICENSE](LICENSE). Assets from
 MIT-licensed sources retain that licence. Seven footprints derived from KiCad and three models
-from SnapMagic are distributed under CC BY-SA 4.0, as listed below.
+from SnapMagic are distributed under CC BY-SA 4.0, and one WAGO model under CC BY-ND 4.0, as
+listed below.
 
 KiCad and SnapMagic provide design-use exceptions: using these assets in a board does not impose
 attribution or ShareAlike requirements on the design or its generated files. The redistribution
@@ -22,6 +23,7 @@ requirements below apply to copies of the library assets themselves.
 | `JST_PA_B08B-PASK_1x08_P2.00mm_Vertical` | Created here from JST's ePA-F drawing | MIT |
 | `JST_PA_S08B-PASK-2_1x08_P2.00mm_Horizontal` | Created here from JST's ePA-F drawing | MIT |
 | `Thumbstick_Alps_RKJXV` | Created here from the ALPS RKJXV catalog's Drawing No. 1 | MIT |
+| `Kingbright_DA08-11` | Created here from Kingbright's DA08-11EWA package drawing | MIT |
 | `Converter_DCDC_RECOM_R-78K-0.5_THT` | KiCad footprint generator output, derived from the KiCad library's R-78E footprint | **CC BY-SA 4.0** |
 | `CP_Elec_10x16.5` | KiCad `CP_Elec_10x*` pad geometry with a taller body | **CC BY-SA 4.0** |
 | `RJ11_Stewart_SS-90000-006_Horizontal` | the KiCad library's Amphenol `54601-x06` footprint, two contacts removed, drills changed | **CC BY-SA 4.0** |
@@ -49,6 +51,7 @@ retain the same licence. The table records their modifications;
 | `JST_PA_B08B-PASK_1x08_P2.00mm_Vertical.step` | SnapMagic download 56544, unmodified | **CC BY-SA 4.0** |
 | `RJ11_Stewart_SS-90000-006_Horizontal.step` | SnapMagic download 510211, unmodified | **CC BY-SA 4.0** |
 | `Texas_B3QFN-14-1EP_5x5.5mm.step` | SnapMagic, TPSM53603RDAR, unmodified | **CC BY-SA 4.0** |
+| `WAGO_2601-1102.step` | WAGO's 2601-1102 model via CADENAS PARTcommunity, unmodified | **CC BY-ND 4.0** |
 
 SnapMagic (formerly SnapEDA) distributes its design files under
 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) with a design-use exception
@@ -60,11 +63,21 @@ written permission. This repository includes three; account for that limit when 
 Do not include manufacturer models licensed only for use in designs without redistribution
 rights. Keep those files with the project that downloaded them.
 
+The WAGO model comes from WAGO's CAD data, which CADENAS serves. CADENAS's own
+[terms](https://www.cadenas.de/terms-of-use-3d-cad-models) bar redistribution, but they defer to
+the Creative Commons licence on any file issued under one, and this file's header names
+[CC BY-ND 4.0](https://creativecommons.org/licenses/by-nd/4.0/). It may be shared only verbatim,
+with attribution. Its `.LICENSE.txt` records the source. A land places it with an offset and
+rotation, which leaves the file unchanged. Unlike KiCad and SnapMagic, it carries no design-use
+exception, so keep the attribution with any board 3D export that includes it. Check each CADENAS
+download's header before adding another: files without a Creative Commons licence fall under the
+general terms.
+
 ## Distributing the library in an executable
 
 When embedding this library, include the MIT notice for MIT-licensed files and the attribution
-and a reference to this notice for the unmodified CC BY-SA assets. The latter are included as a
-collection; their ShareAlike terms apply to the assets.
+and a reference to this notice for the unmodified CC BY-SA and CC BY-ND assets. The latter are
+included as a collection; their ShareAlike and NoDerivatives terms apply to the assets.
 
-To distribute a version without CC BY-SA content, redraw the seven derived footprints from their
-datasheets and replace the three SnapMagic models with original models.
+To distribute a version without Creative Commons content, redraw the seven derived footprints from
+their datasheets and replace the three SnapMagic models and the WAGO model with original models.

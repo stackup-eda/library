@@ -129,7 +129,9 @@ block ina226-sense {
     circuit a self.VIN+
     circuit b self.VIN- self.VBUS
 
-    // Provide the alert pull-up even if the board does not use the output.
-    place pull-up Ralert anchor=self.ALERT node=self.ALERT rail=vs value="1kΩ" \
+    // Provide the alert pull-up even if the board does not use the output. The output's 0.4 V low
+    // is specified at 3 mA; 10 kΩ sinks a third of a milliamp at 3.3 V and still rises in well
+    // under a microsecond against a few tens of picofarads.
+    place pull-up Ralert anchor=self.ALERT node=self.ALERT rail=vs value="10kΩ" \
         note="pull-up for the open-drain alert" designator=ref-Ralert
 }

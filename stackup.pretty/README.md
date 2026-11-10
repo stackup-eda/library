@@ -169,6 +169,18 @@ their offsets. Pads are numbered for the generic connector symbol the part borro
 VR2 (the drawing's circled 1–3), 7–10 the switch's a, b, c, d. Hall-effect and TMR drop-in sticks
 use the same land. Original, MIT licensed. No 3D model.
 
+## `Kingbright_DA08-11`
+
+Kingbright DA08-11 dual-digit 0.8 inch seven-segment display (`@stackup/display/da08`), from the
+DA08-11EWA spec's package drawing and recommended PCB layout (DSAP8270, Rev V.1A): two rows of
+nine 1.0 mm holes in 1.5 mm pads at 2.54 mm, the rows 22.0 mm apart. Drawn from the top with the
+digits upright: pin 1 (square) at the origin, bottom left, pins 1–9 left to right along the bottom
+and 10–18 right to left along the top, at y = −22.0 mm. F.Fab and the silkscreen mark the
+35.8 × 25.85 mm body, centred on the pin field; the drawing dimensions the body's half width
+(18 mm) and the row spacing but not the pins' offset from the body's edges, so the centring is
+read from the drawing, not dimensioned. A tick below pad 1 marks it outside the body. The DC08-11
+(common cathode) uses the same land. Original, MIT licensed. No 3D model.
+
 ## 3D models
 
 Standard footprints reference KiCad's models. When a model is missing, a part may specify a
