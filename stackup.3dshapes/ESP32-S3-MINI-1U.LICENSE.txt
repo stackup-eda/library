@@ -1,0 +1,8 @@
+ESP32-S3-MINI-1U.step — Espressif ESP32-S3-MINI-1U module, external antenna connector.
+
+Source: Espressif kicad-libraries (https://github.com/espressif/kicad-libraries), via the Snips controller project.
+The file is unmodified.
+
+Licence: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0),
+https://creativecommons.org/licenses/by-sa/4.0/
+Attribution: model by Espressif Systems.

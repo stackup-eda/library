@@ -1,9 +1,10 @@
 # Library licences
 
 The KDL definitions and original assets are MIT licensed; see [LICENSE](LICENSE). Assets from
-MIT-licensed sources retain that licence. Seven footprints derived from KiCad and three models
-from SnapMagic are distributed under CC BY-SA 4.0, and one WAGO model under CC BY-ND 4.0, as
-listed below.
+MIT-licensed sources retain that licence. Footprints derived from KiCad, Espressif, EasyEDA,
+SnapMagic and Daniel Benoy's thumbstick-breakout, and models from SnapMagic, EasyEDA and
+Espressif, are distributed under CC BY-SA 4.0; one WAGO model is under CC BY-ND 4.0. Three
+footprints drawn for the Snips controller keep that project's GPL-2.0. All are listed below.
 
 KiCad and SnapMagic provide design-use exceptions: using these assets in a board does not impose
 attribution or ShareAlike requirements on the design or its generated files. The redistribution
@@ -30,13 +31,27 @@ requirements below apply to copies of the library assets themselves.
 | `Texas_RGY0020G_VQFN-20-1EP_3.5x4.5mm_P0.5mm_EP1.7x2.7mm` | the KiCad library's `Texas_RGY_R-PVQFN-N20_EP2.05x3.05mm`, thermal pad resized | **CC BY-SA 4.0** |
 | `Maxim_T1633-4_TQFN-16-1EP_3x3mm_P0.5mm_EP1.23x1.23mm` | the KiCad library's `TQFN-16-1EP_3x3mm_P0.5mm_EP1.23x1.23mm`, terminal pads lengthened | **CC BY-SA 4.0** |
 | `ESP32-C6-MINI-1U` | the KiCad library's `ESP32-C6-MINI-1`, antenna keepout removed and outlines shortened to the 12.5 mm body | **CC BY-SA 4.0** |
+| `ESP32-S3-MINI-1U` | Espressif's `kicad-libraries`, via the Snips controller; model reference repointed | **CC BY-SA 4.0** |
+| `GuliKit_HallStick` | the Snips controller's adaptation of Daniel Benoy's thumbstick-breakout (© Daniel Benoy), itself from the C&K THB001P datasheet; model reference repointed | **CC BY-SA 4.0** |
+| `QMA6100P` | LCSC/EasyEDA C2887190 land (`LGA-12_L2.0-W2.0-P0.50-TL_QMA6100`), via the Snips controller; model reference repointed | **CC BY-SA 4.0** |
+| `IC_BQ25185DLHR` | SnapMagic BQ25185DLHR download, via the Snips controller; model reference repointed | **CC BY-SA 4.0** |
+| `SK6812MINI-HS-012` | the Snips controller (Jessica Janiuk), drawn from the SK6812MINI-HS-012 datasheet | **GPL-2.0** |
+| `SW_Alps_SKRP` | the Snips controller (Jessica Janiuk), drawn from the Alps SKRP land dimensions | **GPL-2.0** |
+| `XB3-24Z8UM` | the Snips controller (Jessica Janiuk), drawn from Digi 90001543; Digi's model reference removed | **GPL-2.0** |
+| `XB324Z8UTJ` | the Amidala shield board, via the Snips controller; original source not recorded; project model reference removed | not recorded |
 | `RotaryEncoder_Bourns_Vertical_PEL12T-4xxxx-S1024` | Created from the Bourns PEL12T data sheet's suggested layout; the mounting-tab slots are the KiCad library's PEL12D-4 | **CC BY-SA 4.0** |
 
 The KiCad libraries are © the KiCad developers and contributors, distributed under
 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) with
 [KiCad's design exception](https://www.kicad.org/libraries/license/). Under that exception,
 designs and files generated from them are not Adapted Material. The seven derived footprints
-retain the same licence. The table records their modifications;
+retain the same licence.
+
+Espressif's KiCad libraries and LCSC's EasyEDA library are distributed under CC BY-SA 4.0, as is
+Daniel Benoy's thumbstick-breakout; footprints and models taken from them keep that licence.
+Footprints from the Snips controller (github.com/thePunderWoman/SnipsControllers) keep its
+GPL-2.0. `XB324Z8UTJ` came to that project from the Amidala shield without a recorded source;
+replace it with a redrawn land before relying on its licence. The table records their modifications;
 [stackup.pretty/README.md](stackup.pretty/README.md) provides further details.
 
 ## 3D models (`stackup.3dshapes/`)
@@ -51,6 +66,10 @@ retain the same licence. The table records their modifications;
 | `JST_PA_B08B-PASK_1x08_P2.00mm_Vertical.step` | SnapMagic download 56544, unmodified | **CC BY-SA 4.0** |
 | `RJ11_Stewart_SS-90000-006_Horizontal.step` | SnapMagic download 510211, unmodified | **CC BY-SA 4.0** |
 | `Texas_B3QFN-14-1EP_5x5.5mm.step` | SnapMagic, TPSM53603RDAR, unmodified | **CC BY-SA 4.0** |
+| `BQ25185DLHR.step` | SnapMagic, BQ25185DLHR, unmodified | **CC BY-SA 4.0** |
+| `QMA6100P_LGA-12_2x2mm.step` | LCSC/EasyEDA C2887190, unmodified | **CC BY-SA 4.0** |
+| `Thumbstick_ALPS_RKJXV1224005.step` | LCSC/EasyEDA C146170 (ALPS RKJXV1224005), unmodified; a stand-in body for the GuliKit stick | **CC BY-SA 4.0** |
+| `ESP32-S3-MINI-1U.step` | Espressif `kicad-libraries`, unmodified | **CC BY-SA 4.0** |
 | `WAGO_2601-1102.step` | WAGO's 2601-1102 model via CADENAS PARTcommunity, unmodified | **CC BY-ND 4.0** |
 
 SnapMagic (formerly SnapEDA) distributes its design files under
@@ -59,7 +78,7 @@ similar to KiCad's. Each downloaded model has an adjacent `.LICENSE.txt` recordi
 and attribution.
 
 SnapMagic's terms §5.1(g) limit public redistribution to ten files in one location without
-written permission. This repository includes three; account for that limit when adding more.
+written permission. This repository includes four models and one footprint; account for that limit when adding more.
 Do not include manufacturer models licensed only for use in designs without redistribution
 rights. Keep those files with the project that downloaded them.
 
@@ -79,5 +98,6 @@ When embedding this library, include the MIT notice for MIT-licensed files and t
 and a reference to this notice for the unmodified CC BY-SA and CC BY-ND assets. The latter are
 included as a collection; their ShareAlike and NoDerivatives terms apply to the assets.
 
-To distribute a version without Creative Commons content, redraw the seven derived footprints from
-their datasheets and replace the three SnapMagic models and the WAGO model with original models.
+To distribute a version without Creative Commons or GPL content, redraw the footprints marked
+CC BY-SA or GPL-2.0 above from their datasheets and replace the CC BY-SA and CC BY-ND models with
+original models.

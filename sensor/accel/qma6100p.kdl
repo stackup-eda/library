@@ -1,8 +1,8 @@
 // @stackup/sensor/accel/qma6100p — QST QMA6100P three-axis accelerometer in a 2 × 2 mm LGA-12.
 // Supports I²C/SPI, motion/no-motion interrupts, and 500 nA standby.
 //
-// The custom symbol and footprint use the SnipsControllers_Custom library; footprint data came
-// from LCSC EasyEDA C2887190. Supply limits were taken from preliminary datasheet 13-52-20 Rev
+// The custom symbol is the Snips controller's SnipsControllers_Custom:QMA6100P. The footprint,
+// stackup:QMA6100P, came from LCSC EasyEDA C2887190. Supply limits were taken from preliminary datasheet 13-52-20 Rev
 // A1 and have not been rechecked.
 //
 // The AD0 parameter selects a strap block and the corresponding I²C address claim, 0x12 or
@@ -34,7 +34,7 @@ part qma6100p {
     pin RESV2 passive
     pin SCX input
 
-    package lga12 footprint="QMA6100P" {
+    package lga12 footprint="stackup:QMA6100P" {
         pad AD0 1
         pad SDX 2
         pad VDD 3

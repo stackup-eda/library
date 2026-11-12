@@ -1,0 +1,8 @@
+QMA6100P_LGA-12_2x2mm.step — QST QMA6100P accelerometer, LGA-12, 2 × 2 mm.
+
+Source: LCSC/EasyEDA part C2887190, fetched by the Snips controller project.
+The file is unmodified.
+
+Licence: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0),
+https://creativecommons.org/licenses/by-sa/4.0/
+Attribution: model from the LCSC/EasyEDA library (https://easyeda.com/).

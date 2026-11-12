@@ -1,5 +1,5 @@
 // @stackup/micro/esp32s3 — Espressif ESP32-S3-WROOM-1 module with supply, reset-delay, and
-// boot-strap blocks.
+// boot-strap blocks, and the ESP32-S3-MINI-1U module (below), which has none.
 //
 // Strapping requirements check the net’s resting level at reset. The `rest` fact comes from
 // connected rails and pull resistors; `role strap` records the pin’s boot function.
@@ -315,5 +315,157 @@ part esp32-s3-wroom-1 {
     }
     peripheral ADC2 adc {
         in IO11 IO12 IO13 IO14 IO15 IO16 IO17 IO18
+    }
+}
+
+// Espressif ESP32-S3-MINI-1U-N8: 15.4 x 15.4 x 2.4 mm, 8 MB flash, no PSRAM, external antenna
+// connector. Pin data is from the MINI-1 and MINI-1U datasheet v1.7, Table 3-1, with straps from
+// Table 4-1, and the footprint is Espressif's, which matches Figure 11-2. On the N8, IO26 and
+// IO33-37 are free GPIOs; the N4R2 takes IO26 for PSRAM, so do not substitute it.
+part esp32-s3-mini-1u {
+    symbol "Espressif:ESP32-S3-MINI-1"
+    reference U
+    value "ESP32-S3-MINI-1U-N8"
+    datasheet "https://documentation.espressif.com/esp32-s3-mini-1_mini-1u_datasheet_en.pdf"
+    description "ESP32-S3 Wi-Fi + Bluetooth LE module, 8 MB flash, no PSRAM, external antenna connector, 15.4x15.4x2.4mm"
+    manufacturer "Espressif Systems"
+    order mpn=ESP32-S3-MINI-1U-N8 lcsc=C2980299
+
+    pin "3V3" power_in
+    pin GND power_in
+
+    // The external supply must deliver at least 0.5 A (Table 6-2), which covers radio transmit bursts.
+    port v3v3 type=power {
+        require net.voltage min="3.0V" max="3.6V"
+        add net.draw "500mA"
+        line rail pin="3V3"
+        line gnd pin=GND
+    }
+
+    pin EN input required {
+        role reset active=low pull=none
+        require net.rest not=low
+    }
+    pin IO0 bidirectional once {
+        role strap sampled=reset pull=internal-up \
+            note="boot mode: high is SPI boot, low is download; a GPIO afterwards"
+        require net.rest high
+    }
+    pin IO3 bidirectional once {
+        role strap sampled=reset pull=none \
+            note="JTAG source: low selects external pins, high selects USB Serial/JTAG"
+    }
+    pin IO45 bidirectional once {
+        role strap sampled=reset pull=internal-down \
+            note="VDD_SPI: must stay low, since high selects 1.8 V and this flash is 3.3 V"
+        require net.rest not=high
+    }
+    pin IO46 bidirectional once {
+        role strap sampled=reset pull=internal-down \
+            note="ROM message control: high with IO0 low is an invalid boot combination"
+        require net.rest not=high
+    }
+    pin IO1 bidirectional once
+    pin IO2 bidirectional once
+    pin IO4 bidirectional once
+    pin IO5 bidirectional once
+    pin IO6 bidirectional once
+    pin IO7 bidirectional once
+    pin IO8 bidirectional once
+    pin IO9 bidirectional once
+    pin IO10 bidirectional once
+    pin IO11 bidirectional once
+    pin IO12 bidirectional once
+    pin IO13 bidirectional once
+    pin IO14 bidirectional once
+    pin IO15 bidirectional once
+    pin IO16 bidirectional once
+    pin IO17 bidirectional once
+    pin IO18 bidirectional once
+    pin "USB_D-" bidirectional once
+    pin "USB_D+" bidirectional once
+    pin IO21 bidirectional once
+    pin IO26 bidirectional once
+    pin IO47 bidirectional once
+    pin IO33 bidirectional once
+    pin IO34 bidirectional once
+    pin IO48 bidirectional once
+    pin IO35 bidirectional once
+    pin IO36 bidirectional once
+    pin IO37 bidirectional once
+    pin IO38 bidirectional once
+    pin IO39 bidirectional once
+    pin IO40 bidirectional once
+    pin IO41 bidirectional once
+    pin IO42 bidirectional once
+    pin TXD0 bidirectional once
+    pin RXD0 bidirectional once
+
+    package module footprint="stackup:ESP32-S3-MINI-1U" {
+        pad GND 1
+        pad GND 2
+        pad "3V3" 3
+        pad IO0 4
+        pad IO1 5
+        pad IO2 6
+        pad IO3 7
+        pad IO4 8
+        pad IO5 9
+        pad IO6 10
+        pad IO7 11
+        pad IO8 12
+        pad IO9 13
+        pad IO10 14
+        pad IO11 15
+        pad IO12 16
+        pad IO13 17
+        pad IO14 18
+        pad IO15 19
+        pad IO16 20
+        pad IO17 21
+        pad IO18 22
+        pad "USB_D-" 23
+        pad "USB_D+" 24
+        pad IO21 25
+        pad IO26 26
+        pad IO47 27
+        pad IO33 28
+        pad IO34 29
+        pad IO48 30
+        pad IO35 31
+        pad IO36 32
+        pad IO37 33
+        pad IO38 34
+        pad IO39 35
+        pad IO40 36
+        pad IO41 37
+        pad IO42 38
+        pad TXD0 39
+        pad RXD0 40
+        pad IO45 41
+        pad GND 42
+        pad GND 43
+        pad IO46 44
+        pad EN 45
+        pad GND 46
+        pad GND 47
+        pad GND 48
+        pad GND 49
+        pad GND 50
+        pad GND 51
+        pad GND 52
+        pad GND 53
+        pad GND 54
+        pad GND 55
+        pad GND 56
+        pad GND 57
+        pad GND 58
+        pad GND 59
+        pad GND 60
+        pad GND 61
+        pad GND 62
+        pad GND 63
+        pad GND 64
+        pad GND 65
     }
 }

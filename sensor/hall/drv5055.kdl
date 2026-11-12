@@ -1,5 +1,8 @@
-// @stackup/sensor/hall/drv5055 — TI DRV5055A2 ratiometric linear Hall sensor in TO-92. Output
-// is VCC/2 at zero field; at 5 V, sensitivity is 50 mV/mT with a ±42 mT range.
+// @stackup/sensor/hall/drv5055 — TI DRV5055A2 ratiometric linear Hall sensor in TO-92 or SOT-23.
+// Output is VCC/2 at zero field; at 5 V, sensitivity is 50 mV/mT with a ±42 mT range.
+//
+// The packages pin out differently (DS SBAS639E, Table 4-1) and sense different axes: the TO-92
+// reads the field through its face, the SOT-23 the field perpendicular to the board (§6.3.1).
 //
 // The datasheet specifies separate supply ranges of 3.0–3.63 V and 4.5–5.5 V. This model checks
 // only the outer limits, so it does not reject voltages in the gap.
@@ -23,6 +26,15 @@ part drv5055a2 {
         pad VCC 1
         pad GND 2
         pad OUT 3
+    }
+    package sot23 footprint="Package_TO_SOT_SMD:SOT-23" {
+        symbol "Sensor_Magnetic:DRV5055A2xDBZxQ1"
+        value "DRV5055A2QDBZR"
+        description "Ratiometric linear Hall effect sensor, 50mV/mT, 3.3V/5V, SOT-23"
+        order mpn=DRV5055A2QDBZR lcsc=C266131
+        pad VCC 1
+        pad OUT 2
+        pad GND 3
     }
 
     // Maximum supply current: 10 mA.

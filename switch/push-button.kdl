@@ -1,9 +1,13 @@
 // @stackup/switch/push-button — momentary tactile switches using Switch:SW_Push. Ports `a`/`b`
 // support a series connection, such as `circuit mcu.IO40 vol-up rail.gnd`.
 //
-// Select with `package=`: Alps SKRTLAE010 for side actuation at a board edge, a 6 × 6 mm
-// tactile switch for a face button, or Panasonic EVQP2 for a small top-actuated button. The
-// Alps package includes a mounting pad named MP.
+// Select with `package=`: Alps SKRTLAE010 for side actuation at a board edge, a 6 × 6 mm tactile
+// switch for a face button, Panasonic EVQP2 for a small top-actuated button, or Alps SKRP for a
+// 4.2 × 3.2 mm top-actuated one. The Alps SKRTLAE010 package includes a mounting pad named MP.
+//
+// The SKRP's four terminals are joined in pairs inside (1–2 and 3–4), so its land merges each pair
+// into one pad. SKRPABE010 is the 1.57 N, 100,000-cycle part; SKRPANE010 has the same force and
+// land and is rated for 1,000,000 cycles.
 
 part push-button {
     symbol "Switch:SW_Push"
@@ -37,6 +41,13 @@ part push-button {
         value "Panasonic_EVQP2"
         description "Panasonic EVQP2 short-travel tactile switch"
         order mpn=EVQP2T02M lcsc=C2915174
+        pad 1 1
+        pad 2 2
+    }
+    package skrp footprint="stackup:SW_Alps_SKRP" {
+        value "SKRPABE010"
+        description "Alps SKRP tact switch, 1.6N, 4.2x3.2x2.5mm, SMD"
+        order mpn=SKRPABE010 lcsc=C115360
         pad 1 1
         pad 2 2
     }

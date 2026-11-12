@@ -39,7 +39,7 @@ part bq25185 {
     pin PAD passive symbol=THERMAL_PAD
 
     // SnapEDA footprint: ten signal pads, exposed pad 11, and two vias numbered 12 and 13.
-    package wson10 footprint="IC_BQ25185DLHR" {
+    package wson10 footprint="stackup:IC_BQ25185DLHR" {
         pad SYS 1
         pad BAT 2
         pad STAT2 3

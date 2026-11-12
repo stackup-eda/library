@@ -181,6 +181,37 @@ and 10–18 right to left along the top, at y = −22.0 mm. F.Fab and the silksc
 read from the drawing, not dimensioned. A tick below pad 1 marks it outside the body. The DC08-11
 (common cathode) uses the same land. Original, MIT licensed. No 3D model.
 
+## Footprints from the Snips controller
+
+These came from the Snips controller boards (github.com/thePunderWoman/SnipsControllers), whose
+layouts use them, with their placement removed and their model references pointed at
+`stackup.3dshapes/` or KiCad's library. Pad numbers are unchanged, so a Snips board and a design
+using the library part share the same pads. Licences are in [../NOTICE.md](../NOTICE.md).
+
+- `GuliKit_HallStick` — the GuliKit hall stick (`@stackup/switch/rkjxv`, package `gulikit`) on the
+  RKJXV holes, adapted from Daniel Benoy's thumbstick-breakout. Pads 1–3 and 1′–3′ are the two
+  axes, a–d the switch legs; the four mounting legs are unnumbered. Larger pads than
+  `Thumbstick_Alps_RKJXV`, and no locating-boss holes or keepouts. The model is the ALPS
+  RKJXV1224005 body as a stand-in, raised 11.4 mm onto its standoffs.
+- `QMA6100P` — QST QMA6100P LGA-12 (`@stackup/sensor/accel/qma6100p`), pad geometry from LCSC's
+  EasyEDA land for C2887190. Pin 1 top left, numbered anticlockwise.
+- `IC_BQ25185DLHR` — TI BQ25185 WSON-10 (`@stackup/power/charger/bq25185`), SnapMagic's land: ten
+  signal pads, exposed pad 11 and two thermal vias numbered 12 and 13. Its model is Y-up and the
+  land rotates it −90° about X.
+- `SK6812MINI-HS-012` — top-mount SK6812MINI-HS (`@stackup/discrete/led/sk6812mini-hs`), from the
+  datasheet's section 6 top-view land: 1.5 × 1.0 mm pads. Pad 1 (GND) is the chamfered corner,
+  lower right. KiCad's 3535 WS2812B-Mini body stands in, rotated to put its pin-1 corner on pad 1.
+- `SW_Alps_SKRP` — Alps SKRP 4.2 × 3.2 mm tact switch (`@stackup/switch/push-button`, package
+  `skrp`), from the SKRP land dimensions. Terminals 1–2 and 3–4 are joined inside, so pad 1 is the
+  top pair and pad 2 the bottom pair. KiCad's same-size C&K PTS810 body stands in.
+- `ESP32-S3-MINI-1U` — Espressif's footprint for the module (`@stackup/micro/esp32s3`), which
+  matches the datasheet's Figure 11-2, with Espressif's model.
+- `XB3-24Z8UM` — XBee 3 Micro, 34-pad castellated (`@stackup/radio/xbee3`, `xbee3-micro`), from
+  Digi 90001543 p. 98 with pad numbers from p. 42. Rule areas keep copper from under the module
+  and its RF test points (p. 58). Digi's model is not redistributable, so none is referenced.
+- `XB324Z8UTJ` — XBee 3 through-hole (`@stackup/radio/xbee3`, `xbee3-zigbee`), from the Amidala
+  shield, on two KiCad 2.00 mm 1×10 socket bodies. Its original source is not recorded.
+
 ## 3D models
 
 Standard footprints reference KiCad's models. When a model is missing, a part may specify a

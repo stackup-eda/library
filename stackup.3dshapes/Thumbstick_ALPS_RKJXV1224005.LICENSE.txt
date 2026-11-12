@@ -1,0 +1,8 @@
+Thumbstick_ALPS_RKJXV1224005.step — ALPS RKJXV1224005 thumbstick, used as a stand-in body for the GuliKit hall stick.
+
+Source: LCSC/EasyEDA part C146170, fetched by the Snips controller project.
+The file is unmodified.
+
+Licence: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0),
+https://creativecommons.org/licenses/by-sa/4.0/
+Attribution: model from the LCSC/EasyEDA library (https://easyeda.com/).

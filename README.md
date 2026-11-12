@@ -178,9 +178,10 @@ The root `manifest.kdl` declares the library name and required stackup version.
 
 ## Licence
 
-The KDL library and original assets are [MIT licensed](LICENSE). Seven footprints derived from
-KiCad and three models from SnapMagic retain their CC BY-SA 4.0 licences, and one WAGO model its
-CC BY-ND 4.0 licence. [NOTICE.md](NOTICE.md)
+The KDL library and original assets are [MIT licensed](LICENSE). Footprints and models derived
+from KiCad, Espressif, EasyEDA, SnapMagic and other CC BY-SA 4.0 sources keep that licence, one
+WAGO model its CC BY-ND 4.0 licence, and three footprints from the Snips controller its GPL-2.0.
+[NOTICE.md](NOTICE.md)
 lists the files, sources, attribution requirements, and design-use exceptions.
 
 ## Stable child references

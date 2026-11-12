@@ -1,0 +1,43 @@
+// @stackup/discrete/led/sk6812mini-hs — SK6812MINI-HS addressable RGB LED, a top-mount 3.5 × 3.5 mm
+// PLCC4 with the lens up, using the single-wire WS2812 protocol. The flat-bottom alternative to the
+// reverse-mount SK6812MINI-E, with the same pins and protocol.
+//
+// Datasheet SK6812MINI-HS-012 Rev B/0. Pin numbers are the datasheet's (section 5), and the
+// footprint's pads, from the section 6 top-view land pattern, carry the same numbers. Supply is
+// 3.7–5.5 V (section 7); input thresholds are 0.7 and 0.3 × VDD (section 9), so a 3.3 V driver
+// needs the LED's supply at 4.7 V or less for a clean high.
+
+use "@stackup/passives"
+
+part sk6812mini-hs {
+    symbol "LED:SK6812"
+    reference D
+    value "SK6812MINI-HS-012"
+    datasheet "https://datasheet.lcsc.com/datasheet/pdf/d15550987339dcd676f3ed17cb498c41.pdf?productCode=C2922787"
+    description "Addressable RGB LED with integrated driver, top-mount 3.5x3.5mm PLCC4, lens up"
+    manufacturer "OPSCO Optoelectronics"
+    order mpn="SK6812MINI-HS" lcsc=C2922787
+
+    pin GND power_in
+    pin DIN input
+    pin VDD power_in
+    pin DOUT output
+
+    package mini-hs footprint="stackup:SK6812MINI-HS-012" {
+        pad GND 1
+        pad DIN 2
+        pad VDD 3
+        pad DOUT 4
+    }
+
+    // Estimated full-brightness current: the datasheet gives 12 mA per colour (section 9).
+    port vdd type=power {
+        require net.voltage min="3.7V" max="5.5V"
+        add net.draw "36mA"
+        line rail pin=VDD
+        line gnd pin=GND
+    }
+
+    port din type=output pin=DIN
+    port dout type=output pin=DOUT
+}
